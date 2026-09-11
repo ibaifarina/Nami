@@ -4,20 +4,23 @@ struct RootView: View {
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var contentGeneration = 0
+    @State private var detailsTitle: String?
 
     var body: some View {
         @Bindable var router = environment.router
         @Bindable var launcher = environment.playbackLaunch
+        let section = router.selection ?? .home
+        let path = router.path(for: section)
+
         ZStack(alignment: .topLeading) {
             ZStack {
-                detailContent
-                    .id(DetailIdentity(section: selectedSection, generation: contentGeneration))
+                sectionStage(section: section, path: path)
+                    .id(DetailIdentity(section: section, generation: contentGeneration))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .transition(.opacity)
             }
             .animation(
                 reduceMotion ? nil : .easeOut(duration: Motion.transition),
-                value: selectedSection
+                value: section
             )
 
             SidebarView()
@@ -29,6 +32,22 @@ struct RootView: View {
                     .zIndex(1)
             }
         }
+        .navigationTitle(detailsTitle ?? section.title)
+        .toolbar {
+            if !path.isEmpty, !environment.playback.isPresenting {
+                ToolbarItem(placement: .navigation) {
+                    Button {
+                        router.pop(in: section)
+                    } label: {
+                        Image(systemName: "chevron.backward")
+                    }
+                    .help("Back")
+                    .accessibilityLabel("Back")
+                    .keyboardShortcut("[", modifiers: .command)
+                }
+            }
+        }
+        .onPreferenceChange(DetailsTitlePreference.self) { detailsTitle = $0 }
         .frame(minWidth: Layout.windowMinWidth, minHeight: Layout.windowMinHeight)
         .containerBackground(AppColor.background, for: .window)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
