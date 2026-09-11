@@ -9,14 +9,16 @@ struct RootView: View {
         @Bindable var router = environment.router
         @Bindable var launcher = environment.playbackLaunch
         ZStack(alignment: .topLeading) {
-            detailContent
-                .id(DetailIdentity(section: selectedSection, generation: contentGeneration))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .transition(.opacity)
-                .animation(
-                    reduceMotion ? nil : .easeOut(duration: Motion.transition),
-                    value: selectedSection
-                )
+            ZStack {
+                detailContent
+                    .id(DetailIdentity(section: selectedSection, generation: contentGeneration))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .transition(.opacity)
+            }
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: Motion.transition),
+                value: selectedSection
+            )
 
             SidebarView()
 
@@ -98,6 +100,7 @@ struct RootView: View {
         switch route {
         case .anime(let id):
             AnimeDetailsView(animeID: id, environment: environment)
+                .navigationBarBackButtonHidden(environment.playback.isPresenting)
         }
     }
 }

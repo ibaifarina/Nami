@@ -13,6 +13,11 @@ struct PlaybackSettingsView: View {
                     description: "When an episode nears its end, the next one is prepared and can start automatically.",
                     isOn: $preferences.autoplayNextEpisode
                 )
+                SettingsToggleRow(
+                    title: "Skip Intro Button",
+                    description: "Shows a button while an episode's opening, ending, or recap is playing, using community-sourced skip times. Timings aren't available for every episode.",
+                    isOn: $preferences.skipIntroEnabled
+                )
             }
             SettingsCard(title: "Player") {
                 SettingsSegmentedRow(

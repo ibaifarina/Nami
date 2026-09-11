@@ -56,6 +56,11 @@ final class PreferencesStore {
         set { update { $0.autoplayNextEpisode = newValue } }
     }
 
+    var skipIntroEnabled: Bool {
+        get { preferences.skipIntroEnabled }
+        set { update { $0.skipIntroEnabled = newValue } }
+    }
+
     var preferredReleaseGroups: [String] {
         get { preferences.preferredReleaseGroups }
         set { update { $0.preferredReleaseGroups = newValue } }

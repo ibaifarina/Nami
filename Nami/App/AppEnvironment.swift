@@ -20,6 +20,7 @@ final class AppEnvironment {
     let playback: PlaybackCoordinator
     let playbackLaunch: PlaybackLaunchController
     let nextEpisode: NextEpisodeController
+    let skipIntro: SkipIntroController
     let externalPlayers: ExternalPlayerService
 
     /// Increments whenever playback persists progress, letting open screens
@@ -119,6 +120,13 @@ final class AppEnvironment {
         )
         nextEpisode = nextEpisodeController
 
+        let skipIntroController = SkipIntroController(
+            skipTimes: AniSkipService(http: http),
+            identityResolver: identityResolver,
+            preferences: preferences
+        )
+        skipIntro = skipIntroController
+
         let externalPlayerService = ExternalPlayerService()
         externalPlayers = externalPlayerService
 
@@ -129,8 +137,14 @@ final class AppEnvironment {
             library: library,
             externalPlayers: externalPlayerService
         )
-        coordinator.onPlaybackTick = { [weak nextEpisodeController] anime, episode, time, duration in
+        coordinator.onPlaybackTick = { [weak nextEpisodeController, weak skipIntroController] anime, episode, time, duration in
             nextEpisodeController?.progressTick(
+                anime: anime,
+                episode: episode,
+                currentTime: time,
+                duration: duration
+            )
+            skipIntroController?.progressTick(
                 anime: anime,
                 episode: episode,
                 currentTime: time,
@@ -140,8 +154,9 @@ final class AppEnvironment {
         coordinator.onPlaybackEnded = { [weak nextEpisodeController] in
             nextEpisodeController?.playbackEnded()
         }
-        coordinator.onSessionClosed = { [weak nextEpisodeController] in
+        coordinator.onSessionClosed = { [weak nextEpisodeController, weak skipIntroController] in
             nextEpisodeController?.reset()
+            skipIntroController?.reset()
         }
         coordinator.onStreamFailed = { [weak streamCache] anime, episode in
             Task {
@@ -155,6 +170,9 @@ final class AppEnvironment {
                 episode: episode,
                 startAt: nil
             )
+        }
+        skipIntroController.onSkip = { [weak coordinator] target in
+            coordinator?.seek(to: target)
         }
         playback = coordinator
         playbackLaunch = PlaybackLaunchController(

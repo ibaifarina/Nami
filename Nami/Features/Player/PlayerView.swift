@@ -17,6 +17,10 @@ struct PlayerView: View {
         environment.nextEpisode
     }
 
+    private var skipIntro: SkipIntroController {
+        environment.skipIntro
+    }
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -35,7 +39,7 @@ struct PlayerView: View {
                     LoadingSpinner(size: 34, lineWidth: 3.5, tint: .white)
                 }
                 controlsOverlay
-                nextEpisodeLayer
+                bottomOverlays
             }
         }
         .background(PlayerWindowChrome())
@@ -85,6 +89,11 @@ struct PlayerView: View {
             playback.toggleMute()
             return .handled
         }
+        .onKeyPress(keys: [KeyEquivalent("s"), KeyEquivalent("S")]) { _ in
+            guard skipIntro.activeInterval != nil else { return .ignored }
+            skipIntro.skip()
+            return .handled
+        }
         .onKeyPress(.escape) {
             handleEscape()
             return .handled
@@ -94,19 +103,41 @@ struct PlayerView: View {
     // MARK: - Overlays
 
     @ViewBuilder
-    private var nextEpisodeLayer: some View {
-        if nextEpisode.overlay != .hidden, let episodeNumber = nextEpisode.nextEpisodeNumber {
+    private var bottomOverlays: some View {
+        if skipIntro.activeInterval != nil || nextEpisode.overlay != .hidden {
             VStack {
                 Spacer()
-                HStack {
+                HStack(alignment: .bottom, spacing: Spacing.md) {
                     Spacer()
-                    nextEpisodeCard(episodeNumber)
+                    if let interval = skipIntro.activeInterval {
+                        skipButton(interval)
+                    }
+                    if nextEpisode.overlay != .hidden, let episodeNumber = nextEpisode.nextEpisodeNumber {
+                        nextEpisodeCard(episodeNumber)
+                    }
                 }
             }
             .padding(Spacing.xl)
             .padding(.bottom, controlsVisible ? 64 : 0)
+            .animation(.easeOut(duration: Motion.transition), value: skipIntro.activeInterval)
             .animation(.easeOut(duration: Motion.transition), value: nextEpisode.overlay)
         }
+    }
+
+    private func skipButton(_ interval: SkipInterval) -> some View {
+        Button {
+            skipIntro.skip()
+        } label: {
+            HStack(spacing: Spacing.xs) {
+                Image(systemName: "forward.end.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                Text(interval.buttonTitle)
+            }
+        }
+        .buttonStyle(BrandButtonStyle())
+        .hoverFeedback(scale: 1.03)
+        .accessibilityLabel(interval.buttonTitle)
+        .transition(.opacity.combined(with: .scale(scale: 0.96)))
     }
 
     private func nextEpisodeCard(_ episodeNumber: Int) -> some View {

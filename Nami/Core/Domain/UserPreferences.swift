@@ -11,6 +11,7 @@ struct UserPreferences: Codable, Hashable, Sendable {
     var preferredAudio: AudioPreference = .japanese
     var preferredSubtitles: SubtitlePreference = .english
     var autoplayNextEpisode = true
+    var skipIntroEnabled = true
     var preferredReleaseGroups: [String] = []
     var blockedReleaseGroups: [String] = []
     var minimumSeedersForUncached = 2
@@ -43,6 +44,7 @@ struct UserPreferences: Codable, Hashable, Sendable {
         preferredAudio = try container.decodeIfPresent(AudioPreference.self, forKey: .preferredAudio) ?? .japanese
         preferredSubtitles = try container.decodeIfPresent(SubtitlePreference.self, forKey: .preferredSubtitles) ?? .english
         autoplayNextEpisode = try container.decodeIfPresent(Bool.self, forKey: .autoplayNextEpisode) ?? true
+        skipIntroEnabled = try container.decodeIfPresent(Bool.self, forKey: .skipIntroEnabled) ?? true
         preferredReleaseGroups = try container.decodeIfPresent([String].self, forKey: .preferredReleaseGroups) ?? []
         blockedReleaseGroups = try container.decodeIfPresent([String].self, forKey: .blockedReleaseGroups) ?? []
         minimumSeedersForUncached = try container.decodeIfPresent(Int.self, forKey: .minimumSeedersForUncached) ?? 2

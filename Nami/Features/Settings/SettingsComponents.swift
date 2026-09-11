@@ -273,7 +273,7 @@ struct SettingsRow<Content: View>: View {
                     .font(AppFont.cardMeta)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: 460, alignment: .leading)
+                    .frame(maxWidth: 340, alignment: .leading)
             }
         }
         .padding(.horizontal, Spacing.md)
@@ -318,7 +318,7 @@ struct SettingsStackedRow<Content: View>: View {
                     .font(AppFont.cardMeta)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: 460, alignment: .leading)
+                    .frame(maxWidth: 340, alignment: .leading)
             }
         }
         .padding(.horizontal, Spacing.md)

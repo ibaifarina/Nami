@@ -52,7 +52,7 @@ struct HeroSection: View {
                     HStack(spacing: Spacing.sm) {
                         Button("Play", systemImage: "play.fill", action: onPlay)
                             .buttonStyle(BrandButtonStyle())
-                        Button("Details", action: onDetails)
+                        Button("View details", action: onDetails)
                             .buttonStyle(GlassButtonStyle())
                     }
                     .padding(.top, Spacing.xxs)

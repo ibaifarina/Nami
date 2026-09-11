@@ -830,7 +830,7 @@ private struct EpisodeListRow: View {
 
     private var watchedToggle: some View {
         Button(action: onToggleWatched) {
-            Image(systemName: isWatched ? "eye.fill" : "eye.slash")
+            Image(systemName: isWatched ? "eye.slash" : "eye")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(isWatched ? AppColor.buttonLabel : Color.secondary)
                 .frame(width: 26, height: 24)
@@ -928,7 +928,7 @@ private struct EpisodeCard: View {
 
     private var watchedToggle: some View {
         Button(action: onToggleWatched) {
-            Image(systemName: isWatched ? "eye.fill" : "eye.slash")
+            Image(systemName: isWatched ? "eye.slash" : "eye")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(isWatched ? AppColor.buttonLabel : .white)
                 .frame(width: 26, height: 26)
