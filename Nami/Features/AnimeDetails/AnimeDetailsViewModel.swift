@@ -18,6 +18,7 @@ final class AnimeDetailsViewModel {
     var selectedInstallmentID: String?
     var progress: PlaybackProgress?
     var watchedEpisodeNumbers: Set<Int> = []
+    var episodeProgressByNumber: [Int: PlaybackProgress] = [:]
     var libraryEntry: LibraryEntry?
     var libraryError: String?
     var isUpdatingLibrary = false
@@ -53,8 +54,9 @@ final class AnimeDetailsViewModel {
 
     var selectedInstallment: AnimeInstallment? {
         guard let series else { return nil }
-        let id = selectedInstallmentID ?? animeID
-        return series.installment(id: id) ?? series.installments.first
+        // Never fall back to another installment: doing so replaces the
+        // requested movie/OVA with the first TV season of its chain.
+        return series.installment(id: selectedInstallmentID ?? animeID)
     }
 
     var selectedAnime: Anime? {
@@ -76,11 +78,38 @@ final class AnimeDetailsViewModel {
         return progress.fraction < 0.95
     }
 
+    var isMovie: Bool {
+        selectedAnime?.subtype?.isMovie ?? false
+    }
+
+    /// Whether the user has started or completed any episode of this
+    /// installment, which makes the "current episode" meaningful to jump to.
+    var hasWatchHistory: Bool {
+        progress != nil || !watchedEpisodeNumbers.isEmpty
+    }
+
     var primaryActionTitle: String {
+        if isMovie {
+            return continuesFromProgress ? "Resume" : "Play"
+        }
         if continuesFromProgress, let progress {
             return "Continue Episode \(progress.episodeNumber)"
         }
+        if let currentEpisode {
+            return "Play Episode \(currentEpisode.displayNumber)"
+        }
         return "Play Episode 1"
+    }
+
+    /// The episode to watch next: the in-progress episode when there is one,
+    /// otherwise the first episode not yet marked watched.
+    var currentEpisode: Episode? {
+        if let progress, continuesFromProgress,
+           let match = episodes.first(where: { $0.number == progress.episodeNumber }) {
+            return match
+        }
+        return episodes.first { !watchedEpisodeNumbers.contains($0.displayNumber) }
+            ?? episodes.last
     }
 
     var primaryEpisode: Episode? {
@@ -99,7 +128,7 @@ final class AnimeDetailsViewModel {
                 )
             }
         }
-        return episodes.first
+        return currentEpisode
     }
 
     func load() async {
@@ -130,6 +159,7 @@ final class AnimeDetailsViewModel {
         episodesState = .loading
         progress = nil
         watchedEpisodeNumbers = []
+        episodeProgressByNumber = [:]
         libraryEntry = nil
         Task { [weak self] in
             guard let self else { return }
@@ -141,6 +171,12 @@ final class AnimeDetailsViewModel {
     func retryEpisodes() async {
         let id = selectedInstallmentID ?? animeID
         await loadEpisodes(for: id)
+    }
+
+    /// Re-reads watched state and resume progress from the store, e.g. after
+    /// playback completed an episode while this screen was open.
+    func refreshLocalContext() async {
+        await loadLocalContext(for: selectedInstallmentID ?? animeID)
     }
 
     func setLibraryStatus(_ status: LibraryStatus) async {
@@ -194,6 +230,7 @@ final class AnimeDetailsViewModel {
         )
         await progressStore.save(progress)
         watchedEpisodeNumbers.insert(episode.displayNumber)
+        episodeProgressByNumber[episode.displayNumber] = progress
         await refreshProgress(for: anime.id)
     }
 
@@ -201,6 +238,7 @@ final class AnimeDetailsViewModel {
         guard let anime = selectedAnime else { return }
         await progressStore.remove(animeID: anime.id, episodeNumber: episode.displayNumber)
         watchedEpisodeNumbers.remove(episode.displayNumber)
+        episodeProgressByNumber[episode.displayNumber] = nil
         await refreshProgress(for: anime.id)
     }
 
@@ -214,6 +252,17 @@ final class AnimeDetailsViewModel {
 
     func isWatched(_ episode: Episode) -> Bool {
         watchedEpisodeNumbers.contains(episode.displayNumber)
+    }
+
+    /// In-progress playback for an episode, used to draw its play status.
+    func episodeProgress(for episode: Episode) -> PlaybackProgress? {
+        guard
+            let entry = episodeProgressByNumber[episode.displayNumber],
+            !entry.isCompleted
+        else {
+            return nil
+        }
+        return entry
     }
 
     /// The latest unfinished episode is the meaningful "Continue" target;
@@ -267,6 +316,10 @@ final class AnimeDetailsViewModel {
         guard !Task.isCancelled, (selectedInstallmentID ?? animeID) == id else { return }
         watchedEpisodeNumbers = Set(
             history.filter(\.isCompleted).map(\.episodeNumber)
+        )
+        episodeProgressByNumber = Dictionary(
+            history.map { ($0.episodeNumber, $0) },
+            uniquingKeysWith: { first, _ in first }
         )
         progress = history.first { !$0.isCompleted }
         libraryEntry = entry

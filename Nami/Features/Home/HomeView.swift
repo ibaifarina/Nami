@@ -30,6 +30,10 @@ struct HomeView: View {
         .ignoresSafeArea(edges: .top)
         .navigationTitle("Home")
         .task { await model.load() }
+        .onChange(of: environment.progressRevision) {
+            guard !environment.playback.isPresenting else { return }
+            Task { await model.refreshContinueWatching() }
+        }
     }
 
     @ViewBuilder
@@ -72,13 +76,18 @@ struct HomeView: View {
                                         startPositionSeconds: entry.progress.positionSeconds
                                     )
                                 )
+                            },
+                            onRemove: {
+                                Task { await model.removeFromContinueWatching(entry) }
                             }
                         )
                         .frame(width: 280)
                     }
                 }
+                .animation(.easeOut(duration: Motion.transition), value: model.continueWatching.map(\.id))
                 .padding(.vertical, Spacing.xxs)
             }
+            .scrollClipDisabled()
         }
     }
 
@@ -106,6 +115,7 @@ struct HomeView: View {
                     }
                     .padding(.vertical, Spacing.xxs)
                 }
+                .scrollClipDisabled()
             }
         case .failed(let error):
             VStack(alignment: .leading, spacing: Spacing.sm) {

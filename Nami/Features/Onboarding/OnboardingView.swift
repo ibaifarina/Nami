@@ -5,7 +5,6 @@ struct OnboardingView: View {
     @Environment(\.openSettings) private var openSettings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var flow = OnboardingFlow()
-    @State private var previousStep: OnboardingFlow.Step = .welcome
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xl) {
@@ -13,7 +12,7 @@ struct OnboardingView: View {
             ZStack(alignment: .topLeading) {
                 stepContent
                     .id(flow.step)
-                    .transition(.screenChange(direction: stepDirection))
+                    .transition(.opacity)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .animation(reduceMotion ? nil : .easeOut(duration: Motion.transition), value: flow.step)
@@ -22,9 +21,6 @@ struct OnboardingView: View {
         }
         .padding(Spacing.xxl)
         .frame(width: 580, height: 470)
-        .onChange(of: flow.step) { _, newValue in
-            previousStep = newValue
-        }
     }
 
     @ViewBuilder
@@ -45,10 +41,6 @@ struct OnboardingView: View {
         case .preferences:
             preferencesStep
         }
-    }
-
-    private var stepDirection: ScreenTransitionDirection {
-        flow.step.rawValue >= previousStep.rawValue ? .forward : .backward
     }
 
     private var header: some View {

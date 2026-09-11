@@ -4,6 +4,7 @@ struct ContinueWatchingCard: View {
     let anime: Anime
     let progress: PlaybackProgress
     var onResume: () -> Void
+    var onRemove: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovered = false
@@ -16,7 +17,7 @@ struct ContinueWatchingCard: View {
                     RemoteImage(url: anime.bannerURL ?? anime.posterURL, contentMode: .fill)
                 }
                 .overlay { scrim }
-                .overlay(alignment: .topTrailing) { resumeButton }
+                .overlay { resumeButton }
                 .overlay(alignment: .bottom) { progressBar }
                 .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                 .overlay {
@@ -26,6 +27,7 @@ struct ContinueWatchingCard: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .overlay(alignment: .topTrailing) { removeButton }
         .onHover { hovering in
             withAnimation(.easeOut(duration: Motion.hover)) {
                 isHovered = hovering
@@ -67,17 +69,29 @@ struct ContinueWatchingCard: View {
     @ViewBuilder
     private var resumeButton: some View {
         if isHovered {
-            HStack(spacing: Spacing.xxs) {
-                Image(systemName: "play.fill")
-                Text("Resume")
+            Image(systemName: "play.circle.fill")
+                .font(.system(size: 38))
+                .foregroundStyle(.white)
+                .shadow(radius: 8)
+                .transition(.opacity)
+        }
+    }
+
+    @ViewBuilder
+    private var removeButton: some View {
+        if isHovered {
+            Button(action: onRemove) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(6)
+                    .background(.black.opacity(0.55), in: Circle())
             }
-            .font(AppFont.cardMeta.weight(.semibold))
-            .foregroundStyle(.white)
-            .padding(.horizontal, Spacing.sm)
-            .padding(.vertical, Spacing.xxs + 2)
-            .background(.ultraThinMaterial, in: Capsule())
+            .buttonStyle(.plain)
+            .hoverFeedback(scale: 1.15)
             .padding(Spacing.xs)
             .transition(.opacity)
+            .accessibilityLabel("Remove \(anime.displayTitle) from Continue Watching")
         }
     }
 

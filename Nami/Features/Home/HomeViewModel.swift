@@ -81,6 +81,20 @@ final class HomeViewModel {
         await loadRow(id)
     }
 
+    /// Re-reads only the Continue Watching shelf. Called when playback persists
+    /// progress so the row reflects the just-watched episode immediately.
+    func refreshContinueWatching() async {
+        await loadContinueWatching()
+    }
+
+    func removeFromContinueWatching(_ entry: ContinueWatchingEntry) async {
+        continueWatching.removeAll { $0.id == entry.id }
+        await progressStore.remove(
+            animeID: entry.progress.animeID,
+            episodeNumber: entry.progress.episodeNumber
+        )
+    }
+
     private func loadRow(_ id: RowID) async {
         guard let index = rows.firstIndex(where: { $0.id == id }) else { return }
         rows[index].state = .loading

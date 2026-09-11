@@ -375,6 +375,21 @@ struct PlaybackCoordinatorTests {
         #expect(saved?.animeTitle == anime.displayTitle)
     }
 
+    @Test func progressPersistenceNotifiesObserver() async throws {
+        let setup = try makeSetup()
+        var persisted: PlaybackProgress?
+        setup.coordinator.onProgressSaved = { persisted = $0 }
+
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(7), startAt: nil)
+        await waitUntil { setup.coordinator.state == .playing }
+        setup.engine.emitTime(120)
+
+        await waitUntil { persisted != nil }
+        #expect(persisted?.episodeNumber == 7)
+        #expect(persisted?.positionSeconds == 120)
+        #expect(persisted?.isCompleted == false)
+    }
+
     @Test func shortPlaybackDoesNotMarkComplete() async throws {
         let setup = try makeSetup()
         setup.coordinator.start(stream: stream, anime: anime, episode: episode(7), startAt: nil)

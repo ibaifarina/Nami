@@ -28,7 +28,6 @@ struct LibraryView: View {
             }
         }
         .background(AppColor.background)
-        .ignoresSafeArea(edges: .top)
         .navigationTitle("Library")
         .task { await model.load() }
     }
@@ -94,6 +93,7 @@ struct LibraryView: View {
     }
 
     private func progressLabel(_ entry: LibraryEntry) -> String? {
+        guard entry.anime.subtype?.isMovie != true else { return nil }
         if let total = entry.anime.episodesAvailable, total > 0 {
             return "Ep \(entry.progress) / \(total)"
         }

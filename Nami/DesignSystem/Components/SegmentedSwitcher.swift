@@ -50,6 +50,8 @@ struct SegmentedSwitcher<Value: Hashable & Identifiable>: View {
             .contentShape(Capsule())
         }
         .buttonStyle(SegmentButtonStyle(isSelected: isSelected))
+        .accessibilityLabel(title(option))
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 

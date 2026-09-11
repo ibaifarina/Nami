@@ -433,12 +433,21 @@ struct SettingsDropdown<Value: Hashable>: View {
     }
 }
 
-private struct SettingsDropdownPanel<Value: Hashable>: View {
+struct SettingsDropdownAction {
+    let label: String
+    var systemImage: String?
+    var isDestructive = false
+    let handler: () -> Void
+}
+
+struct SettingsDropdownPanel<Value: Hashable>: View {
     let options: [SettingsDropdownOption<Value>]
     let selection: Value
     let onSelect: (Value) -> Void
+    var action: SettingsDropdownAction? = nil
 
     @State private var hoveredValue: Value?
+    @State private var isActionHovered = false
 
     var body: some View {
         Group {
@@ -455,48 +464,118 @@ private struct SettingsDropdownPanel<Value: Hashable>: View {
 
     private var rows: some View {
         VStack(spacing: 2) {
-            ForEach(options) { option in
-                Button {
-                    onSelect(option.value)
-                } label: {
-                    HStack(spacing: Spacing.xs) {
-                        optionIcon(option)
+            ForEach(options.indices, id: \.self) { index in
+                optionRow(
+                    options[index],
+                    isFirst: index == 0,
+                    isLast: index == options.count - 1 && action == nil
+                )
+            }
 
-                        Text(option.label)
-                            .font(AppFont.cardTitle)
-                            .lineLimit(1)
+            if let action {
+                Divider()
+                    .padding(.vertical, Spacing.xxs)
 
-                        Spacer(minLength: Spacing.sm)
-
-                        if option.value == selection {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(AppColor.brand)
-                        }
-                    }
-                    .foregroundStyle(.primary)
-                    .padding(.horizontal, Spacing.xs)
-                    .padding(.vertical, 6)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        rowBackground(for: option),
-                        in: RoundedRectangle(cornerRadius: Radius.control - 2, style: .continuous)
-                    )
-                    .contentShape(RoundedRectangle(cornerRadius: Radius.control - 2, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .onHover { hovering in
-                    if hovering {
-                        hoveredValue = option.value
-                    } else if hoveredValue == option.value {
-                        hoveredValue = nil
-                    }
-                }
-                .accessibilityAddTraits(option.value == selection ? .isSelected : [])
+                actionRow(action, isFirst: options.isEmpty, isLast: true)
             }
         }
         .padding(Spacing.xxs)
     }
+
+    private func optionRow(
+        _ option: SettingsDropdownOption<Value>,
+        isFirst: Bool,
+        isLast: Bool
+    ) -> some View {
+        Button {
+            onSelect(option.value)
+        } label: {
+            HStack(spacing: Spacing.xs) {
+                optionIcon(option)
+
+                Text(option.label)
+                    .font(AppFont.cardTitle)
+                    .lineLimit(1)
+
+                Spacer(minLength: Spacing.sm)
+
+                if option.value == selection {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(AppColor.brand)
+                }
+            }
+            .foregroundStyle(.primary)
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                highlightShape(isFirst: isFirst, isLast: isLast)
+                    .fill(rowBackground(for: option))
+            }
+            .contentShape(highlightShape(isFirst: isFirst, isLast: isLast))
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            if hovering {
+                hoveredValue = option.value
+            } else if hoveredValue == option.value {
+                hoveredValue = nil
+            }
+        }
+        .accessibilityAddTraits(option.value == selection ? .isSelected : [])
+    }
+
+    private func actionRow(
+        _ action: SettingsDropdownAction,
+        isFirst: Bool,
+        isLast: Bool
+    ) -> some View {
+        Button {
+            action.handler()
+        } label: {
+            HStack(spacing: Spacing.xs) {
+                if let systemImage = action.systemImage {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(action.isDestructive ? Color.red : Color.secondary)
+                        .frame(width: 16)
+                }
+
+                Text(action.label)
+                    .font(AppFont.cardTitle)
+                    .lineLimit(1)
+
+                Spacer(minLength: Spacing.sm)
+            }
+            .foregroundStyle(action.isDestructive ? Color.red : Color.primary)
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                highlightShape(isFirst: isFirst, isLast: isLast)
+                    .fill(actionBackground(for: action))
+            }
+            .contentShape(highlightShape(isFirst: isFirst, isLast: isLast))
+        }
+        .buttonStyle(.plain)
+        .onHover { isActionHovered = $0 }
+    }
+
+    /// Matches the corner curvature of the enclosing popover so the first and
+    /// last row highlights nest concentrically inside the dropdown container.
+    private func highlightShape(isFirst: Bool, isLast: Bool) -> UnevenRoundedRectangle {
+        let inner = Radius.control - 2
+        return UnevenRoundedRectangle(
+            topLeadingRadius: isFirst ? Self.containerRadius - Spacing.xxs : inner,
+            bottomLeadingRadius: isLast ? Self.containerRadius - Spacing.xxs : inner,
+            bottomTrailingRadius: isLast ? Self.containerRadius - Spacing.xxs : inner,
+            topTrailingRadius: isFirst ? Self.containerRadius - Spacing.xxs : inner,
+            style: .circular
+        )
+    }
+
+    private static var containerRadius: CGFloat { 18 }
 
     @ViewBuilder
     private func optionIcon(_ option: SettingsDropdownOption<Value>) -> some View {
@@ -521,6 +600,11 @@ private struct SettingsDropdownPanel<Value: Hashable>: View {
             return Color.primary.opacity(0.05)
         }
         return .clear
+    }
+
+    private func actionBackground(for action: SettingsDropdownAction) -> Color {
+        guard isActionHovered else { return .clear }
+        return action.isDestructive ? Color.red.opacity(0.08) : Color.primary.opacity(0.05)
     }
 }
 

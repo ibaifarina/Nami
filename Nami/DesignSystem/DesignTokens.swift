@@ -36,36 +36,6 @@ enum Effects {
     static let heroBlur: CGFloat = 5
 }
 
-/// Direction of a screen-to-screen swap, used to pick the drift of the cross-fade.
-enum ScreenTransitionDirection {
-    case forward
-    case backward
-
-    fileprivate var insertionOffset: CGFloat {
-        switch self {
-        case .forward: 24
-        case .backward: -24
-        }
-    }
-
-    fileprivate var removalOffset: CGFloat {
-        switch self {
-        case .forward: -24
-        case .backward: 24
-        }
-    }
-}
-
-extension AnyTransition {
-    /// Cross-fade with a slight horizontal drift, for swapping one screen for another.
-    static func screenChange(direction: ScreenTransitionDirection) -> AnyTransition {
-        .asymmetric(
-            insertion: .opacity.combined(with: .offset(x: direction.insertionOffset)),
-            removal: .opacity.combined(with: .offset(x: direction.removalOffset))
-        )
-    }
-}
-
 enum Layout {
     static let windowMinWidth: CGFloat = 1000
     static let windowMinHeight: CGFloat = 680

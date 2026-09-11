@@ -4,7 +4,6 @@ struct RootView: View {
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var contentGeneration = 0
-    @State private var previousSection: AppRouter.SidebarItem = .home
 
     var body: some View {
         @Bindable var router = environment.router
@@ -13,7 +12,7 @@ struct RootView: View {
             detailContent
                 .id(DetailIdentity(section: selectedSection, generation: contentGeneration))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .transition(.screenChange(direction: sectionDirection))
+                .transition(.opacity)
                 .animation(
                     reduceMotion ? nil : .easeOut(duration: Motion.transition),
                     value: selectedSection
@@ -60,20 +59,10 @@ struct RootView: View {
             await environment.clearCaches()
             contentGeneration += 1
         }
-        .onChange(of: selectedSection) { _, newValue in
-            previousSection = newValue
-        }
     }
 
     private var selectedSection: AppRouter.SidebarItem {
         environment.router.selection ?? .home
-    }
-
-    private var sectionDirection: ScreenTransitionDirection {
-        let order = AppRouter.SidebarItem.allCases
-        let from = order.firstIndex(of: previousSection) ?? 0
-        let to = order.firstIndex(of: selectedSection) ?? 0
-        return to >= from ? .forward : .backward
     }
 
     @ViewBuilder

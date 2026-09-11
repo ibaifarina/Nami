@@ -218,4 +218,31 @@ struct HomeViewModelTests {
         #expect(model.continueWatching.count == 1)
         #expect(model.continueWatching.first?.anime.displayTitle == "Offline Show")
     }
+
+    @Test func refreshContinueWatchingPicksUpProgressSavedAfterLoad() async {
+        let progressStore = InMemoryPlaybackProgressStore()
+        let model = HomeViewModel(
+            media: StubMediaRepository(),
+            progressStore: progressStore
+        )
+
+        await model.load()
+        #expect(model.continueWatching.isEmpty)
+
+        await progressStore.save(
+            PlaybackProgress(
+                animeID: "46474",
+                episodeNumber: 3,
+                positionSeconds: 420,
+                durationSeconds: 1400,
+                updatedAt: Date(),
+                animeTitle: "Frieren"
+            )
+        )
+        await model.refreshContinueWatching()
+
+        #expect(model.continueWatching.count == 1)
+        #expect(model.continueWatching.first?.anime.id == "46474")
+        #expect(model.continueWatching.first?.progress.episodeNumber == 3)
+    }
 }

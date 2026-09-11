@@ -335,7 +335,7 @@ private struct FilterDropdownPanel<Value: Hashable>: View {
         )
     }
 
-    private static var containerRadius: CGFloat { 16 }
+    private static var containerRadius: CGFloat { 18 }
 
     private func rowBackground(for row: Item) -> Color {
         if row.isSelected { return AppColor.brand.opacity(0.12) }

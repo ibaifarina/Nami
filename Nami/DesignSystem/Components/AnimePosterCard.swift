@@ -122,7 +122,9 @@ struct AnimePosterCard: View {
             durationSeconds: 1_452,
             updatedAt: Date()
         )
-    ) {}
+    ) {
+    } onRemove: {
+    }
     .frame(width: 280)
     .padding()
 }

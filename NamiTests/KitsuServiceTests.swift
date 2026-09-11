@@ -163,6 +163,32 @@ struct SeriesGroupingServiceTests {
         #expect(series.related.contains { $0.anime.id == "2" })
     }
 
+    @Test func movieInsideTVChainStaysTheSoleInstallment() async throws {
+        let season1 = anime(id: "1", title: "Chainsaw Man", episodes: 12)
+        let movie = anime(id: "2", title: "Chainsaw Man: Reze-hen", subtype: .movie, episodes: 1)
+        let season2 = anime(id: "3", title: "Chainsaw Man: Shikaku-hen", episodes: 12)
+
+        var repository = StubMediaRepository()
+        repository.details = [
+            "1": details(season1, relations: [AnimeRelation(role: .sequel, anime: movie)]),
+            "2": details(movie, relations: [
+                AnimeRelation(role: .prequel, anime: season1),
+                AnimeRelation(role: .sequel, anime: season2),
+            ]),
+            "3": details(season2, relations: [AnimeRelation(role: .prequel, anime: movie)]),
+        ]
+
+        let service = SeriesGroupingService(repository: repository)
+        let movieDetails = try #require(repository.details["2"])
+        let series = await service.series(for: movie, details: movieDetails)
+
+        #expect(series.installments.map(\.anime.id) == ["2"])
+        #expect(series.installment(id: "2")?.anime.id == "2")
+        #expect(series.related.contains { $0.anime.id == "1" && $0.role == .prequel })
+        #expect(series.related.contains { $0.anime.id == "3" && $0.role == .sequel })
+        #expect(!series.related.contains { $0.anime.id == "2" })
+    }
+
     @Test func missingPrequelUsesTitleSeasonNumberForDisplay() async throws {
         let season2 = anime(id: "2", title: "Show Season 2", episodes: 12)
         let season3 = anime(id: "3", title: "Show Season 3", episodes: 12)

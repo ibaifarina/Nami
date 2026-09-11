@@ -36,6 +36,9 @@ final class PlaybackCoordinator {
     var onPlaybackTick: ((Anime, Episode, Double, Double) -> Void)?
     var onPlaybackEnded: (() -> Void)?
     var onSessionClosed: (() -> Void)?
+    /// Called after a progress snapshot has been persisted, so open screens can
+    /// refresh watched state without polling the store.
+    var onProgressSaved: ((PlaybackProgress) -> Void)?
     /// Called when a stream fails to load or play so callers can invalidate
     /// any cached source for the episode.
     var onStreamFailed: ((Anime, Episode) -> Void)?
@@ -492,8 +495,9 @@ final class PlaybackCoordinator {
         )
         syncLibrary(anime: session.anime, progress: progress)
         let store = progressStore
-        Task {
+        Task { [weak self] in
             await store.save(progress)
+            self?.onProgressSaved?(progress)
         }
     }
 

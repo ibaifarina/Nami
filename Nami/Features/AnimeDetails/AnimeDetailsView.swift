@@ -2,9 +2,15 @@ import SwiftUI
 
 struct AnimeDetailsView: View {
     @Environment(AppEnvironment.self) private var environment
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var model: AnimeDetailsViewModel
     @State private var isSynopsisExpanded = false
     @State private var episodeViewMode: EpisodeViewMode = .cards
+    @State private var isLibraryMenuExpanded = false
+    @State private var synopsisFullHeight: CGFloat = 0
+    @State private var synopsisClampedHeight: CGFloat = 0
+
+    private static let synopsisLineLimit = 4
 
     init(animeID: String, environment: AppEnvironment) {
         _model = State(initialValue: AnimeDetailsViewModel(environment: environment, animeID: animeID))
@@ -38,6 +44,10 @@ struct AnimeDetailsView: View {
             }
             environment.streamPreload.prepare(anime: anime, episode: episode)
         }
+        .onChange(of: environment.progressRevision) {
+            guard !environment.playback.isPresenting else { return }
+            Task { await model.refreshLocalContext() }
+        }
     }
 
     private func content(_ details: AnimeDetails) -> some View {
@@ -51,7 +61,9 @@ struct AnimeDetailsView: View {
                     } else if model.series == nil, hasLikelySeasons(details) {
                         skeletonSeason
                     }
-                    episodesSection
+                    if !model.isMovie {
+                        episodesSection
+                    }
                     if model.series == nil, model.related.isEmpty, hasLikelyRelated(details) {
                         skeletonRelated
                     } else {
@@ -181,59 +193,82 @@ struct AnimeDetailsView: View {
 
     /// Whether the direct relations fetched with the details suggest multiple
     /// TV installments, so the season selector is likely to appear once the
-    /// full series grouping resolves.
+    /// full series grouping resolves. Only TV entries get a season selector.
     private func hasLikelySeasons(_ details: AnimeDetails) -> Bool {
-        details.relations.contains {
+        details.anime.subtype == .tv && details.relations.contains {
             $0.role.isSequentialInstallment && $0.anime.subtype == .tv
         }
     }
 
     /// Whether the direct relations suggest non-installment entries, so the
     /// related row is likely to appear once the full series grouping resolves.
+    /// For non-TV entries the whole sequential chain becomes related media.
     private func hasLikelyRelated(_ details: AnimeDetails) -> Bool {
-        details.relations.contains {
-            !($0.role.isSequentialInstallment && $0.anime.subtype == .tv)
+        let entryIsTV = details.anime.subtype == .tv
+        return details.relations.contains { relation in
+            guard relation.role.isSequentialInstallment, relation.anime.subtype == .tv else {
+                return true
+            }
+            return !entryIsTV
         }
     }
 
     private func header(_ anime: Anime) -> some View {
-        ZStack(alignment: .bottomLeading) {
-            Color.clear
-                .frame(height: Layout.detailHeroHeight)
-                .frame(maxWidth: .infinity)
-                .overlay {
+        GeometryReader { proxy in
+            let frame = proxy.frame(in: .scrollView)
+            let topOverscroll = max(frame.minY, 0)
+            let leadingOverscroll = max(frame.minX, 0)
+            let horizontalOverscroll = abs(frame.minX)
+
+            ZStack(alignment: .topLeading) {
+                ZStack {
                     ParallaxHeroImage(
                         url: anime.bannerURL ?? anime.posterURL,
                         height: Layout.detailHeroHeight,
                         blurRadius: CGFloat(environment.preferences.heroBackgroundBlur.radius)
                     )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .clipped()
+                        .mask { AppColor.detailHeroMask }
+                    Color.black.opacity(0.7)
+                    AppColor.detailHeroFade
                 }
-                .clipped()
-                .mask { AppColor.detailHeroMask }
-            Color.black.opacity(0.7)
-            AppColor.detailHeroFade
-            HStack(alignment: .bottom, spacing: Spacing.lg) {
-                poster(anime)
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text(anime.displayTitle)
-                        .font(AppFont.heroTitle)
-                        .lineLimit(2)
-                    if let alternative = anime.alternativeTitle {
-                        Text(alternative)
-                            .font(AppFont.cardMeta)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                .frame(
+                    width: proxy.size.width + horizontalOverscroll,
+                    height: Layout.detailHeroHeight + topOverscroll
+                )
+                .offset(x: -leadingOverscroll, y: -topOverscroll)
+
+                HStack(alignment: .bottom, spacing: Spacing.lg) {
+                    poster(anime)
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text(anime.displayTitle)
+                            .font(AppFont.heroTitle)
+                            .lineLimit(2)
+                        if let alternative = anime.alternativeTitle {
+                            Text(alternative)
+                                .font(AppFont.cardMeta)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        metadataPills(anime)
+                            .padding(.top, Spacing.xxs)
+                        actions
+                            .padding(.top, Spacing.sm)
                     }
-                    metadataPills(anime)
-                        .padding(.top, Spacing.xxs)
-                    actions
-                        .padding(.top, Spacing.sm)
+                    .padding(.bottom, Spacing.xs)
+                    Spacer(minLength: 0)
                 }
-                .padding(.bottom, Spacing.xs)
-                Spacer(minLength: 0)
+                .contentPadding()
+                .padding(.bottom, Layout.detailHeroContentInset)
+                .frame(
+                    width: proxy.size.width,
+                    height: Layout.detailHeroHeight,
+                    alignment: .bottomLeading
+                )
+                .offset(x: -frame.minX, y: -topOverscroll)
             }
-            .contentPadding()
-            .padding(.bottom, Layout.detailHeroContentInset)
+            .frame(width: proxy.size.width, height: Layout.detailHeroHeight)
         }
         .frame(height: Layout.detailHeroHeight)
         .frame(maxWidth: .infinity)
@@ -298,32 +333,8 @@ struct AnimeDetailsView: View {
     }
 
     private var libraryMenu: some View {
-        Menu {
-            if model.libraryEntry != nil {
-                Section("Status") {
-                    ForEach(LibraryStatus.libraryCases) { status in
-                        Button {
-                            Task { await model.setLibraryStatus(status) }
-                        } label: {
-                            if model.libraryEntry?.status == status {
-                                Label(status.displayName, systemImage: "checkmark")
-                            } else {
-                                Text(status.displayName)
-                            }
-                        }
-                    }
-                }
-                Divider()
-                Button("Remove from Library", role: .destructive) {
-                    Task { await model.removeFromLibrary() }
-                }
-            } else {
-                ForEach(LibraryStatus.libraryCases) { status in
-                    Button(status.displayName, systemImage: status.systemImage) {
-                        Task { await model.setLibraryStatus(status) }
-                    }
-                }
-            }
+        Button {
+            isLibraryMenuExpanded.toggle()
         } label: {
             Label(
                 model.libraryEntry?.status.displayName ?? "Add to Library",
@@ -331,14 +342,43 @@ struct AnimeDetailsView: View {
             )
             .labelStyle(.iconOnly)
         }
-        .menuStyle(.button)
         .buttonStyle(GlassButtonStyle())
-        .menuIndicator(.hidden)
         .fixedSize()
         .hoverFeedback(scale: 1.03)
         .accessibilityLabel(model.libraryEntry?.status.displayName ?? "Add to Library")
         .disabled(model.isUpdatingLibrary || model.selectedAnime == nil)
         .help("Manage your local library")
+        .popover(isPresented: $isLibraryMenuExpanded, arrowEdge: .top) {
+            SettingsDropdownPanel(
+                options: libraryOptions,
+                selection: model.libraryEntry?.status,
+                onSelect: { status in
+                    guard let status else { return }
+                    isLibraryMenuExpanded = false
+                    Task { await model.setLibraryStatus(status) }
+                },
+                action: removeFromLibraryAction
+            )
+            .frame(width: 240)
+        }
+    }
+
+    private var libraryOptions: [SettingsDropdownOption<LibraryStatus?>] {
+        LibraryStatus.libraryCases.map {
+            SettingsDropdownOption(value: Optional($0), label: $0.displayName, systemImage: $0.systemImage)
+        }
+    }
+
+    private var removeFromLibraryAction: SettingsDropdownAction? {
+        guard model.libraryEntry != nil else { return nil }
+        return SettingsDropdownAction(
+            label: "Remove from Library",
+            systemImage: "trash",
+            isDestructive: true
+        ) {
+            isLibraryMenuExpanded = false
+            Task { await model.removeFromLibrary() }
+        }
     }
 
     @ViewBuilder
@@ -349,18 +389,49 @@ struct AnimeDetailsView: View {
                 Text(synopsis)
                     .font(AppFont.body)
                     .foregroundStyle(.secondary)
-                    .lineLimit(isSynopsisExpanded ? nil : 4)
-                Button(isSynopsisExpanded ? "Show Less" : "Show More") {
-                    withAnimation(.easeOut(duration: Motion.transition)) {
-                        isSynopsisExpanded.toggle()
+                    .lineLimit(isSynopsisExpanded ? nil : Self.synopsisLineLimit)
+                    .background(synopsisTruncationProbe(synopsis))
+                if isSynopsisExpanded || isSynopsisTruncated {
+                    Button(isSynopsisExpanded ? "Show Less" : "Show More") {
+                        withAnimation(.easeOut(duration: Motion.transition)) {
+                            isSynopsisExpanded.toggle()
+                        }
                     }
+                    .buttonStyle(.plain)
+                    .font(AppFont.cardTitle)
+                    .foregroundStyle(AppColor.brand)
+                    .hoverFeedback(brightness: 0.2)
                 }
-                .buttonStyle(.plain)
-                .font(AppFont.cardTitle)
-                .foregroundStyle(AppColor.brand)
-                .hoverFeedback(brightness: 0.2)
             }
         }
+    }
+
+    private func synopsisTruncationProbe(_ synopsis: String) -> some View {
+        ZStack {
+            Text(synopsis)
+                .font(AppFont.body)
+                .lineLimit(Self.synopsisLineLimit)
+                .fixedSize(horizontal: false, vertical: true)
+                .hidden()
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.height
+                } action: { height in
+                    synopsisClampedHeight = height
+                }
+            Text(synopsis)
+                .font(AppFont.body)
+                .fixedSize(horizontal: false, vertical: true)
+                .hidden()
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.height
+                } action: { height in
+                    synopsisFullHeight = height
+                }
+        }
+    }
+
+    private var isSynopsisTruncated: Bool {
+        synopsisFullHeight > synopsisClampedHeight + 0.5
     }
 
     private var seasonSection: some View {
@@ -392,6 +463,7 @@ struct AnimeDetailsView: View {
                 }
                 .padding(.vertical, 2)
             }
+            .scrollClipDisabled()
         }
     }
 
@@ -517,30 +589,45 @@ struct AnimeDetailsView: View {
                         Task { await model.toggleEpisodeWatched(episode) }
                     }
                 )
+                .id(episode.id)
                 .contextMenu { watchedMenu(episode) }
             }
         }
     }
 
     private func episodeCards(_ episodes: [Episode]) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: Spacing.md) {
-                ForEach(episodes) { episode in
-                    EpisodeCard(
-                        episode: episode,
-                        fallbackImageURL: model.selectedAnime?.bannerURL
-                            ?? model.selectedAnime?.posterURL,
-                        isWatched: model.isWatched(episode),
-                        onPlay: { play(episode: episode) },
-                        onToggleWatched: {
-                            Task { await model.toggleEpisodeWatched(episode) }
-                        }
-                    )
-                    .frame(width: 360)
-                    .contextMenu { watchedMenu(episode) }
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: Spacing.md) {
+                    ForEach(episodes) { episode in
+                        EpisodeCard(
+                            episode: episode,
+                            fallbackImageURL: model.selectedAnime?.bannerURL
+                                ?? model.selectedAnime?.posterURL,
+                            isWatched: model.isWatched(episode),
+                            progress: model.episodeProgress(for: episode),
+                            onPlay: { play(episode: episode) },
+                            onToggleWatched: {
+                                Task { await model.toggleEpisodeWatched(episode) }
+                            }
+                        )
+                        .frame(width: 360)
+                        .id(episode.id)
+                        .contextMenu { watchedMenu(episode) }
+                    }
+                }
+                .padding(.vertical, Spacing.xxs)
+            }
+            .scrollClipDisabled()
+            .task(id: episodeScrollTarget) {
+                guard model.hasWatchHistory, let target = model.currentEpisode else { return }
+                // Let the lazy stack lay out the loaded cards before scrolling.
+                try? await Task.sleep(for: .milliseconds(80))
+                guard !Task.isCancelled else { return }
+                withAnimation(reduceMotion ? nil : .easeOut(duration: Motion.transition)) {
+                    proxy.scrollTo(target.id, anchor: .center)
                 }
             }
-            .padding(.vertical, Spacing.xxs)
         }
     }
 
@@ -578,6 +665,7 @@ struct AnimeDetailsView: View {
                     }
                     .padding(.vertical, Spacing.xxs)
                 }
+                .scrollClipDisabled()
             }
         }
     }
@@ -595,6 +683,18 @@ struct AnimeDetailsView: View {
             return nil
         }
         return "\(anime.id)-\(episode.displayNumber)"
+    }
+
+    /// Changes whenever the episode that should be scrolled into view changes,
+    /// including after episodes load or playback marks one watched.
+    private var episodeScrollTarget: String {
+        [
+            model.selectedInstallmentID ?? model.animeID,
+            String(model.episodes.count),
+            model.currentEpisode?.id ?? "none",
+            episodeViewMode.rawValue,
+        ]
+        .joined(separator: "-")
     }
 
     private func open(_ anime: Anime) {
@@ -783,6 +883,7 @@ private struct EpisodeCard: View {
     let episode: Episode
     let fallbackImageURL: URL?
     let isWatched: Bool
+    let progress: PlaybackProgress?
     let onPlay: () -> Void
     let onToggleWatched: () -> Void
 
@@ -799,6 +900,7 @@ private struct EpisodeCard: View {
                     }
                     .overlay { scrim }
                     .overlay(alignment: .center) { playGlyph }
+                    .overlay(alignment: .bottom) { progressBar }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                     .overlay {
                         RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
@@ -808,7 +910,10 @@ private struct EpisodeCard: View {
             }
             .buttonStyle(.plain)
             .opacity(isWatched ? 0.6 : 1)
-            .accessibilityLabel("Play \(episode.displayTitle)")
+            .accessibilityLabel(
+                progress.map { "Resume \(episode.displayTitle), \($0.timecode)" }
+                    ?? "Play \(episode.displayTitle)"
+            )
 
             watchedToggle
                 .padding(Spacing.xs)
@@ -871,7 +976,14 @@ private struct EpisodeCard: View {
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                 }
-                if let duration = episode.durationText {
+                if let progress {
+                    HStack(spacing: Spacing.xxs) {
+                        Image(systemName: "play.fill")
+                        Text(progress.timecode)
+                    }
+                    .font(AppFont.cardMeta)
+                    .foregroundStyle(.white.opacity(0.75))
+                } else if let duration = episode.durationText {
                     HStack(spacing: Spacing.xxs) {
                         Image(systemName: "clock")
                         Text(duration)
@@ -881,6 +993,22 @@ private struct EpisodeCard: View {
                 }
             }
             .padding(Spacing.sm)
+        }
+    }
+
+    @ViewBuilder
+    private var progressBar: some View {
+        if let progress {
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(.white.opacity(0.25))
+                    Rectangle()
+                        .fill(AppColor.brandGradient)
+                        .frame(width: max(3, geometry.size.width * progress.fraction))
+                }
+            }
+            .frame(height: 3)
         }
     }
 

@@ -22,6 +22,10 @@ final class AppEnvironment {
     let nextEpisode: NextEpisodeController
     let externalPlayers: ExternalPlayerService
 
+    /// Increments whenever playback persists progress, letting open screens
+    /// refresh watched state without a manual reload.
+    private(set) var progressRevision = 0
+
     /// Kitsu is the canonical metadata provider.
     let media: any MediaRepository
     let episodes: any EpisodeRepository
@@ -158,6 +162,9 @@ final class AppEnvironment {
             resolver: sourceResolver,
             playback: coordinator
         )
+        coordinator.onProgressSaved = { [weak self] _ in
+            self?.progressRevision += 1
+        }
     }
 
     func clearCaches() async {

@@ -59,44 +59,49 @@ struct SeriesGroupingService: Sendable {
         }
 
         let chain = Self.buildChain(from: nodes, after: after, fallback: anime)
+        // Only a TV entry anchors the season selector. Opening a movie, OVA or
+        // other non-TV entry directly keeps it as the sole installment; the
+        // surrounding chain is surfaced as related media instead.
+        let entryIndex = chain.firstIndex { $0.id == anime.id }
+        let entryIsTV = entryIndex.map { chain[$0].subtype == .tv } ?? false
         var installments: [AnimeInstallment] = []
         var offset = 0
         var related = relatedByID
 
-        for node in chain where node.subtype == .tv {
-            let order = installments.count
-            installments.append(
-                AnimeInstallment(
-                    anime: node,
-                    relationship: order == 0 ? .original : .sequel,
-                    displayOrder: order,
-                    displayName: Self.displayName(for: node, order: order, chain: chain),
-                    absoluteEpisodeOffset: offset
+        if entryIsTV {
+            for node in chain where node.subtype == .tv {
+                let order = installments.count
+                installments.append(
+                    AnimeInstallment(
+                        anime: node,
+                        relationship: order == 0 ? .original : .sequel,
+                        displayOrder: order,
+                        displayName: Self.displayName(for: node, order: order, chain: chain),
+                        absoluteEpisodeOffset: offset
+                    )
                 )
-            )
-            offset += max(node.episodeCount ?? 0, 0)
-        }
-
-        for node in chain where node.subtype != .tv {
-            if related[node.id] == nil {
-                related[node.id] = AnimeRelation(role: .sequel, anime: node)
+                offset += max(node.episodeCount ?? 0, 0)
             }
-        }
-
-        if installments.isEmpty {
+        } else {
             installments = [
                 AnimeInstallment(
                     anime: anime,
                     relationship: .original,
                     displayOrder: 0,
-                    displayName: Self.displayName(for: anime, order: 0, chain: [anime]),
+                    displayName: Self.displayName(for: anime, order: 0, chain: chain),
                     absoluteEpisodeOffset: 0
                 ),
             ]
         }
 
-        let root = chain.first ?? anime
         let installmentIDs = Set(installments.map(\.id))
+        for (index, node) in chain.enumerated() where !installmentIDs.contains(node.id) {
+            guard related[node.id] == nil else { continue }
+            let role: MediaRelationRole = entryIndex.map { index < $0 ? .prequel : .sequel } ?? .sequel
+            related[node.id] = AnimeRelation(role: role, anime: node)
+        }
+
+        let root = entryIsTV ? (chain.first ?? anime) : anime
         let relatedList = related.values
             .filter { !installmentIDs.contains($0.anime.id) }
             .sorted {
