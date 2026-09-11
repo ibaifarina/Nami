@@ -28,6 +28,7 @@ struct LibraryView: View {
             }
         }
         .background(AppColor.background)
+        .ignoresSafeArea(edges: .top)
         .navigationTitle("Library")
         .task { await model.load() }
     }
