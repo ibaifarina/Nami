@@ -130,6 +130,26 @@ struct PreferencesStoreTests {
         #expect(reloaded.heroBackgroundBlur == .strong)
     }
 
+    @Test func animeTitleLanguageDefaultsToStandardAndPersists() throws {
+        let suite = "preferences-test-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let store = PreferencesStore(defaults: defaults)
+        #expect(store.animeTitleLanguage == .standard)
+
+        store.animeTitleLanguage = .japanese
+
+        let reloaded = PreferencesStore(defaults: defaults)
+        #expect(reloaded.animeTitleLanguage == .japanese)
+    }
+
+    @Test func legacyPreferencesDefaultAnimeTitleLanguageToStandard() throws {
+        let legacy = Data(#"{"autoSelectBestStream":true}"#.utf8)
+        let decoded = try JSONDecoder().decode(UserPreferences.self, from: legacy)
+        #expect(decoded.animeTitleLanguage == .standard)
+    }
+
     @Test func externalPlayerDefaultsToBuiltInAndPersists() throws {
         let suite = "preferences-test-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))

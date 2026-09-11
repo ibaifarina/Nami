@@ -3,6 +3,7 @@ import SwiftUI
 struct AnimeDetailsView: View {
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.animeTitleLanguage) private var titleLanguage
     @State private var model: AnimeDetailsViewModel
     @State private var isSynopsisExpanded = false
     @State private var episodeViewMode: EpisodeViewMode = .cards
@@ -79,7 +80,7 @@ struct AnimeDetailsView: View {
         .frame(minWidth: 0, idealWidth: 900, maxWidth: .infinity)
         .topBarScrim()
         .ignoresSafeArea(edges: .top)
-        .navigationTitle((model.selectedAnime ?? details.anime).displayTitle)
+        .navigationTitle((model.selectedAnime ?? details.anime).displayTitle(for: titleLanguage))
     }
 
     private var skeletonContent: some View {
@@ -242,10 +243,10 @@ struct AnimeDetailsView: View {
                 HStack(alignment: .bottom, spacing: Spacing.lg) {
                     poster(anime)
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text(anime.displayTitle)
+                        Text(anime.displayTitle(for: titleLanguage))
                             .font(AppFont.heroTitle)
                             .lineLimit(2)
-                        if let alternative = anime.alternativeTitle {
+                        if let alternative = anime.alternativeTitle(for: titleLanguage) {
                             Text(alternative)
                                 .font(AppFont.cardMeta)
                                 .foregroundStyle(.secondary)
@@ -458,7 +459,7 @@ struct AnimeDetailsView: View {
                         }
                         .buttonStyle(.plain)
                         .hoverFeedback(scale: 1.03)
-                        .help(installment.anime.displayTitle)
+                        .help(installment.anime.displayTitle(for: titleLanguage))
                     }
                 }
                 .padding(.vertical, 2)

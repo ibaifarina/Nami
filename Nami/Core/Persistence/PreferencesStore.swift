@@ -101,6 +101,11 @@ final class PreferencesStore {
         set { update { $0.heroBackgroundBlur = newValue } }
     }
 
+    var animeTitleLanguage: AnimeTitleLanguage {
+        get { preferences.animeTitleLanguage }
+        set { update { $0.animeTitleLanguage = newValue } }
+    }
+
     var playbackEngine: PlaybackEngineKind {
         get { preferences.playbackEngine }
         set { update { $0.playbackEngine = newValue } }

@@ -211,10 +211,32 @@ struct Anime: Identifiable, Hashable, Codable, Sendable {
 
     var displayTitle: String { title }
 
-    /// A secondary title when one differs from the display title.
-    var alternativeTitle: String? {
-        for candidate in [englishTitle, romajiTitle, japaneseTitle, canonicalTitle] {
-            if let candidate, candidate != title, !candidate.isEmpty { return candidate }
+    /// The primary title resolved for a display preference.
+    func displayTitle(for language: AnimeTitleLanguage) -> String {
+        switch language {
+        case .standard:
+            title
+        case .english:
+            englishTitle ?? title
+        case .japanese:
+            japaneseTitle ?? romajiTitle ?? title
+        }
+    }
+
+    /// A secondary title in a different language than the resolved primary title.
+    func alternativeTitle(for language: AnimeTitleLanguage) -> String? {
+        let primary = displayTitle(for: language)
+        let candidates: [String?]
+        switch language {
+        case .standard:
+            candidates = [englishTitle, romajiTitle, japaneseTitle, canonicalTitle]
+        case .english:
+            candidates = [japaneseTitle, romajiTitle, canonicalTitle]
+        case .japanese:
+            candidates = [englishTitle, canonicalTitle, romajiTitle]
+        }
+        for candidate in candidates {
+            if let candidate, !candidate.isEmpty, candidate != primary { return candidate }
         }
         return nil
     }

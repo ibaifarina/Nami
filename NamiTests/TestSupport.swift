@@ -52,13 +52,19 @@ actor StubDebridTokenProvider: DebridTokenProviding {
 
 actor StubDebridService: DebridService {
     var availabilityByCandidateID: [String: DebridAvailability] = [:]
+    var filesByCandidateID: [String: [DebridFileInfo]] = [:]
     var checkError: DebridError?
     var resolveURL: URL = testURL("https://resolved.example/video.mp4")
     private(set) var checkedCandidateIDs: [String] = []
     private(set) var resolvedCandidateIDs: [String] = []
+    private(set) var resolvedFileIDs: [Int?] = []
 
     func configure(availability: [String: DebridAvailability]) {
         availabilityByCandidateID = availability
+    }
+
+    func configure(files: [String: [DebridFileInfo]]) {
+        filesByCandidateID = files
     }
 
     func configure(checkError: DebridError?) {
@@ -88,19 +94,24 @@ actor StubDebridService: DebridService {
             DebridCheckResult(
                 candidateID: candidate.id,
                 availability: availabilityByCandidateID[candidate.id] ?? .unknown,
-                files: []
+                files: filesByCandidateID[candidate.id] ?? []
             )
         }
     }
 
-    func resolve(_ candidate: StreamCandidate) async throws -> ResolvedStream {
+    func files(for candidate: StreamCandidate) async throws -> [DebridFileInfo] {
+        filesByCandidateID[candidate.id] ?? []
+    }
+
+    func resolve(_ candidate: StreamCandidate, fileID: Int?) async throws -> ResolvedStream {
         resolvedCandidateIDs.append(candidate.id)
+        resolvedFileIDs.append(fileID)
         return ResolvedStream(
             url: resolveURL,
             filename: candidate.displayTitle,
             sizeBytes: candidate.sizeBytes,
             streamable: true,
-            fileID: 1
+            fileID: fileID ?? 1
         )
     }
 }

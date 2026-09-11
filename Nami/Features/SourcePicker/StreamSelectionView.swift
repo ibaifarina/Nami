@@ -6,6 +6,7 @@ struct StreamSelectionView: View {
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openSettings) private var openSettings
+    @Environment(\.animeTitleLanguage) private var titleLanguage
     @State private var model: StreamSelectionViewModel
 
     init(request: PlaybackRequest, environment: AppEnvironment) {
@@ -48,7 +49,7 @@ struct StreamSelectionView: View {
                 }
 
             VStack(alignment: .leading, spacing: Spacing.xxs) {
-                Text(request.anime.displayTitle)
+                Text(request.anime.displayTitle(for: titleLanguage))
                     .font(AppFont.sectionTitle)
                     .lineLimit(2)
                 Text("Episode \(request.episodeNumber)")
@@ -73,7 +74,11 @@ struct StreamSelectionView: View {
         case .loading:
             loadingView
         case .picker:
-            pickerView
+            if model.isChoosingFile {
+                filePickerView
+            } else {
+                pickerView
+            }
         case .started:
             loadingView
         case .failed(let message):
@@ -183,6 +188,45 @@ struct StreamSelectionView: View {
                 .padding(.bottom, Spacing.xs)
             }
         }
+    }
+
+    @ViewBuilder
+    private var filePickerView: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            SectionHeader(
+                title: "Choose a file",
+                subtitle: "This source contains \(model.pendingFiles.count) video files. Pick the one to play."
+            )
+
+            ScrollView {
+                VStack(spacing: Spacing.sm) {
+                    ForEach(model.pendingFiles, id: \.id) { file in
+                        MovieFileRow(
+                            file: file,
+                            isResolving: model.resolvingCandidateID == model.pendingFileCandidate?.id,
+                            isLargest: file.id == largestFileID,
+                            onSelect: { Task { await model.chooseFile(file) } }
+                        )
+                    }
+                }
+                .padding(.bottom, Spacing.xs)
+            }
+
+            HStack {
+                Button("Back") {
+                    model.cancelFileSelection()
+                }
+                .hoverFeedback(scale: 1.03)
+                Spacer()
+                Text("Parts are often labelled by episode number or size.")
+                    .font(AppFont.cardMeta)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    private var largestFileID: Int? {
+        model.pendingFiles.max(by: { $0.bytes < $1.bytes })?.id
     }
 
     @ViewBuilder
@@ -428,6 +472,89 @@ private struct SourceRow: View {
         .compactMap { $0 }
         .filter { !$0.isEmpty }
         .joined(separator: ", ")
+    }
+}
+
+private struct MovieFileRow: View {
+    let file: DebridFileInfo
+    var isResolving = false
+    var isLargest = false
+    var onSelect: () -> Void
+
+    @State private var isHovering = false
+
+    var body: some View {
+        Button(action: onSelect) {
+            HStack(alignment: .center, spacing: Spacing.sm) {
+                Image(systemName: "film")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 24)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(file.filename)
+                        .font(AppFont.cardTitle)
+                        .lineLimit(2)
+                        .truncationMode(.middle)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: Spacing.xs) {
+                        if let sizeText {
+                            Text(sizeText)
+                                .monospacedDigit()
+                        }
+                        Text(subtitle)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                    .font(AppFont.cardMeta)
+                    .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: Spacing.xs)
+                if isLargest {
+                    Pill(text: "LARGEST")
+                }
+                if isResolving {
+                    LoadingSpinner(size: 16, lineWidth: 2)
+                }
+            }
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, Spacing.xs + 2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                Color.primary.opacity(isHovering ? 0.075 : 0.035),
+                in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+                    .strokeBorder(
+                        isHovering ? Color.primary.opacity(0.16) : AppColor.stroke,
+                        lineWidth: 0.5
+                    )
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: Motion.hover)) {
+                isHovering = hovering
+            }
+        }
+        .disabled(isResolving)
+        .accessibilityLabel(accessibilityText)
+    }
+
+    private var sizeText: String? {
+        guard file.bytes > 0 else { return nil }
+        return ByteCountFormatter.string(fromByteCount: file.bytes, countStyle: .file)
+    }
+
+    private var subtitle: String {
+        file.path == file.filename ? "Video file" : file.path
+    }
+
+    private var accessibilityText: String {
+        [file.filename, sizeText, isLargest ? "largest file" : nil]
+            .compactMap { $0 }
+            .joined(separator: ", ")
     }
 }
 

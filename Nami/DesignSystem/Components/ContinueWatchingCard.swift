@@ -7,6 +7,7 @@ struct ContinueWatchingCard: View {
     var onRemove: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.animeTitleLanguage) private var titleLanguage
     @State private var isHovered = false
 
     var body: some View {
@@ -35,8 +36,12 @@ struct ContinueWatchingCard: View {
         }
         .scaleEffect(isHovered && !reduceMotion ? 1.015 : 1)
         .accessibilityLabel(
-            "Resume \(anime.displayTitle), episode \(progress.episodeNumber), \(progress.timecode)"
+            "Resume \(title), episode \(progress.episodeNumber), \(progress.timecode)"
         )
+    }
+
+    private var title: String {
+        anime.displayTitle(for: titleLanguage)
     }
 
     private var scrim: some View {
@@ -50,7 +55,7 @@ struct ContinueWatchingCard: View {
                 endPoint: .bottom
             )
             VStack(alignment: .leading, spacing: 2) {
-                Text(anime.displayTitle)
+                Text(title)
                     .font(AppFont.cardTitle)
                     .foregroundStyle(.white)
                     .lineLimit(1)
@@ -91,7 +96,7 @@ struct ContinueWatchingCard: View {
             .hoverFeedback(scale: 1.15)
             .padding(Spacing.xs)
             .transition(.opacity)
-            .accessibilityLabel("Remove \(anime.displayTitle) from Continue Watching")
+            .accessibilityLabel("Remove \(title) from Continue Watching")
         }
     }
 

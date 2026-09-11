@@ -7,6 +7,7 @@ struct AnimePosterCard: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.openURL) private var openURL
+    @Environment(\.animeTitleLanguage) private var titleLanguage
     @State private var isHovered = false
 
     var body: some View {
@@ -14,7 +15,7 @@ struct AnimePosterCard: View {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 poster
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(anime.displayTitle)
+                    Text(title)
                         .font(AppFont.cardTitle)
                         .foregroundStyle(.primary)
                         .lineLimit(1)
@@ -41,7 +42,11 @@ struct AnimePosterCard: View {
                 }
             }
         }
-        .accessibilityLabel("\(anime.displayTitle), \(metaOverride ?? metaLine)")
+        .accessibilityLabel("\(title), \(metaOverride ?? metaLine)")
+    }
+
+    private var title: String {
+        anime.displayTitle(for: titleLanguage)
     }
 
     private var poster: some View {

@@ -11,6 +11,7 @@ final class AnimeDetailsViewModel {
     private let progressStore: any PlaybackProgressStore
     private let library: any LibraryRepository
     private let grouping: SeriesGroupingService
+    private let preferences: PreferencesStore?
 
     var state: LoadingState<AnimeDetails> = .idle
     var episodesState: LoadingState<[Episode]> = .idle
@@ -32,6 +33,7 @@ final class AnimeDetailsViewModel {
         progressStore = environment.progress
         library = environment.library
         grouping = SeriesGroupingService(repository: environment.media)
+        preferences = environment.preferences
     }
 
     init(
@@ -40,7 +42,8 @@ final class AnimeDetailsViewModel {
         episodeRepository: any EpisodeRepository,
         progressStore: any PlaybackProgressStore,
         library: any LibraryRepository,
-        grouping: SeriesGroupingService? = nil
+        grouping: SeriesGroupingService? = nil,
+        preferences: PreferencesStore? = nil
     ) {
         self.animeID = animeID
         self.media = media
@@ -48,6 +51,7 @@ final class AnimeDetailsViewModel {
         self.progressStore = progressStore
         self.library = library
         self.grouping = grouping ?? SeriesGroupingService(repository: media)
+        self.preferences = preferences
     }
 
     var details: AnimeDetails? { state.value }
@@ -223,7 +227,7 @@ final class AnimeDetailsViewModel {
             durationSeconds: 0,
             isCompleted: true,
             updatedAt: Date(),
-            animeTitle: anime.displayTitle,
+            animeTitle: anime.displayTitle(for: preferences?.animeTitleLanguage ?? .standard),
             posterURL: anime.posterURL,
             bannerURL: anime.bannerURL,
             episodeCount: anime.episodeCount

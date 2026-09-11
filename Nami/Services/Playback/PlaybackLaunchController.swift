@@ -78,6 +78,22 @@ final class PlaybackLaunchController {
             return
         }
 
+        // Movie releases are occasionally packaged as several files. Hand the
+        // choice back to the user instead of guessing which part to play.
+        // Auto-selection stays enabled so the picker can jump straight to the
+        // file list for the best source.
+        if request.anime.subtype?.isMovie == true,
+           let files = try? await resolver.files(for: candidate),
+           TorrentFileSelector.playableFiles(from: files).count > 1 {
+            guard !Task.isCancelled, isCurrent(expectedGeneration) else { return }
+            pickerRequest = PlaybackRequest(
+                anime: request.anime,
+                episode: request.episode,
+                startPositionSeconds: request.startPositionSeconds
+            )
+            return
+        }
+
         do {
             let stream = try await resolver.resolve(
                 candidate,

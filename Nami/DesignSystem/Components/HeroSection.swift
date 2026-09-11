@@ -6,6 +6,8 @@ struct HeroSection: View {
     var onPlay: () -> Void
     var onDetails: () -> Void
 
+    @Environment(\.animeTitleLanguage) private var titleLanguage
+
     var body: some View {
         GeometryReader { proxy in
             let frame = proxy.frame(in: .scrollView)
@@ -30,7 +32,7 @@ struct HeroSection: View {
                 .offset(x: -leadingOverscroll, y: -topOverscroll)
 
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    Text(anime.displayTitle)
+                    Text(anime.displayTitle(for: titleLanguage))
                         .font(AppFont.heroTitle)
                         .lineLimit(2)
                         .foregroundStyle(.primary)

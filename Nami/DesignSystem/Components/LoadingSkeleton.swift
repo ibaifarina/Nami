@@ -4,17 +4,22 @@ struct LoadingSkeleton: View {
     var cornerRadius: CGFloat = Radius.card
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isPulsing = false
 
     var body: some View {
+        if reduceMotion {
+            shape
+        } else {
+            PhaseAnimator([false, true]) { dimmed in
+                shape.opacity(dimmed ? 0.55 : 1)
+            } animation: { _ in
+                .easeInOut(duration: 1.1)
+            }
+        }
+    }
+
+    private var shape: some View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .fill(AppColor.surfaceElevated)
-            .opacity(reduceMotion ? 1 : (isPulsing ? 0.55 : 1))
-            .animation(
-                reduceMotion ? nil : .easeInOut(duration: 1.1).repeatForever(autoreverses: true),
-                value: isPulsing
-            )
-            .onAppear { isPulsing = true }
     }
 }
 

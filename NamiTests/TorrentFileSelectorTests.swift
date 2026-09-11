@@ -96,6 +96,31 @@ struct TorrentFileSelectorTests {
         #expect(selection.file.id == 2)
     }
 
+    @Test func playableFilesHidesExtrasWhenMainFilesExist() {
+        let files = [
+            file(1, "/Movie Part 1.mkv", bytes: 1_000),
+            file(2, "/Movie Part 2.mkv", bytes: 2_000),
+            file(3, "/NCED.mkv", bytes: 9_000),
+            file(4, "/Movie Part 1.srt", bytes: 10),
+        ]
+
+        let playable = TorrentFileSelector.playableFiles(from: files)
+
+        #expect(playable.map(\.id) == [1, 2])
+    }
+
+    @Test func playableFilesKeepsExtrasWhenNothingElseExists() {
+        let files = [
+            file(1, "/NCED.mkv"),
+            file(2, "/NCOP.mkv"),
+            file(3, "/fonts/font.ttf"),
+        ]
+
+        let playable = TorrentFileSelector.playableFiles(from: files)
+
+        #expect(playable.map(\.id) == [1, 2])
+    }
+
     @Test func videoAndExtraDetection() {
         #expect(TorrentFileSelector.isVideo("Show - 07.mkv"))
         #expect(TorrentFileSelector.isVideo("Show - 07.MP4"))

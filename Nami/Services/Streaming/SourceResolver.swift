@@ -39,17 +39,26 @@ final class SourceResolver {
         )
     }
 
+    /// Lists the files inside a torrent candidate so a caller can offer an
+    /// explicit choice when automatic file selection is ambiguous, such as a
+    /// movie release split into multiple parts.
+    func files(for candidate: StreamCandidate) async throws -> [DebridFileInfo] {
+        try await debrid.files(for: candidate)
+    }
+
     /// Returns the cached source when one matches the candidate, otherwise
     /// resolves it through the debrid service and caches the result.
     func resolve(
         _ candidate: StreamCandidate,
         anime: Anime,
-        episode: Episode
+        episode: Episode,
+        fileID: Int? = nil
     ) async throws -> ResolvedStream {
-        if let cached = await cachedStream(anime: anime, episode: episode, candidateID: candidate.id) {
+        if let cached = await cachedStream(anime: anime, episode: episode, candidateID: candidate.id),
+           fileID == nil || cached.fileID == fileID {
             return cached
         }
-        let stream = try await debrid.resolve(candidate)
+        let stream = try await debrid.resolve(candidate, fileID: fileID)
         if preferences.cacheResolvedSources {
             await cache.store(
                 stream,

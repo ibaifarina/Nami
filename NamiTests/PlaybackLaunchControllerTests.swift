@@ -88,7 +88,11 @@ private actor FailingDebridService: DebridService {
         []
     }
 
-    func resolve(_ candidate: StreamCandidate) async throws -> ResolvedStream {
+    func files(for candidate: StreamCandidate) async throws -> [DebridFileInfo] {
+        throw DebridError.itemNotReady
+    }
+
+    func resolve(_ candidate: StreamCandidate, fileID: Int?) async throws -> ResolvedStream {
         throw DebridError.itemNotReady
     }
 }
@@ -106,6 +110,10 @@ struct PlaybackLaunchControllerTests {
 
     private var anime: Anime { SampleCatalog.anime[0] }
 
+    private var movie: Anime { SampleCatalog.anime[4] }
+
+    private let multiFileHash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
     private func episode(_ number: Int) -> Episode {
         Episode(
             id: "\(anime.id)-\(number)",
@@ -114,6 +122,17 @@ struct PlaybackLaunchControllerTests {
             relativeNumber: number,
             seasonNumber: 1,
             durationMinutes: anime.durationMinutes
+        )
+    }
+
+    private func movieEpisode() -> Episode {
+        Episode(
+            id: "\(movie.id)-1",
+            animeID: movie.id,
+            number: 1,
+            relativeNumber: 1,
+            seasonNumber: 1,
+            durationMinutes: movie.durationMinutes
         )
     }
 
@@ -216,6 +235,44 @@ struct PlaybackLaunchControllerTests {
         #expect(setup.engine.loadedURLs == [testURL("https://resolved.example/video.mp4")])
         #expect(setup.controller.pickerRequest == nil)
         #expect(setup.preloader.streamsCallCount == 1)
+    }
+
+    @Test func movieWithMultipleFilesPresentsPickerInsteadOfGuessing() async throws {
+        let debrid = StubDebridService()
+        await debrid.configure(files: [
+            multiFileHash: [
+                DebridFileInfo(id: 1, path: "/Your Name Part 1.mkv", bytes: 1_000_000, selected: false),
+                DebridFileInfo(id: 2, path: "/Your Name Part 2.mkv", bytes: 2_000_000, selected: false),
+            ],
+        ])
+        let setup = try makeSetup(result: makeResult(autoPlay: true), debrid: debrid)
+        defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
+
+        setup.controller.play(PlaybackRequest(anime: movie, episode: movieEpisode()))
+        await waitUntil { setup.controller.pickerRequest != nil }
+
+        #expect(setup.controller.pickerRequest?.prefersManualSelection == false)
+        #expect(setup.playback.isAwaitingSource)
+        #expect(setup.engine.loadedURLs.isEmpty)
+        let resolvedIDs = await debrid.resolvedCandidateIDs
+        #expect(resolvedIDs.isEmpty)
+    }
+
+    @Test func movieWithSingleFileStillAutoPlays() async throws {
+        let debrid = StubDebridService()
+        await debrid.configure(files: [
+            multiFileHash: [
+                DebridFileInfo(id: 1, path: "/Your Name.mkv", bytes: 2_000_000, selected: false),
+            ],
+        ])
+        let setup = try makeSetup(result: makeResult(autoPlay: true), debrid: debrid)
+        defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
+
+        setup.controller.play(PlaybackRequest(anime: movie, episode: movieEpisode()))
+        await waitUntil { setup.playback.state == .playing }
+
+        #expect(setup.controller.pickerRequest == nil)
+        #expect(setup.engine.loadedURLs == [testURL("https://resolved.example/video.mp4")])
     }
 
     @Test func lowConfidencePresentsSourcePickerOverPlayer() async throws {

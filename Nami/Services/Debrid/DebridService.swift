@@ -4,7 +4,16 @@ protocol DebridService: Sendable {
     func validateAccount() async throws -> DebridAccount
     func validateAccount(token: String) async throws -> DebridAccount
     func checkAvailability(_ candidates: [StreamCandidate]) async throws -> [DebridCheckResult]
-    func resolve(_ candidate: StreamCandidate) async throws -> ResolvedStream
+    func resolve(_ candidate: StreamCandidate, fileID: Int?) async throws -> ResolvedStream
+    /// Lists the files inside a torrent candidate. Returns an empty array for
+    /// candidates that are not torrents, such as direct URLs.
+    func files(for candidate: StreamCandidate) async throws -> [DebridFileInfo]
+}
+
+extension DebridService {
+    func resolve(_ candidate: StreamCandidate) async throws -> ResolvedStream {
+        try await resolve(candidate, fileID: nil)
+    }
 }
 
 struct RealDebridAPIError: Error, Equatable, Sendable {

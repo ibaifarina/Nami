@@ -20,6 +20,7 @@ struct UserPreferences: Codable, Hashable, Sendable {
     var autoSelectConfidenceThreshold = 0.88
     var showStreamScoringDebugInfo = false
     var heroBackgroundBlur: HeroBackgroundBlur = .subtle
+    var animeTitleLanguage: AnimeTitleLanguage = .standard
     var playbackEngine: PlaybackEngineKind = .mpv
     var externalPlayerBundleID: String?
     var cacheResolvedSources = true
@@ -57,6 +58,7 @@ struct UserPreferences: Codable, Hashable, Sendable {
         autoSelectConfidenceThreshold = try container.decodeIfPresent(Double.self, forKey: .autoSelectConfidenceThreshold) ?? 0.88
         showStreamScoringDebugInfo = try container.decodeIfPresent(Bool.self, forKey: .showStreamScoringDebugInfo) ?? false
         heroBackgroundBlur = try container.decodeIfPresent(HeroBackgroundBlur.self, forKey: .heroBackgroundBlur) ?? .subtle
+        animeTitleLanguage = try container.decodeIfPresent(AnimeTitleLanguage.self, forKey: .animeTitleLanguage) ?? .standard
         playbackEngine = try container.decodeIfPresent(PlaybackEngineKind.self, forKey: .playbackEngine) ?? .mpv
         externalPlayerBundleID = try container.decodeIfPresent(String.self, forKey: .externalPlayerBundleID)
         cacheResolvedSources = try container.decodeIfPresent(Bool.self, forKey: .cacheResolvedSources) ?? true
@@ -179,6 +181,22 @@ enum HeroBackgroundBlur: String, Codable, CaseIterable, Identifiable, Sendable {
         case .subtle: 6
         case .medium: 12
         case .strong: 24
+        }
+    }
+}
+
+enum AnimeTitleLanguage: String, Codable, CaseIterable, Identifiable, Sendable {
+    case standard
+    case english
+    case japanese
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .standard: "Default"
+        case .english: "English"
+        case .japanese: "Original (Japanese)"
         }
     }
 }

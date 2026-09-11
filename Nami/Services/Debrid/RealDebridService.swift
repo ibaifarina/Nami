@@ -6,19 +6,25 @@ actor RealDebridService: DebridService {
     private let maxAvailabilityProbes: Int
     private let resolvePollAttempts: Int
     private let resolvePollInterval: Duration
+    private let fileListPollAttempts: Int
+    private let fileListPollInterval: Duration
 
     init(
         tokenProvider: any DebridTokenProviding,
         http: any HTTPClient = URLSessionHTTPClient(),
         maxAvailabilityProbes: Int = 6,
         resolvePollAttempts: Int = 8,
-        resolvePollInterval: Duration = .milliseconds(350)
+        resolvePollInterval: Duration = .milliseconds(350),
+        fileListPollAttempts: Int = 6,
+        fileListPollInterval: Duration = .milliseconds(300)
     ) {
         self.tokenProvider = tokenProvider
         self.http = http
         self.maxAvailabilityProbes = maxAvailabilityProbes
         self.resolvePollAttempts = resolvePollAttempts
         self.resolvePollInterval = resolvePollInterval
+        self.fileListPollAttempts = fileListPollAttempts
+        self.fileListPollInterval = fileListPollInterval
     }
 
     // MARK: - Account
@@ -126,7 +132,30 @@ actor RealDebridService: DebridService {
 
     // MARK: - Resolve
 
-    func resolve(_ candidate: StreamCandidate) async throws -> ResolvedStream {
+    func files(for candidate: StreamCandidate) async throws -> [DebridFileInfo] {
+        guard let magnet = Self.magnet(for: candidate) else {
+            return []
+        }
+        guard await tokenProvider.token() != nil else {
+            throw DebridError.notConfigured
+        }
+        do {
+            let added = try await addMagnet(magnet, hash: candidate.infoHash)
+            var info = try await torrentInfo(id: added.id)
+            var attempts = 0
+            // A freshly added magnet resolves its file list asynchronously.
+            while info.fileInfos.isEmpty, attempts < fileListPollAttempts {
+                try? await Task.sleep(for: fileListPollInterval)
+                info = try await torrentInfo(id: added.id)
+                attempts += 1
+            }
+            return info.fileInfos
+        } catch {
+            throw DebridError.map(error)
+        }
+    }
+
+    func resolve(_ candidate: StreamCandidate, fileID: Int?) async throws -> ResolvedStream {
         if candidate.infoHash == nil, candidate.magnetURI == nil {
             if let direct = candidate.directURL, Self.isPlayableURL(direct) {
                 return ResolvedStream(
@@ -155,9 +184,10 @@ actor RealDebridService: DebridService {
             created = added.created
 
             let initial = try await torrentInfo(id: added.id)
-            let selection = try TorrentFileSelector.selectFile(
+            let selection = try Self.selection(
                 from: initial.fileInfos,
-                targetEpisode: candidate.targetEpisode
+                targetEpisode: candidate.targetEpisode,
+                fileID: fileID
             )
             try? await selectFiles(torrentID: added.id, files: String(selection.file.id))
 
@@ -320,6 +350,19 @@ actor RealDebridService: DebridService {
     }
 
     // MARK: - Helpers
+
+    /// Uses the user's explicit file choice when it still exists, otherwise
+    /// falls back to automatic selection.
+    static func selection(
+        from files: [DebridFileInfo],
+        targetEpisode: Int?,
+        fileID: Int?
+    ) throws -> TorrentFileSelection {
+        if let fileID, let file = files.first(where: { $0.id == fileID }) {
+            return TorrentFileSelection(file: file, reason: "User-selected file")
+        }
+        return try TorrentFileSelector.selectFile(from: files, targetEpisode: targetEpisode)
+    }
 
     static func magnet(for candidate: StreamCandidate) -> String? {
         if let magnet = candidate.magnetURI?.absoluteString, !magnet.isEmpty {

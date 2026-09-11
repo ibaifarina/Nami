@@ -18,7 +18,9 @@ struct RealDebridServiceTests {
             http: http,
             maxAvailabilityProbes: maxProbes,
             resolvePollAttempts: pollAttempts,
-            resolvePollInterval: pollInterval
+            resolvePollInterval: pollInterval,
+            fileListPollAttempts: 2,
+            fileListPollInterval: .milliseconds(1)
         )
     }
 
@@ -249,6 +251,55 @@ struct RealDebridServiceTests {
 
         let unrestrictedBody = bodies.first { $0.contains("link=") }
         #expect(unrestrictedBody?.contains("real-debrid.com") == true)
+    }
+
+    @Test func resolveUsesExplicitlySelectedFile() async throws {
+        let backend = DebridStubBackend(
+            infoStatuses: ["waiting_files_selection", "downloaded"],
+            infoFiles: [
+                (1, "/Movie Part 1.mkv", 1_000_000_000, 0),
+                (2, "/Movie Part 2.mkv", 1_400_000_000, 0),
+            ],
+            infoLinks: ["https://real-debrid.com/dl/abc"]
+        )
+        let service = makeService(backend: backend)
+
+        let stream = try await service.resolve(candidate(targetEpisode: 1), fileID: 2)
+
+        #expect(stream.fileID == 2)
+        let bodies = await backend.formBodies
+        #expect(bodies.contains { $0.contains("files=2") })
+    }
+
+    @Test func listsFilesInsideTorrentCandidate() async throws {
+        let backend = DebridStubBackend(
+            infoStatuses: ["downloaded"],
+            infoFiles: [
+                (1, "/Movie Part 1.mkv", 1_000_000, 0),
+                (2, "/Movie Part 2.mkv", 1_200_000, 0),
+            ]
+        )
+        let service = makeService(backend: backend)
+
+        let files = try await service.files(for: candidate())
+
+        #expect(files.map(\.filename) == ["Movie Part 1.mkv", "Movie Part 2.mkv"])
+        let requests = await backend.requests
+        #expect(requests.contains { $0.path == "/torrents/addMagnet" })
+        #expect(requests.contains { $0.path.hasPrefix("/torrents/info/") })
+    }
+
+    @Test func filesForDirectURLIsEmptyWithoutNetwork() async throws {
+        let backend = DebridStubBackend()
+        let service = makeService(backend: backend)
+
+        let files = try await service.files(
+            for: candidate(hash: nil, url: "https://cdn.example/video.mp4")
+        )
+
+        #expect(files.isEmpty)
+        let requests = await backend.requests
+        #expect(requests.isEmpty)
     }
 
     @Test func resolveUncachedLeavesTorrentPreparing() async throws {

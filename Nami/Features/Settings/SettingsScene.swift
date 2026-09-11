@@ -68,6 +68,15 @@ struct GeneralSettingsView: View {
                     selection: $preferences.heroBackgroundBlur
                 )
             }
+            SettingsCard(title: "Titles") {
+                SettingsSegmentedRow(
+                    title: "Anime Names",
+                    description: "How anime titles are shown across the app. Original (Japanese) uses the Japanese title when available.",
+                    options: AnimeTitleLanguage.allCases,
+                    titleForOption: \.displayName,
+                    selection: $preferences.animeTitleLanguage
+                )
+            }
             SettingsCard(title: "Library") {
                 SettingsRow(
                     "Stored on This Mac",

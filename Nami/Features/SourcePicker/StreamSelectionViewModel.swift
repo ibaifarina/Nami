@@ -64,6 +64,11 @@ final class StreamSelectionViewModel {
     var resolvingCandidateID: String?
     var debridAvailable = false
 
+    /// A source that contains several video files and therefore needs an
+    /// explicit file choice from the user before it can be resolved.
+    var pendingFileCandidate: StreamCandidate?
+    var pendingFiles: [DebridFileInfo] = []
+
     /// The episode used for stream discovery, enriched with real Kitsu
     /// metadata (season/absolute numbering) when available.
     private(set) var effectiveEpisode: Episode
@@ -102,6 +107,14 @@ final class StreamSelectionViewModel {
         environment.addons.enabledAddons.count
     }
 
+    var isMovie: Bool {
+        request.anime.subtype?.isMovie ?? false
+    }
+
+    var isChoosingFile: Bool {
+        pendingFileCandidate != nil
+    }
+
     var addonFailureMessages: [String] {
         addonResults.compactMap(\.failureMessage)
     }
@@ -129,7 +142,11 @@ final class StreamSelectionViewModel {
         if !request.prefersManualSelection,
            result.decision.shouldAutoPlay,
            let candidate = result.decision.candidate {
-            await resolve(candidate, episode: episode)
+            if await offerFileSelection(for: candidate) {
+                phase = .picker
+            } else {
+                await resolve(candidate, episode: episode)
+            }
         } else {
             phase = .picker
         }
@@ -142,7 +159,38 @@ final class StreamSelectionViewModel {
     }
 
     func choose(_ scored: ScoredStream) async {
+        if await offerFileSelection(for: scored.candidate) { return }
         await resolve(scored.candidate, episode: effectiveEpisode)
+    }
+
+    /// Resolves the pending candidate with the file the user picked.
+    func chooseFile(_ file: DebridFileInfo) async {
+        guard let candidate = pendingFileCandidate else { return }
+        pendingFileCandidate = nil
+        pendingFiles = []
+        await resolve(candidate, episode: effectiveEpisode, fileID: file.id)
+    }
+
+    func cancelFileSelection() {
+        pendingFileCandidate = nil
+        pendingFiles = []
+    }
+
+    /// Movies are occasionally packaged as several files (split parts or
+    /// per-episode files). When that happens the user has to pick the file
+    /// instead of letting automatic selection guess.
+    private func offerFileSelection(for candidate: StreamCandidate) async -> Bool {
+        guard isMovie else { return false }
+        resolvingCandidateID = candidate.id
+        defer { resolvingCandidateID = nil }
+        guard let files = try? await environment.sourceResolver.files(for: candidate) else {
+            return false
+        }
+        let playable = TorrentFileSelector.playableFiles(from: files)
+        guard playable.count > 1 else { return false }
+        pendingFileCandidate = candidate
+        pendingFiles = playable
+        return true
     }
 
     func retry() async {
@@ -163,14 +211,15 @@ final class StreamSelectionViewModel {
         return episodes.first { $0.number == episode.number || $0.displayNumber == episode.number }
     }
 
-    private func resolve(_ candidate: StreamCandidate, episode: Episode) async {
+    private func resolve(_ candidate: StreamCandidate, episode: Episode, fileID: Int? = nil) async {
         resolvingCandidateID = candidate.id
         defer { resolvingCandidateID = nil }
         do {
             let stream = try await environment.sourceResolver.resolve(
                 candidate,
                 anime: request.anime,
-                episode: episode
+                episode: episode,
+                fileID: fileID
             )
             environment.playback.start(
                 stream: stream,

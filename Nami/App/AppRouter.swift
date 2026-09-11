@@ -65,20 +65,4 @@ final class AppRouter {
         case .library: libraryPath.append(route)
         }
     }
-
-    func pop(in section: SidebarItem) {
-        switch section {
-        case .home: if !homePath.isEmpty { homePath.removeLast() }
-        case .discover: if !discoverPath.isEmpty { discoverPath.removeLast() }
-        case .library: if !libraryPath.isEmpty { libraryPath.removeLast() }
-        }
-    }
-
-    func path(for section: SidebarItem) -> [Route] {
-        switch section {
-        case .home: homePath
-        case .discover: discoverPath
-        case .library: libraryPath
-        }
-    }
 }

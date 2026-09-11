@@ -19,8 +19,7 @@ enum TorrentFileSelector {
             throw DebridError.fileSelectionFailed("No video files were found in this torrent.")
         }
 
-        let mainFiles = videoFiles.filter { !isExtra($0.filename) }
-        let candidates = mainFiles.isEmpty ? videoFiles : mainFiles
+        let candidates = playableFiles(from: files)
 
         if let targetEpisode {
             let matches = candidates.compactMap { file -> (file: DebridFileInfo, episode: Int)? in
@@ -48,6 +47,14 @@ enum TorrentFileSelector {
             throw DebridError.fileSelectionFailed("No playable files were found in this torrent.")
         }
         return TorrentFileSelection(file: largest, reason: "Largest playable file")
+    }
+
+    /// The video files a user can meaningfully pick between: extras such as
+    /// samples and creditless openings are hidden when normal files exist.
+    static func playableFiles(from files: [DebridFileInfo]) -> [DebridFileInfo] {
+        let videoFiles = files.filter { isVideo($0.filename) }
+        let mainFiles = videoFiles.filter { !isExtra($0.filename) }
+        return mainFiles.isEmpty ? videoFiles : mainFiles
     }
 
     static func isVideo(_ filename: String) -> Bool {
