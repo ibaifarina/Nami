@@ -91,7 +91,8 @@ actor StreamDiscoveryService {
                 let rankingContext = ScoringContext(
                     episodeDurationMinutes: request.durationMinutes,
                     addonPriorities: priorities,
-                    debridAvailable: true
+                    debridAvailable: true,
+                    isMovie: request.isMovie
                 )
                 let probeOrder = StreamScoringEngine(options: options)
                     .rank(candidates, context: rankingContext)
@@ -120,7 +121,8 @@ actor StreamDiscoveryService {
         let scoringContext = ScoringContext(
             episodeDurationMinutes: request.durationMinutes,
             addonPriorities: priorities,
-            debridAvailable: debridAvailable
+            debridAvailable: debridAvailable,
+            isMovie: request.isMovie
         )
         let engine = StreamScoringEngine(options: options)
         return StreamDiscoveryResult(

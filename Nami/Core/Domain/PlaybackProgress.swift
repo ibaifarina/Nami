@@ -67,6 +67,12 @@ struct PlaybackProgress: Identifiable, Hashable, Codable, Sendable {
         "\(Timecode.format(positionSeconds)) / \(Timecode.format(durationSeconds))"
     }
 
+    /// Episodes considered watched for library progress. The episode currently
+    /// in progress isn't counted until it completes.
+    var watchedEpisodeCount: Int {
+        isCompleted ? episodeNumber : max(episodeNumber - 1, 0)
+    }
+
     /// A minimal anime snapshot used for offline Continue Watching cards.
     var animeSnapshot: Anime? {
         guard let animeTitle, !animeTitle.isEmpty else { return nil }

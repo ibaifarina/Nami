@@ -17,6 +17,7 @@ final class StreamPreloadService: StreamPreloading {
     private struct Key: Hashable {
         let animeID: String
         let episodeNumber: Int
+        let options: StreamScoringOptions
     }
 
     private struct Entry {
@@ -50,14 +51,24 @@ final class StreamPreloadService: StreamPreloading {
 
     func prepare(anime: Anime, episode: Episode) {
         guard !registry.enabledAddons.isEmpty else { return }
-        let key = Key(animeID: anime.id, episodeNumber: episode.displayNumber)
+        let options = currentOptions()
+        let key = Key(
+            animeID: anime.id,
+            episodeNumber: episode.displayNumber,
+            options: options
+        )
         guard entry(for: key) == nil, inFlight[key] == nil else { return }
-        inFlight[key] = makeTask(anime: anime, episode: episode, key: key)
+        inFlight[key] = makeTask(anime: anime, episode: episode, options: options, key: key)
     }
 
     func streams(anime: Anime, episode: Episode) async -> StreamDiscoveryResult {
         let episode = await episodeWithAbsoluteNumber(episode, anime: anime)
-        let key = Key(animeID: anime.id, episodeNumber: episode.displayNumber)
+        let options = currentOptions()
+        let key = Key(
+            animeID: anime.id,
+            episodeNumber: episode.displayNumber,
+            options: options
+        )
         if let entry = entry(for: key) {
             return entry.result
         }
@@ -66,7 +77,7 @@ final class StreamPreloadService: StreamPreloading {
         if let existing = inFlight[key] {
             task = existing
         } else {
-            let created = makeTask(anime: anime, episode: episode, key: key)
+            let created = makeTask(anime: anime, episode: episode, options: options, key: key)
             inFlight[key] = created
             task = created
         }
@@ -82,15 +93,19 @@ final class StreamPreloadService: StreamPreloading {
         inFlight.removeAll()
     }
 
-    private func makeTask(
-        anime: Anime,
-        episode: Episode,
-        key: Key
-    ) -> Task<StreamDiscoveryResult, Never> {
-        let options = StreamScoringOptions(
+    private func currentOptions() -> StreamScoringOptions {
+        StreamScoringOptions(
             preferences: preferences.preferences,
             debridAvailable: true
         )
+    }
+
+    private func makeTask(
+        anime: Anime,
+        episode: Episode,
+        options: StreamScoringOptions,
+        key: Key
+    ) -> Task<StreamDiscoveryResult, Never> {
         let request = StreamDiscoveryService.Request(
             anime: anime,
             episode: episode,

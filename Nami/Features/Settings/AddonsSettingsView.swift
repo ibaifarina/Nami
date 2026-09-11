@@ -60,7 +60,7 @@ struct AddonsSettingsView: View {
                     AddonRow(addon: addon)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 3, leading: 0, bottom: 3, trailing: 0))
+                        .listRowInsets(EdgeInsets(top: 3, leading: -Spacing.xs, bottom: 3, trailing: 0))
                         .contextMenu {
                             Button("Check Health") {
                                 Task { await checkHealth(addon) }

@@ -6,6 +6,7 @@ import Testing
 struct StreamPreloadServiceTests {
     private struct Setup {
         let service: StreamPreloadService
+        let preferences: PreferencesStore
         let http: MockHTTPClient
         let debrid: StubDebridService
         let defaults: UserDefaults
@@ -69,6 +70,7 @@ struct StreamPreloadServiceTests {
         )
         return Setup(
             service: service,
+            preferences: preferences,
             http: http,
             debrid: debrid,
             defaults: defaults,
@@ -113,6 +115,17 @@ struct StreamPreloadServiceTests {
 
         _ = await setup.service.streams(anime: anime, episode: episode(7))
         try? await Task.sleep(for: .milliseconds(60))
+        _ = await setup.service.streams(anime: anime, episode: episode(7))
+
+        #expect(await setup.http.requestCount == 2)
+    }
+
+    @Test func changingQualityPreferenceTriggersFreshDiscovery() async throws {
+        let setup = try await makeSetup()
+        defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
+
+        _ = await setup.service.streams(anime: anime, episode: episode(7))
+        setup.preferences.preferredQuality = .p720
         _ = await setup.service.streams(anime: anime, episode: episode(7))
 
         #expect(await setup.http.requestCount == 2)

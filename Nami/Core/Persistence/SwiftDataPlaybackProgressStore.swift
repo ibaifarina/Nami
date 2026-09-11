@@ -144,6 +144,15 @@ actor SwiftDataPlaybackProgressStore: PlaybackProgressStore {
         return (try? modelContext.fetch(descriptor))?.first?.toDomain()
     }
 
+    func progress(forAnimeID animeID: String) async -> [PlaybackProgress] {
+        let descriptor = FetchDescriptor<StoredPlaybackProgress>(
+            predicate: #Predicate { $0.animeID == animeID },
+            sortBy: [SortDescriptor(\StoredPlaybackProgress.updatedAt, order: .reverse)]
+        )
+        let stored = (try? modelContext.fetch(descriptor)) ?? []
+        return stored.map { $0.toDomain() }
+    }
+
     func latestProgress(animeID: String) async -> PlaybackProgress? {
         var descriptor = FetchDescriptor<StoredPlaybackProgress>(
             predicate: #Predicate { $0.animeID == animeID },
@@ -168,6 +177,21 @@ actor SwiftDataPlaybackProgressStore: PlaybackProgressStore {
             try modelContext.save()
         } catch {
             AppLogger.persistence.error("Failed to save playback progress")
+        }
+    }
+
+    func remove(animeID: String, episodeNumber: Int) async {
+        let id = "\(animeID)-\(episodeNumber)"
+        var descriptor = FetchDescriptor<StoredPlaybackProgress>(
+            predicate: #Predicate { $0.id == id }
+        )
+        descriptor.fetchLimit = 1
+        guard let existing = (try? modelContext.fetch(descriptor))?.first else { return }
+        modelContext.delete(existing)
+        do {
+            try modelContext.save()
+        } catch {
+            AppLogger.persistence.error("Failed to remove playback progress")
         }
     }
 }

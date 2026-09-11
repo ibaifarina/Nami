@@ -244,6 +244,43 @@ struct LocalLibraryRepositoryTests {
         #expect(empty.isEmpty)
     }
 
+    @Test func addToWatchingCreatesRefreshesAndPromotesEntries() async throws {
+        let repository = LocalLibraryRepository(persistence: InMemoryLibraryPersistence())
+        let anime = SampleCatalog.anime[0]
+
+        try await repository.addToWatching(anime: anime, progress: 4)
+        var entry = try await repository.entry(animeID: anime.id)
+        #expect(entry?.status == .watching)
+        #expect(entry?.progress == 4)
+
+        _ = try await repository.update(anime: anime, status: .planToWatch, progress: 8)
+        try await repository.addToWatching(anime: anime, progress: 5)
+        entry = try await repository.entry(animeID: anime.id)
+        #expect(entry?.status == .watching)
+        #expect(entry?.progress == 5)
+
+        try await repository.addToWatching(anime: anime, progress: nil)
+        entry = try await repository.entry(animeID: anime.id)
+        #expect(entry?.status == .watching)
+        #expect(entry?.progress == 5)
+    }
+
+    @Test func addToWatchingPreservesExplicitStatuses() async throws {
+        let repository = LocalLibraryRepository(persistence: InMemoryLibraryPersistence())
+        let statuses: [LibraryStatus] = [.completed, .favorites, .onHold, .dropped]
+
+        for (index, status) in statuses.enumerated() {
+            let anime = SampleCatalog.anime[index]
+            _ = try await repository.update(anime: anime, status: status, progress: 12)
+
+            try await repository.addToWatching(anime: anime, progress: 2)
+
+            let entry = try await repository.entry(animeID: anime.id)
+            #expect(entry?.status == status)
+            #expect(entry?.progress == 12)
+        }
+    }
+
     @Test func entriesSortByMostRecentlyUpdated() async throws {
         let older = LibraryEntry(
             animeID: SampleCatalog.anime[0].id,

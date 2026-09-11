@@ -18,6 +18,8 @@ struct PreferencesStoreTests {
         #expect(store.preferredSubtitles == .english)
         #expect(store.autoplayNextEpisode)
         #expect(store.cacheResolvedSources)
+        #expect(store.maximumEpisodeFileSizeBytes == 5_000_000_000)
+        #expect(store.maximumMovieFileSizeBytes == 20_000_000_000)
     }
 
     @Test func changesPersistAcrossInstances() throws {
@@ -59,6 +61,26 @@ struct PreferencesStoreTests {
         #expect(decoded.preferredQuality == .p1080)
         #expect(decoded.qualityBalance == .balanced)
         #expect(decoded.preferredAudio == .japanese)
+        #expect(decoded.maximumEpisodeFileSizeBytes == 5_000_000_000)
+        #expect(decoded.maximumMovieFileSizeBytes == 20_000_000_000)
+    }
+
+    @Test func migratesLegacyFileSizeLimitToBothTypes() throws {
+        let legacy = Data(#"{"maximumFileSizeBytes":10000000000}"#.utf8)
+
+        let decoded = try JSONDecoder().decode(UserPreferences.self, from: legacy)
+
+        #expect(decoded.maximumEpisodeFileSizeBytes == 10_000_000_000)
+        #expect(decoded.maximumMovieFileSizeBytes == 10_000_000_000)
+    }
+
+    @Test func legacyUnlimitedFileSizeFallsBackToDefaults() throws {
+        let legacy = Data(#"{"maximumFileSizeBytes":0}"#.utf8)
+
+        let decoded = try JSONDecoder().decode(UserPreferences.self, from: legacy)
+
+        #expect(decoded.maximumEpisodeFileSizeBytes == 5_000_000_000)
+        #expect(decoded.maximumMovieFileSizeBytes == 20_000_000_000)
     }
 
     @Test func releaseGroupsAreStored() throws {

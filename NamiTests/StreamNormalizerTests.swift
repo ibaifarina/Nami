@@ -131,6 +131,23 @@ struct StreamNormalizerTests {
         #expect(candidate.sizeBytes == 2_000_000_000)
     }
 
+    @Test func fallsBackToSeedersFromTitle() {
+        let candidate = normalizer.normalize(
+            raw(title: "Show - 07 1080p\n\u{1F464} 142 \u{1F4BE} 2.1 GB")
+        )
+
+        #expect(candidate.seeders == 142)
+        #expect(candidate.sizeBytes == 2_100_000_000)
+    }
+
+    @Test func addonProvidedSeedersWinOverTitle() {
+        let candidate = normalizer.normalize(
+            raw(title: "Show - 07\n\u{1F464} 142", seeders: 12)
+        )
+
+        #expect(candidate.seeders == 12)
+    }
+
     @Test func normalizesMultipleRawResults() {
         let context = EpisodeMatcher.Context(requestedEpisode: 7, animeTitles: ["Show"])
         let candidates = normalizer.normalize(

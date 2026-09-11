@@ -282,7 +282,8 @@ private struct FilterDropdownPanel<Value: Hashable>: View {
 
     private var rowList: some View {
         VStack(spacing: 2) {
-            ForEach(rows) { row in
+            ForEach(rows.indices, id: \.self) { index in
+                let row = rows[index]
                 Button {
                     onSelect(row.value)
                 } label: {
@@ -301,11 +302,11 @@ private struct FilterDropdownPanel<Value: Hashable>: View {
                     .padding(.horizontal, Spacing.xs)
                     .padding(.vertical, 6)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        rowBackground(for: row),
-                        in: RoundedRectangle(cornerRadius: Radius.control - 2, style: .continuous)
-                    )
-                    .contentShape(RoundedRectangle(cornerRadius: Radius.control - 2, style: .continuous))
+                    .background {
+                        highlightShape(isFirst: index == 0, isLast: index == rows.count - 1)
+                            .fill(rowBackground(for: row))
+                    }
+                    .contentShape(highlightShape(isFirst: index == 0, isLast: index == rows.count - 1))
                 }
                 .buttonStyle(.plain)
                 .onHover { isHovering in
@@ -320,6 +321,21 @@ private struct FilterDropdownPanel<Value: Hashable>: View {
         }
         .padding(Spacing.xxs)
     }
+
+    /// Matches the corner curvature of the enclosing popover so the first and
+    /// last row highlights nest concentrically inside the dropdown container.
+    private func highlightShape(isFirst: Bool, isLast: Bool) -> UnevenRoundedRectangle {
+        let inner = Radius.control - 2
+        return UnevenRoundedRectangle(
+            topLeadingRadius: isFirst ? Self.containerRadius - Spacing.xxs : inner,
+            bottomLeadingRadius: isLast ? Self.containerRadius - Spacing.xxs : inner,
+            bottomTrailingRadius: isLast ? Self.containerRadius - Spacing.xxs : inner,
+            topTrailingRadius: isFirst ? Self.containerRadius - Spacing.xxs : inner,
+            style: .circular
+        )
+    }
+
+    private static var containerRadius: CGFloat { 16 }
 
     private func rowBackground(for row: Item) -> Color {
         if row.isSelected { return AppColor.brand.opacity(0.12) }

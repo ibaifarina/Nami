@@ -84,16 +84,18 @@ struct AdvancedSettingsView: View {
                     range: 0...50
                 )
                 SettingsDropdownRow(
-                    title: "Maximum File Size",
-                    systemImage: "externaldrive",
-                    options: [
-                        SettingsDropdownOption(value: Int64(0), label: "Unlimited"),
-                        SettingsDropdownOption(value: Int64(2_000_000_000), label: "2 GB"),
-                        SettingsDropdownOption(value: Int64(5_000_000_000), label: "5 GB"),
-                        SettingsDropdownOption(value: Int64(10_000_000_000), label: "10 GB"),
-                        SettingsDropdownOption(value: Int64(20_000_000_000), label: "20 GB"),
-                    ],
-                    selection: $preferences.maximumFileSizeBytes
+                    title: "Episode Size Limit",
+                    description: "Sources larger than this are skipped for episodes. Defaults to 5 GB.",
+                    systemImage: "tv",
+                    options: Self.fileSizeOptions,
+                    selection: $preferences.maximumEpisodeFileSizeBytes
+                )
+                SettingsDropdownRow(
+                    title: "Movie Size Limit",
+                    description: "Sources larger than this are skipped for movies. Defaults to 20 GB.",
+                    systemImage: "film",
+                    options: Self.fileSizeOptions,
+                    selection: $preferences.maximumMovieFileSizeBytes
                 )
                 SettingsToggleRow(
                     title: "Show Stream Scoring Debug Info",
@@ -140,6 +142,15 @@ struct AdvancedSettingsView: View {
             }
         }
     }
+
+    private static let fileSizeOptions: [SettingsDropdownOption<Int64>] = [
+        SettingsDropdownOption(value: 0, label: "Unlimited"),
+        SettingsDropdownOption(value: 2_000_000_000, label: "2 GB"),
+        SettingsDropdownOption(value: 5_000_000_000, label: "5 GB"),
+        SettingsDropdownOption(value: 10_000_000_000, label: "10 GB"),
+        SettingsDropdownOption(value: 20_000_000_000, label: "20 GB"),
+        SettingsDropdownOption(value: 50_000_000_000, label: "50 GB"),
+    ]
 
     private var preferredGroupsBinding: Binding<String> {
         Binding(

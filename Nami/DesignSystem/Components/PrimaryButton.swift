@@ -29,6 +29,7 @@ struct BrandButtonStyle: ButtonStyle {
                 .shadow(color: .black.opacity(isHovering ? 0.22 : 0), radius: isHovering ? 10 : 0, y: isHovering ? 4 : 0)
                 .animation(.easeOut(duration: Motion.hover), value: configuration.isPressed)
                 .animation(.easeOut(duration: Motion.hover), value: isHovering)
+                .pointerStyle(.link)
                 .onHover { isHovering = $0 }
         }
 
@@ -69,6 +70,7 @@ struct GlassButtonStyle: ButtonStyle {
                 .shadow(color: .black.opacity(isHovering ? 0.18 : 0), radius: isHovering ? 8 : 0, y: isHovering ? 3 : 0)
                 .animation(.easeOut(duration: Motion.hover), value: configuration.isPressed)
                 .animation(.easeOut(duration: Motion.hover), value: isHovering)
+                .pointerStyle(.link)
                 .onHover { isHovering = $0 }
         }
 
@@ -102,6 +104,7 @@ struct HoverFeedbackModifier: ViewModifier {
                 y: isHovering ? shadowY : 0
             )
             .animation(.easeOut(duration: Motion.hover), value: isHovering)
+            .pointerStyle(.link)
             .onHover { isHovering = $0 }
     }
 }

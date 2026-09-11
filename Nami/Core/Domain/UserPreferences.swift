@@ -1,6 +1,9 @@
 import Foundation
 
 struct UserPreferences: Codable, Hashable, Sendable {
+    static let defaultMaximumEpisodeFileSizeBytes: Int64 = 5_000_000_000
+    static let defaultMaximumMovieFileSizeBytes: Int64 = 20_000_000_000
+
     var autoSelectBestStream = true
     var preferredQuality: QualityPreference = .auto
     var qualityBalance: QualityBalance = .balanced
@@ -11,7 +14,8 @@ struct UserPreferences: Codable, Hashable, Sendable {
     var preferredReleaseGroups: [String] = []
     var blockedReleaseGroups: [String] = []
     var minimumSeedersForUncached = 2
-    var maximumFileSizeBytes: Int64 = 0
+    var maximumEpisodeFileSizeBytes: Int64 = UserPreferences.defaultMaximumEpisodeFileSizeBytes
+    var maximumMovieFileSizeBytes: Int64 = UserPreferences.defaultMaximumMovieFileSizeBytes
     var autoSelectConfidenceThreshold = 0.88
     var showStreamScoringDebugInfo = false
     var heroBackgroundBlur: HeroBackgroundBlur = .subtle
@@ -22,8 +26,16 @@ struct UserPreferences: Codable, Hashable, Sendable {
 
     init() {}
 
+    private enum LegacyCodingKeys: String, CodingKey {
+        case maximumFileSizeBytes
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        let legacyMaximumFileSizeBytes = try decoder
+            .container(keyedBy: LegacyCodingKeys.self)
+            .decodeIfPresent(Int64.self, forKey: .maximumFileSizeBytes)
+            .flatMap { $0 > 0 ? $0 : nil }
         autoSelectBestStream = try container.decodeIfPresent(Bool.self, forKey: .autoSelectBestStream) ?? true
         preferredQuality = try container.decodeIfPresent(QualityPreference.self, forKey: .preferredQuality) ?? .auto
         qualityBalance = try container.decodeIfPresent(QualityBalance.self, forKey: .qualityBalance) ?? .balanced
@@ -34,7 +46,12 @@ struct UserPreferences: Codable, Hashable, Sendable {
         preferredReleaseGroups = try container.decodeIfPresent([String].self, forKey: .preferredReleaseGroups) ?? []
         blockedReleaseGroups = try container.decodeIfPresent([String].self, forKey: .blockedReleaseGroups) ?? []
         minimumSeedersForUncached = try container.decodeIfPresent(Int.self, forKey: .minimumSeedersForUncached) ?? 2
-        maximumFileSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .maximumFileSizeBytes) ?? 0
+        maximumEpisodeFileSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .maximumEpisodeFileSizeBytes)
+            ?? legacyMaximumFileSizeBytes
+            ?? Self.defaultMaximumEpisodeFileSizeBytes
+        maximumMovieFileSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .maximumMovieFileSizeBytes)
+            ?? legacyMaximumFileSizeBytes
+            ?? Self.defaultMaximumMovieFileSizeBytes
         autoSelectConfidenceThreshold = try container.decodeIfPresent(Double.self, forKey: .autoSelectConfidenceThreshold) ?? 0.88
         showStreamScoringDebugInfo = try container.decodeIfPresent(Bool.self, forKey: .showStreamScoringDebugInfo) ?? false
         heroBackgroundBlur = try container.decodeIfPresent(HeroBackgroundBlur.self, forKey: .heroBackgroundBlur) ?? .subtle

@@ -3,8 +3,10 @@ import Foundation
 protocol PlaybackProgressStore: Sendable {
     func allProgress(limit: Int) async -> [PlaybackProgress]
     func progress(animeID: String, episodeNumber: Int) async -> PlaybackProgress?
+    func progress(forAnimeID animeID: String) async -> [PlaybackProgress]
     func latestProgress(animeID: String) async -> PlaybackProgress?
     func save(_ progress: PlaybackProgress) async
+    func remove(animeID: String, episodeNumber: Int) async
 }
 
 actor InMemoryPlaybackProgressStore: PlaybackProgressStore {
@@ -22,6 +24,12 @@ actor InMemoryPlaybackProgressStore: PlaybackProgressStore {
         items.first { $0.animeID == animeID && $0.episodeNumber == episodeNumber }
     }
 
+    func progress(forAnimeID animeID: String) async -> [PlaybackProgress] {
+        items
+            .filter { $0.animeID == animeID }
+            .sorted { $0.updatedAt > $1.updatedAt }
+    }
+
     func latestProgress(animeID: String) async -> PlaybackProgress? {
         items
             .filter { $0.animeID == animeID }
@@ -34,5 +42,10 @@ actor InMemoryPlaybackProgressStore: PlaybackProgressStore {
         } else {
             items.append(progress)
         }
+    }
+
+    func remove(animeID: String, episodeNumber: Int) async {
+        let id = "\(animeID)-\(episodeNumber)"
+        items.removeAll { $0.id == id }
     }
 }

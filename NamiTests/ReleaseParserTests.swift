@@ -208,6 +208,13 @@ struct ReleaseParserTests {
         #expect(ReleaseParser.parse("Show - 07").sizeBytes == nil)
     }
 
+    @Test func parsesSeeders() {
+        #expect(ReleaseParser.parse("Show - 07\n\u{1F464} 142 \u{1F4BE} 2.1 GB").seeders == 142)
+        #expect(ReleaseParser.parse("Show - 07 Seeders: 50").seeders == 50)
+        #expect(ReleaseParser.parse("Show - 07 50 seeders").seeders == 50)
+        #expect(ReleaseParser.parse("Show - 07").seeders == nil)
+    }
+
     @Test func parsesFileExtension() {
         #expect(ReleaseParser.parse("Anime - 07.mkv").fileExtension == "mkv")
         #expect(ReleaseParser.parse("Anime - 07.MKV").fileExtension == "mkv")

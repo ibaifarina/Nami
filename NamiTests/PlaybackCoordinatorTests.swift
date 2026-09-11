@@ -109,6 +109,7 @@ struct PlaybackCoordinatorTests {
         let coordinator: PlaybackCoordinator
         let engine: MockPlayerEngine
         let store: InMemoryPlaybackProgressStore
+        let library: StubLibraryRepository
         let preferences: PreferencesStore
         let defaults: UserDefaults
         let suiteName: String
@@ -117,7 +118,8 @@ struct PlaybackCoordinatorTests {
     private func makeSetup(
         audio: AudioPreference = .japanese,
         subtitles: SubtitlePreference = .english,
-        externalPlayers: (any ExternalPlayerOpening)? = nil
+        externalPlayers: (any ExternalPlayerOpening)? = nil,
+        library: StubLibraryRepository? = nil
     ) throws -> Setup {
         let suiteName = "playback-test-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
@@ -125,17 +127,20 @@ struct PlaybackCoordinatorTests {
         preferences.preferredAudio = audio
         preferences.preferredSubtitles = subtitles
         let store = InMemoryPlaybackProgressStore()
+        let library = library ?? StubLibraryRepository()
         let engine = MockPlayerEngine()
         let coordinator = PlaybackCoordinator(
             engine: engine,
             progressStore: store,
             preferences: preferences,
+            library: library,
             externalPlayers: externalPlayers ?? ExternalPlayerService()
         )
         return Setup(
             coordinator: coordinator,
             engine: engine,
             store: store,
+            library: library,
             preferences: preferences,
             defaults: defaults,
             suiteName: suiteName
@@ -382,6 +387,85 @@ struct PlaybackCoordinatorTests {
         #expect(saved?.isCompleted != true)
     }
 
+    @Test func playbackAddsAnimeToWatchingLibrary() async throws {
+        let setup = try makeSetup()
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(7), startAt: nil)
+        await waitUntil { setup.coordinator.state == .playing }
+        setup.engine.emitTime(120)
+
+        await waitUntil {
+            guard let entry = try? await setup.library.entry(animeID: anime.id) else { return false }
+            return entry.status == .watching
+        }
+
+        let entry = try await setup.library.entry(animeID: anime.id)
+        #expect(entry?.status == .watching)
+        #expect(entry?.progress == 6)
+        #expect(entry?.anime.id == anime.id)
+    }
+
+    @Test func completionAdvancesLibraryProgress() async throws {
+        let setup = try makeSetup()
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(7), startAt: nil)
+        await waitUntil { setup.coordinator.state == .playing }
+        setup.engine.emitTime(590)
+
+        await waitUntil {
+            guard let entry = try? await setup.library.entry(animeID: anime.id) else { return false }
+            return entry.progress == 7
+        }
+
+        let entry = try await setup.library.entry(animeID: anime.id)
+        #expect(entry?.progress == 7)
+    }
+
+    @Test func playbackPreservesExplicitLibraryStatus() async throws {
+        let completed = LibraryEntry(
+            animeID: anime.id,
+            status: .completed,
+            progress: 12,
+            updatedAt: Date(),
+            anime: anime
+        )
+        let library = StubLibraryRepository(entries: [completed])
+        let setup = try makeSetup(library: library)
+
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(1), startAt: nil)
+        await waitUntil { setup.coordinator.state == .playing }
+        setup.engine.emitTime(30)
+        await waitUntil { await setup.store.progress(animeID: anime.id, episodeNumber: 1) != nil }
+
+        let entry = try await setup.library.entry(animeID: anime.id)
+        #expect(entry?.status == .completed)
+        #expect(entry?.progress == 12)
+        #expect(entry?.updatedAt == completed.updatedAt)
+    }
+
+    @Test func playbackPromotesPlanToWatch() async throws {
+        let planned = LibraryEntry(
+            animeID: anime.id,
+            status: .planToWatch,
+            progress: 0,
+            updatedAt: Date(),
+            anime: anime
+        )
+        let library = StubLibraryRepository(entries: [planned])
+        let setup = try makeSetup(library: library)
+
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(3), startAt: nil)
+        await waitUntil { setup.coordinator.state == .playing }
+        setup.engine.emitTime(60)
+
+        await waitUntil {
+            guard let entry = try? await setup.library.entry(animeID: anime.id) else { return false }
+            return entry.status == .watching
+        }
+
+        let entry = try await setup.library.entry(animeID: anime.id)
+        #expect(entry?.status == .watching)
+        #expect(entry?.progress == 2)
+    }
+
     @Test func externalPlayerOpensStreamWithoutPresentingBuiltInPlayer() async throws {
         let player = ExternalPlayer(bundleID: "com.example.player", displayName: "Example Player")
         let opener = MockExternalPlayerOpener()
@@ -451,5 +535,29 @@ struct PlaybackProgressStoreTests {
 
         let latest = await store.latestProgress(animeID: "anime-1")
         #expect(latest?.positionSeconds == 90)
+    }
+
+    @Test func watchedEpisodeCountTracksCompletedEpisodes() {
+        let inProgress = PlaybackProgress(
+            animeID: "anime-1",
+            episodeNumber: 7,
+            positionSeconds: 300,
+            durationSeconds: 1_400,
+            updatedAt: Date()
+        )
+        #expect(inProgress.watchedEpisodeCount == 6)
+
+        let firstEpisode = PlaybackProgress(
+            animeID: "anime-1",
+            episodeNumber: 1,
+            positionSeconds: 60,
+            durationSeconds: 1_400,
+            updatedAt: Date()
+        )
+        #expect(firstEpisode.watchedEpisodeCount == 0)
+
+        var completed = inProgress
+        completed.isCompleted = true
+        #expect(completed.watchedEpisodeCount == 7)
     }
 }

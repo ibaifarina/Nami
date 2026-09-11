@@ -3,35 +3,52 @@ import SwiftUI
 struct OnboardingView: View {
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.openSettings) private var openSettings
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var flow = OnboardingFlow()
+    @State private var previousStep: OnboardingFlow.Step = .welcome
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xl) {
             header
-            Group {
-                switch flow.step {
-                case .welcome:
-                    welcomeStep
-                case .realDebrid:
-                    serviceStep(
-                        systemImage: "bolt",
-                        connected: environment.debridAuth.isConnected,
-                        connectedDetail: environment.debridAuth.account?.username,
-                        description: "Resolve torrent and hoster sources and start cached streams instantly. Without it you can still play direct sources.",
-                        settingsHint: "Settings \u{203A} Real-Debrid"
-                    )
-                case .addons:
-                    addonsStep
-                case .preferences:
-                    preferencesStep
-                }
+            ZStack(alignment: .topLeading) {
+                stepContent
+                    .id(flow.step)
+                    .transition(.screenChange(direction: stepDirection))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .animation(reduceMotion ? nil : .easeOut(duration: Motion.transition), value: flow.step)
             Spacer()
             footer
         }
         .padding(Spacing.xxl)
         .frame(width: 580, height: 470)
+        .onChange(of: flow.step) { _, newValue in
+            previousStep = newValue
+        }
+    }
+
+    @ViewBuilder
+    private var stepContent: some View {
+        switch flow.step {
+        case .welcome:
+            welcomeStep
+        case .realDebrid:
+            serviceStep(
+                systemImage: "bolt",
+                connected: environment.debridAuth.isConnected,
+                connectedDetail: environment.debridAuth.account?.username,
+                description: "Resolve torrent and hoster sources and start cached streams instantly. Without it you can still play direct sources.",
+                settingsHint: "Settings \u{203A} Real-Debrid"
+            )
+        case .addons:
+            addonsStep
+        case .preferences:
+            preferencesStep
+        }
+    }
+
+    private var stepDirection: ScreenTransitionDirection {
+        flow.step.rawValue >= previousStep.rawValue ? .forward : .backward
     }
 
     private var header: some View {

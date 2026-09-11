@@ -24,10 +24,12 @@ final class PlaybackCoordinator {
     private var engine: any PlayerEngine
     private let progressStore: any PlaybackProgressStore
     private let preferences: PreferencesStore
+    private let library: any LibraryRepository
     private let externalPlayers: any ExternalPlayerOpening
     private let completionService = PlaybackCompletionService()
     private var session: Session?
     private var lastProgressWrite = Date.distantPast
+    private var lastSyncedLibraryProgress: Int?
     private var previousVolume: Double = 1
     private var hasCompletedSession = false
 
@@ -61,6 +63,7 @@ final class PlaybackCoordinator {
         engine: (any PlayerEngine)? = nil,
         progressStore: any PlaybackProgressStore,
         preferences: PreferencesStore,
+        library: any LibraryRepository,
         externalPlayers: any ExternalPlayerOpening = ExternalPlayerService()
     ) {
         let factory = engineFactory ?? PlaybackEngineFactory.make
@@ -69,6 +72,7 @@ final class PlaybackCoordinator {
         self.engine = engine ?? factory(engineKind)
         self.progressStore = progressStore
         self.preferences = preferences
+        self.library = library
         self.externalPlayers = externalPlayers
         volume = self.engine.volume
         previousVolume = self.engine.volume
@@ -198,6 +202,7 @@ final class PlaybackCoordinator {
         selectedAudioTrackID = nil
         selectedSubtitleTrackID = nil
         lastProgressWrite = .distantPast
+        lastSyncedLibraryProgress = nil
         hasCompletedSession = false
         presentationGeneration += 1
 
@@ -225,6 +230,7 @@ final class PlaybackCoordinator {
         selectedAudioTrackID = nil
         selectedSubtitleTrackID = nil
         lastProgressWrite = .distantPast
+        lastSyncedLibraryProgress = nil
         hasCompletedSession = false
         presentationGeneration += 1
     }
@@ -253,6 +259,7 @@ final class PlaybackCoordinator {
         selectedSubtitleTrackID = nil
         title = ""
         episodeLabel = ""
+        lastSyncedLibraryProgress = nil
         hasCompletedSession = false
         presentationGeneration += 1
         onSessionClosed?()
@@ -380,8 +387,10 @@ final class PlaybackCoordinator {
     }
 
     private func timeChanged(_ time: Double, _ duration: Double) {
-        currentTime = time
-        if duration > 0 {
+        if currentTime != time {
+            currentTime = time
+        }
+        if duration > 0, duration != self.duration {
             self.duration = duration
         }
         if let session {
@@ -481,9 +490,23 @@ final class PlaybackCoordinator {
             bannerURL: session.anime.bannerURL,
             episodeCount: session.anime.episodeCount
         )
+        syncLibrary(anime: session.anime, progress: progress)
         let store = progressStore
         Task {
             await store.save(progress)
+        }
+    }
+
+    /// Mirrors playback into the library so anything being watched shows up
+    /// under `watching`, with its watched-episode count kept current. The
+    /// repository preserves statuses the user picked explicitly.
+    private func syncLibrary(anime: Anime, progress: PlaybackProgress) {
+        let watchedCount = progress.watchedEpisodeCount
+        guard lastSyncedLibraryProgress != watchedCount else { return }
+        lastSyncedLibraryProgress = watchedCount
+        let library = library
+        Task {
+            try? await library.addToWatching(anime: anime, progress: watchedCount)
         }
     }
 

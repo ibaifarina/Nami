@@ -61,6 +61,23 @@ protocol LibraryRepository: Sendable {
         progress: Int?
     ) async throws -> LibraryEntry
     func remove(animeID: String) async throws
+
+    /// Adds the anime to the library as `watching` when it isn't tracked yet,
+    /// refreshes entries already in `watching`, and promotes `planToWatch`
+    /// entries. Statuses the user chose explicitly (`completed`, `favorites`,
+    /// `onHold`, `dropped`) are never overwritten.
+    func addToWatching(anime: Anime, progress: Int?) async throws
+}
+
+extension LibraryRepository {
+    func addToWatching(anime: Anime, progress: Int?) async throws {
+        guard let existing = try await entry(animeID: anime.id) else {
+            try await update(anime: anime, status: .watching, progress: progress)
+            return
+        }
+        guard existing.status == .watching || existing.status == .planToWatch else { return }
+        try await update(anime: anime, status: .watching, progress: progress ?? existing.progress)
+    }
 }
 
 protocol LibraryPersistence: Sendable {

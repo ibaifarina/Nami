@@ -5,8 +5,7 @@ struct PlayerView: View {
     @Environment(AppEnvironment.self) private var environment
 
     @State private var controlsVisible = true
-    @State private var hideControlsTask: Task<Void, Never>?
-    @State private var lastHoverPoint: CGPoint = .zero
+    @State private var controlsTracker = ControlsVisibilityTracker()
     @State private var nextSelectionRequest: PlaybackRequest?
     @FocusState private var isFocused: Bool
 
@@ -41,24 +40,22 @@ struct PlayerView: View {
         }
         .background(PlayerWindowChrome())
         .focusable()
+        .focusEffectDisabled()
         .focused($isFocused)
         .onAppear {
             isFocused = true
             scheduleHide()
         }
         .onDisappear {
-            hideControlsTask?.cancel()
+            controlsTracker.cancel()
+            NSCursor.setHiddenUntilMouseMoves(false)
         }
         .sheet(item: $nextSelectionRequest) { request in
             StreamSelectionView(request: request, environment: environment)
         }
         .onContinuousHover { phase in
-            if case .active(let point) = phase {
-                if abs(point.x - lastHoverPoint.x) > 2 || abs(point.y - lastHoverPoint.y) > 2 {
-                    lastHoverPoint = point
-                    revealControls()
-                }
-            }
+            guard case .active(let point) = phase, controlsTracker.registerMovement(point) else { return }
+            revealControls()
         }
         .onKeyPress(.space) {
             playback.togglePlayPause()
@@ -287,11 +284,14 @@ struct PlayerView: View {
                 }
             }
         } label: {
-            Text(playback.rate == 1 ? "Speed" : String(format: "%g\u{00D7}", playback.rate))
-                .font(AppFont.cardMeta)
+            Label("Speed", systemImage: "gauge.with.dots.needle.67percent")
+                .labelStyle(.iconOnly)
+                .font(.system(size: 13))
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
+        .pointerStyle(.link)
+        .accessibilityLabel(playback.rate == 1 ? "Playback speed" : String(format: "Playback speed %g\u{00D7}", playback.rate))
     }
 
     private var audioMenu: some View {
@@ -309,11 +309,14 @@ struct PlayerView: View {
             }
         } label: {
             Label("Audio", systemImage: "waveform")
-                .font(AppFont.cardMeta)
+                .labelStyle(.iconOnly)
+                .font(.system(size: 13))
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
         .disabled(playback.audioTracks.isEmpty)
+        .pointerStyle(.link)
+        .accessibilityLabel("Audio track")
     }
 
     private var subtitleMenu: some View {
@@ -343,11 +346,14 @@ struct PlayerView: View {
             }
         } label: {
             Label("Subtitles", systemImage: "captions.bubble")
-                .font(AppFont.cardMeta)
+                .labelStyle(.iconOnly)
+                .font(.system(size: 13))
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
         .disabled(playback.subtitleTracks.isEmpty && playback.selectedSubtitleTrackID == nil)
+        .pointerStyle(.link)
+        .accessibilityLabel("Subtitles")
     }
 
     private var volumeControl: some View {
@@ -406,17 +412,17 @@ struct PlayerView: View {
     // MARK: - Behavior
 
     private func revealControls() {
-        controlsVisible = true
+        if !controlsVisible {
+            controlsVisible = true
+        }
         scheduleHide()
     }
 
     private func scheduleHide() {
-        hideControlsTask?.cancel()
-        hideControlsTask = Task {
-            try? await Task.sleep(for: .seconds(3))
-            guard !Task.isCancelled else { return }
+        controlsTracker.scheduleHide {
             if playback.isPlaying {
                 controlsVisible = false
+                NSCursor.setHiddenUntilMouseMoves(true)
             }
         }
     }
@@ -431,6 +437,40 @@ struct PlayerView: View {
         } else {
             playback.close()
         }
+    }
+}
+
+/// Owns player-control visibility bookkeeping outside of SwiftUI state: hover
+/// events arrive at pointer frequency, and writing to `@State` for each one
+/// would invalidate the whole player body (including its video surface) on
+/// every mouse move.
+@MainActor
+private final class ControlsVisibilityTracker {
+    private var lastPoint: CGPoint = .zero
+    private var hideTask: Task<Void, Never>?
+
+    /// Returns true when the pointer moved far enough to count as activity.
+    func registerMovement(_ point: CGPoint) -> Bool {
+        guard abs(point.x - lastPoint.x) > 2 || abs(point.y - lastPoint.y) > 2 else {
+            return false
+        }
+        lastPoint = point
+        return true
+    }
+
+    /// (Re)schedules the auto-hide callback for when activity stops.
+    func scheduleHide(after delay: Duration = .seconds(3), _ hide: @escaping @MainActor () -> Void) {
+        hideTask?.cancel()
+        hideTask = Task { @MainActor in
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled else { return }
+            hide()
+        }
+    }
+
+    func cancel() {
+        hideTask?.cancel()
+        hideTask = nil
     }
 }
 
@@ -538,7 +578,7 @@ private struct PlayerTimecodeView: View {
 
     var body: some View {
         Text("\(Timecode.format(playback.currentTime)) / \(Timecode.format(playback.duration))")
-            .font(.system(.caption, design: .monospaced))
+            .font(.system(.caption).monospacedDigit())
             .foregroundStyle(.white.opacity(0.85))
     }
 }

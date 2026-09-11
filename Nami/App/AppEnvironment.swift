@@ -122,6 +122,7 @@ final class AppEnvironment {
             engineKind: preferences.playbackEngine,
             progressStore: self.progress,
             preferences: preferences,
+            library: library,
             externalPlayers: externalPlayerService
         )
         coordinator.onPlaybackTick = { [weak nextEpisodeController] anime, episode, time, duration in

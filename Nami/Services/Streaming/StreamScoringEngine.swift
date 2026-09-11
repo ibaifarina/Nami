@@ -29,7 +29,8 @@ struct StreamScoringOptions: Hashable, Sendable {
     var preferredReleaseGroups: [String] = []
     var blockedReleaseGroups: [String] = []
     var minimumSeedersForUncached: Int = 2
-    var maximumFileSizeBytes: Int64?
+    var maximumEpisodeFileSizeBytes: Int64?
+    var maximumMovieFileSizeBytes: Int64?
     var confidenceThreshold: Double = 0.88
     var debridAvailable: Bool = true
 
@@ -45,7 +46,12 @@ struct StreamScoringOptions: Hashable, Sendable {
         preferredReleaseGroups = preferences.preferredReleaseGroups
         blockedReleaseGroups = preferences.blockedReleaseGroups
         minimumSeedersForUncached = preferences.minimumSeedersForUncached
-        maximumFileSizeBytes = preferences.maximumFileSizeBytes > 0 ? preferences.maximumFileSizeBytes : nil
+        maximumEpisodeFileSizeBytes = preferences.maximumEpisodeFileSizeBytes > 0
+            ? preferences.maximumEpisodeFileSizeBytes
+            : nil
+        maximumMovieFileSizeBytes = preferences.maximumMovieFileSizeBytes > 0
+            ? preferences.maximumMovieFileSizeBytes
+            : nil
         confidenceThreshold = preferences.autoSelectConfidenceThreshold
         self.debridAvailable = debridAvailable
     }
@@ -55,6 +61,7 @@ struct ScoringContext: Hashable, Sendable {
     var episodeDurationMinutes: Int?
     var addonPriorities: [String: Int] = [:]
     var debridAvailable: Bool = true
+    var isMovie: Bool = false
 }
 
 struct ScoreReason: Hashable, Sendable, Identifiable {
@@ -178,7 +185,7 @@ struct StreamScoringEngine: Sendable {
         if !context.debridAvailable && candidate.directURL == nil {
             reasons.append("Real-Debrid isn't connected")
         }
-        if let maximum = options.maximumFileSizeBytes,
+        if let maximum = maximumFileSizeBytes(for: context),
            let size = candidate.sizeBytes,
            size > maximum {
             reasons.append("File is larger than your size limit")
@@ -202,6 +209,10 @@ struct StreamScoringEngine: Sendable {
         candidate.infoHash != nil
             || candidate.magnetURI != nil
             || candidate.directURL != nil
+    }
+
+    private func maximumFileSizeBytes(for context: ScoringContext) -> Int64? {
+        context.isMovie ? options.maximumMovieFileSizeBytes : options.maximumEpisodeFileSizeBytes
     }
 
     // MARK: - Weights

@@ -107,16 +107,19 @@ final class HomeViewModel {
     }
 
     private func loadContinueWatching() async {
-        let items = await progressStore.allProgress(limit: 12)
+        let items = await progressStore.allProgress(limit: 32)
+        var seenAnimeIDs = Set<String>()
         var entries: [ContinueWatchingEntry] = []
         for item in items where !item.isCompleted {
+            guard entries.count < 8 else { break }
+            // One card per show: the most recently watched episode wins.
+            guard seenAnimeIDs.insert(item.animeID).inserted else { continue }
             if let details = try? await media.anime(id: item.animeID) {
                 entries.append(ContinueWatchingEntry(anime: details.anime, progress: item))
             } else if let snapshot = item.animeSnapshot {
                 // Continue Watching must survive Kitsu outages.
                 entries.append(ContinueWatchingEntry(anime: snapshot, progress: item))
             }
-            if entries.count >= 8 { break }
         }
         continueWatching = entries
     }

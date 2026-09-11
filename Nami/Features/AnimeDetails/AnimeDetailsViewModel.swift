@@ -17,6 +17,7 @@ final class AnimeDetailsViewModel {
     var series: AnimeSeries?
     var selectedInstallmentID: String?
     var progress: PlaybackProgress?
+    var watchedEpisodeNumbers: Set<Int> = []
     var libraryEntry: LibraryEntry?
     var libraryError: String?
     var isUpdatingLibrary = false
@@ -128,6 +129,7 @@ final class AnimeDetailsViewModel {
         absoluteEpisodeOffset = installment.absoluteEpisodeOffset
         episodesState = .loading
         progress = nil
+        watchedEpisodeNumbers = []
         libraryEntry = nil
         Task { [weak self] in
             guard let self else { return }
@@ -191,7 +193,35 @@ final class AnimeDetailsViewModel {
             episodeCount: anime.episodeCount
         )
         await progressStore.save(progress)
-        self.progress = progress
+        watchedEpisodeNumbers.insert(episode.displayNumber)
+        await refreshProgress(for: anime.id)
+    }
+
+    func markEpisodeUnwatched(_ episode: Episode) async {
+        guard let anime = selectedAnime else { return }
+        await progressStore.remove(animeID: anime.id, episodeNumber: episode.displayNumber)
+        watchedEpisodeNumbers.remove(episode.displayNumber)
+        await refreshProgress(for: anime.id)
+    }
+
+    func toggleEpisodeWatched(_ episode: Episode) async {
+        if isWatched(episode) {
+            await markEpisodeUnwatched(episode)
+        } else {
+            await markEpisodeWatched(episode)
+        }
+    }
+
+    func isWatched(_ episode: Episode) -> Bool {
+        watchedEpisodeNumbers.contains(episode.displayNumber)
+    }
+
+    /// The latest unfinished episode is the meaningful "Continue" target;
+    /// manually marking an older episode watched must not hijack it.
+    private func refreshProgress(for animeID: String) async {
+        let history = await progressStore.progress(forAnimeID: animeID)
+        guard (selectedInstallmentID ?? self.animeID) == animeID else { return }
+        progress = history.first { !$0.isCompleted }
     }
 
     // MARK: - Loading
@@ -231,11 +261,14 @@ final class AnimeDetailsViewModel {
     }
 
     private func loadLocalContext(for id: String) async {
-        async let progressTask: PlaybackProgress? = progressStore.latestProgress(animeID: id)
+        async let historyTask: [PlaybackProgress] = progressStore.progress(forAnimeID: id)
         async let entryTask: LibraryEntry? = try? library.entry(animeID: id)
-        let (progress, entry) = await (progressTask, entryTask)
+        let (history, entry) = await (historyTask, entryTask)
         guard !Task.isCancelled, (selectedInstallmentID ?? animeID) == id else { return }
-        self.progress = progress
+        watchedEpisodeNumbers = Set(
+            history.filter(\.isCompleted).map(\.episodeNumber)
+        )
+        progress = history.first { !$0.isCompleted }
         libraryEntry = entry
         libraryError = nil
     }

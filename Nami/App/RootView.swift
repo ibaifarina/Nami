@@ -2,15 +2,22 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(AppEnvironment.self) private var environment
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var contentGeneration = 0
+    @State private var previousSection: AppRouter.SidebarItem = .home
 
     var body: some View {
         @Bindable var router = environment.router
         @Bindable var launcher = environment.playbackLaunch
         ZStack(alignment: .topLeading) {
             detailContent
-                .id(contentGeneration)
+                .id(DetailIdentity(section: selectedSection, generation: contentGeneration))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.screenChange(direction: sectionDirection))
+                .animation(
+                    reduceMotion ? nil : .easeOut(duration: Motion.transition),
+                    value: selectedSection
+                )
 
             SidebarView()
 
@@ -26,6 +33,7 @@ struct RootView: View {
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .toolbar(removing: .sidebarToggle)
         .toolbar(removing: environment.playback.isPresenting ? .title : nil)
+        .windowToolbarFullScreenVisibility(.onHover)
         .toolbarWindowChrome()
         .animation(.easeOut(duration: Motion.transition), value: environment.playback.isPresenting)
         .task {
@@ -52,6 +60,20 @@ struct RootView: View {
             await environment.clearCaches()
             contentGeneration += 1
         }
+        .onChange(of: selectedSection) { _, newValue in
+            previousSection = newValue
+        }
+    }
+
+    private var selectedSection: AppRouter.SidebarItem {
+        environment.router.selection ?? .home
+    }
+
+    private var sectionDirection: ScreenTransitionDirection {
+        let order = AppRouter.SidebarItem.allCases
+        let from = order.firstIndex(of: previousSection) ?? 0
+        let to = order.firstIndex(of: selectedSection) ?? 0
+        return to >= from ? .forward : .backward
     }
 
     @ViewBuilder
@@ -89,6 +111,11 @@ struct RootView: View {
             AnimeDetailsView(animeID: id, environment: environment)
         }
     }
+}
+
+private struct DetailIdentity: Hashable {
+    let section: AppRouter.SidebarItem
+    let generation: Int
 }
 
 private struct ToolbarWindowChrome: ViewModifier {

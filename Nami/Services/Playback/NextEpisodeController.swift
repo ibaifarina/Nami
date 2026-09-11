@@ -101,11 +101,11 @@ final class NextEpisodeController {
 
         guard preferences.autoplayNextEpisode else {
             cancelPrefetch()
-            overlay = .hidden
+            setOverlay(.hidden)
             return
         }
         guard let nextEpisodeNumber, !autoplayCancelled else {
-            overlay = .hidden
+            setOverlay(.hidden)
             return
         }
 
@@ -127,20 +127,20 @@ final class NextEpisodeController {
                 }
             } else if remaining <= overlayLeadSeconds {
                 if prepared.result.decision.shouldAutoPlay {
-                    overlay = .countdown(seconds: countdown(for: remaining))
+                    setOverlay(.countdown(seconds: countdown(for: remaining)))
                 } else {
-                    overlay = .readyToChoose
+                    setOverlay(.readyToChoose)
                 }
             } else if case .countdown = overlay {
-                overlay = .hidden
+                setOverlay(.hidden)
             } else if case .readyToChoose = overlay {
-                overlay = .hidden
+                setOverlay(.hidden)
             }
         } else if remaining <= overlayLeadSeconds, hasPrefetched {
-            overlay = .preparing
+            setOverlay(.preparing)
         } else if remaining > overlayLeadSeconds {
             if case .preparing = overlay {
-                overlay = .hidden
+                setOverlay(.hidden)
             }
         }
 
@@ -151,11 +151,11 @@ final class NextEpisodeController {
 
     func playbackEnded() {
         guard preferences.autoplayNextEpisode, !autoplayCancelled else {
-            overlay = .hidden
+            setOverlay(.hidden)
             return
         }
         guard nextEpisodeNumber != nil else {
-            overlay = .hidden
+            setOverlay(.hidden)
             return
         }
         advanceIfNeeded()
@@ -169,7 +169,7 @@ final class NextEpisodeController {
         preparedDecision = nil
         preparedEpisodeNumber = nil
         prepareError = nil
-        overlay = .hidden
+        setOverlay(.hidden)
         hasPrefetched = false
         autoplayCancelled = false
         advanceInFlight = false
@@ -189,11 +189,11 @@ final class NextEpisodeController {
 
     func cancelCountdown() {
         autoplayCancelled = true
-        overlay = .hidden
+        setOverlay(.hidden)
     }
 
     func dismissOverlay() {
-        overlay = .hidden
+        setOverlay(.hidden)
     }
 
     // MARK: - Prefetch
@@ -228,7 +228,9 @@ final class NextEpisodeController {
             self.preparedDecision = result.decision
             self.preparedEpisodeNumber = episodeNumber
             if self.overlay == .preparing {
-                self.overlay = result.decision.shouldAutoPlay ? .countdown(seconds: self.countdownSeconds) : .readyToChoose
+                self.setOverlay(
+                    result.decision.shouldAutoPlay ? .countdown(seconds: self.countdownSeconds) : .readyToChoose
+                )
             }
         }
     }
@@ -236,10 +238,25 @@ final class NextEpisodeController {
     private func cancelPrefetch() {
         prefetchTask?.cancel()
         prefetchTask = nil
-        prepared = nil
-        preparedDecision = nil
-        preparedEpisodeNumber = nil
-        hasPrefetched = false
+        if prepared != nil {
+            prepared = nil
+        }
+        if preparedDecision != nil {
+            preparedDecision = nil
+        }
+        if preparedEpisodeNumber != nil {
+            preparedEpisodeNumber = nil
+        }
+        if hasPrefetched {
+            hasPrefetched = false
+        }
+    }
+
+    /// Assigns only on an actual change: the progress tick runs several times a
+    /// second and `@Observable` notifies on every set, even for equal values.
+    private func setOverlay(_ newOverlay: Overlay) {
+        guard overlay != newOverlay else { return }
+        overlay = newOverlay
     }
 
     // MARK: - Advancing
@@ -248,19 +265,19 @@ final class NextEpisodeController {
         guard !advanceInFlight else { return }
         guard let prepared, prepared.episodeNumber == nextEpisodeNumber else {
             if nextEpisodeNumber != nil, hasPrefetched {
-                overlay = .preparing
+                setOverlay(.preparing)
             } else if nextEpisodeNumber != nil {
-                overlay = .readyToChoose
+                setOverlay(.readyToChoose)
             }
             return
         }
         guard let candidate = prepared.result.decision.candidate,
               prepared.result.decision.shouldAutoPlay else {
-            overlay = .readyToChoose
+            setOverlay(.readyToChoose)
             return
         }
         advanceInFlight = true
-        overlay = .hidden
+        setOverlay(.hidden)
 
         Task { [weak self] in
             guard let self else { return }
@@ -276,7 +293,7 @@ final class NextEpisodeController {
                 self.advanceInFlight = false
                 self.prepareError = (error as? DebridError)?.errorDescription
                     ?? error.localizedDescription
-                self.overlay = .readyToChoose
+                self.setOverlay(.readyToChoose)
             }
         }
     }
@@ -289,7 +306,7 @@ final class NextEpisodeController {
         preparedDecision = nil
         preparedEpisodeNumber = nil
         prepareError = nil
-        overlay = .hidden
+        setOverlay(.hidden)
         hasPrefetched = false
         autoplayCancelled = false
         advanceInFlight = false

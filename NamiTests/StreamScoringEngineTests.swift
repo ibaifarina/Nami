@@ -14,6 +14,7 @@ struct StreamScoringEngineTests {
         blockedGroups: [String] = [],
         minSeeders: Int = 2,
         maxSize: Int64? = nil,
+        maxMovieSize: Int64? = nil,
         threshold: Double = 0.88,
         debridAvailable: Bool = true
     ) -> StreamScoringOptions {
@@ -27,7 +28,8 @@ struct StreamScoringEngineTests {
         options.preferredReleaseGroups = preferredGroups
         options.blockedReleaseGroups = blockedGroups
         options.minimumSeedersForUncached = minSeeders
-        options.maximumFileSizeBytes = maxSize
+        options.maximumEpisodeFileSizeBytes = maxSize
+        options.maximumMovieFileSizeBytes = maxMovieSize
         options.confidenceThreshold = threshold
         options.debridAvailable = debridAvailable
         return options
@@ -262,6 +264,25 @@ struct StreamScoringEngineTests {
         let fine = candidate(id: "fine", sizeBytes: 1_500_000_000)
 
         let ranked = engine.rank([huge, fine], context: context)
+
+        #expect(ranked.first { $0.candidate.id == "huge" }?.isAutoEligible == false)
+        #expect(ranked.first { $0.candidate.id == "fine" }?.isAutoEligible == true)
+    }
+
+    @Test func movieFileSizeGateUsesMovieLimit() {
+        let engine = StreamScoringEngine(
+            options: options(maxSize: 5_000_000_000, maxMovieSize: 20_000_000_000)
+        )
+        let huge = candidate(id: "huge", sizeBytes: 25_000_000_000)
+        let fine = candidate(id: "fine", sizeBytes: 15_000_000_000)
+        let movieContext = ScoringContext(
+            episodeDurationMinutes: 110,
+            addonPriorities: [:],
+            debridAvailable: true,
+            isMovie: true
+        )
+
+        let ranked = engine.rank([huge, fine], context: movieContext)
 
         #expect(ranked.first { $0.candidate.id == "huge" }?.isAutoEligible == false)
         #expect(ranked.first { $0.candidate.id == "fine" }?.isAutoEligible == true)

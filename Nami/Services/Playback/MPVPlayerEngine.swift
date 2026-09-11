@@ -1,7 +1,9 @@
 import AppKit
 import Foundation
 import Libmpv
+import OpenGL
 import OpenGL.GL
+import QuartzCore
 import os
 
 // MARK: - libmpv event model
@@ -191,11 +193,10 @@ final class MPVPlayerCore: @unchecked Sendable {
     // MARK: Rendering
 
     @MainActor
-    func attachRenderContext(to view: MPVGLView) -> Bool {
+    func attachRenderContext(to layer: MPVVideoLayer) -> Bool {
         if renderContext != nil { return true }
-        guard let openGLContext = view.openGLContext else { return false }
-        openGLContext.makeCurrentContext()
-        defer { NSOpenGLContext.clearCurrentContext() }
+        CGLSetCurrentContext(layer.cglContext)
+        defer { CGLSetCurrentContext(nil) }
 
         var initParams = mpv_opengl_init_params(
             get_proc_address: mpvGLGetProcAddress,
@@ -224,14 +225,14 @@ final class MPVPlayerCore: @unchecked Sendable {
             mpv_render_context_set_update_callback(
                 context,
                 mpvRenderUpdateCallback,
-                Unmanaged.passUnretained(view).toOpaque()
+                Unmanaged.passUnretained(layer).toOpaque()
             )
             return true
         }
     }
 
-    @MainActor
-    func render(fbo: Int32, width: Int32, height: Int32) {
+    /// Called from the layer's render queue; must not hop to the main actor.
+    nonisolated func render(fbo: Int32, width: Int32, height: Int32) {
         guard let renderContext else { return }
         var fboDescription = mpv_opengl_fbo(
             fbo: fbo,
@@ -258,15 +259,22 @@ final class MPVPlayerCore: @unchecked Sendable {
         }
     }
 
+    /// Called from the layer's render queue; must not hop to the main actor.
+    nonisolated func reportSwap() {
+        guard let renderContext else { return }
+        mpv_render_context_report_swap(renderContext)
+    }
+
     @MainActor
     func destroyRenderContext() {
         guard let renderContext else { return }
         self.renderContext = nil
+        mpv_render_context_set_update_callback(renderContext, nil, nil)
         mpv_render_context_free(renderContext)
     }
 
     @MainActor
-    func shutdown(view: MPVGLView?) {
+    func shutdown(view: MPVVideoView?) {
         let alreadyShutDown = didShutdown.withLock { flag -> Bool in
             if flag { return true }
             flag = true
@@ -278,9 +286,10 @@ final class MPVPlayerCore: @unchecked Sendable {
         mpv_wakeup(handle)
         eventQueue.sync {}
 
-        view?.openGLContext?.makeCurrentContext()
+        view?.videoLayer.detach()
+        CGLSetCurrentContext(view?.videoLayer.cglContext)
         destroyRenderContext()
-        NSOpenGLContext.clearCurrentContext()
+        CGLSetCurrentContext(nil)
         mpv_terminate_destroy(handle)
     }
 
@@ -346,46 +355,191 @@ private func mpvGLGetProcAddress(
 
 private func mpvRenderUpdateCallback(_ context: UnsafeMutableRawPointer?) {
     guard let context else { return }
-    let view = Unmanaged<MPVGLView>.fromOpaque(context).takeUnretainedValue()
-    DispatchQueue.main.async {
-        MainActor.assumeIsolated {
-            view.needsDisplay = true
-        }
-    }
+    let layer = Unmanaged<MPVVideoLayer>.fromOpaque(context).takeUnretainedValue()
+    layer.requestFrame()
 }
 
 // MARK: - Video surface
 
-final class MPVGLView: NSOpenGLView {
-    var drawFrame: ((Int32, Int32, Int32) -> Void)?
+/// Renders libmpv through a `CAOpenGLLayer` so OpenGL work runs on a dedicated
+/// queue instead of the main thread. Drawing video on the main thread starves
+/// SwiftUI's event loop, which makes control animations and cursor-driven UI
+/// (showing the controls) feel sluggish.
+final class MPVVideoLayer: CAOpenGLLayer, @unchecked Sendable {
+    var render: (@Sendable (Int32, Int32, Int32) -> Void)?
+    var didPresent: (@Sendable () -> Void)?
 
-    override class func defaultPixelFormat() -> NSOpenGLPixelFormat {
-        let attributes: [NSOpenGLPixelFormatAttribute] = [
-            NSOpenGLPixelFormatAttribute(NSOpenGLPFADoubleBuffer),
-            NSOpenGLPixelFormatAttribute(NSOpenGLPFAColorSize), NSOpenGLPixelFormatAttribute(32),
-            NSOpenGLPixelFormatAttribute(NSOpenGLPFADepthSize), NSOpenGLPixelFormatAttribute(24),
-            NSOpenGLPixelFormatAttribute(NSOpenGLPFAStencilSize), NSOpenGLPixelFormatAttribute(8),
-            NSOpenGLPixelFormatAttribute(NSOpenGLPFAAllowOfflineRenderers),
-            NSOpenGLPixelFormatAttribute(0),
-        ]
-        return NSOpenGLPixelFormat(attributes: attributes)
-            ?? NSOpenGLPixelFormat(
-                attributes: [
-                    NSOpenGLPixelFormatAttribute(NSOpenGLPFADoubleBuffer),
-                    NSOpenGLPixelFormatAttribute(0),
-                ]
-            )!
+    let cglPixelFormat: CGLPixelFormatObj
+    let cglContext: CGLContextObj
+
+    private let renderQueue = DispatchQueue(label: "com.auax.Nami.mpv.gl", qos: .userInteractive)
+    private let displayLock = NSRecursiveLock()
+    private let needsFrame = OSAllocatedUnfairLock(initialState: false)
+    /// CA can hand back a zero FBO on the first draw; keep the last valid one.
+    private var lastFBO: GLint = 1
+
+    override init() {
+        let pixelFormat = Self.makePixelFormat()
+        cglPixelFormat = pixelFormat
+        cglContext = Self.makeContext(pixelFormat: pixelFormat)
+        super.init()
+        configureLayer()
     }
 
-    override func draw(_ dirtyRect: NSRect) {
-        guard let openGLContext else { return }
-        openGLContext.makeCurrentContext()
+    override init(layer: Any) {
+        if let previous = layer as? MPVVideoLayer {
+            cglPixelFormat = previous.cglPixelFormat
+            cglContext = previous.cglContext
+        } else {
+            let pixelFormat = Self.makePixelFormat()
+            cglPixelFormat = pixelFormat
+            cglContext = Self.makeContext(pixelFormat: pixelFormat)
+        }
+        super.init(layer: layer)
+        configureLayer()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func configureLayer() {
+        autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+        backgroundColor = NSColor.black.cgColor
+        contentsGravity = .resizeAspect
+        isAsynchronous = false
+    }
+
+    /// Schedules a draw off the main thread. Safe to call from any thread.
+    func requestFrame() {
+        renderQueue.async { [weak self] in
+            guard let self else { return }
+            self.needsFrame.withLock { $0 = true }
+            self.display()
+        }
+    }
+
+    /// Drains the render queue and stops drawing so the engine can safely
+    /// destroy the mpv render context.
+    func detach() {
+        renderQueue.sync {
+            render = nil
+            didPresent = nil
+            needsFrame.withLock { $0 = false }
+        }
+    }
+
+    override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
+        cglPixelFormat
+    }
+
+    override func copyCGLContext(forPixelFormat pf: CGLPixelFormatObj) -> CGLContextObj {
+        cglContext
+    }
+
+    override func canDraw(
+        inCGLContext ctx: CGLContextObj,
+        pixelFormat pf: CGLPixelFormatObj,
+        forLayerTime t: CFTimeInterval,
+        displayTime ts: UnsafePointer<CVTimeStamp>?
+    ) -> Bool {
+        needsFrame.withLock { $0 }
+    }
+
+    override func draw(
+        inCGLContext ctx: CGLContextObj,
+        pixelFormat pf: CGLPixelFormatObj,
+        forLayerTime t: CFTimeInterval,
+        displayTime ts: UnsafePointer<CVTimeStamp>?
+    ) {
+        needsFrame.withLock { $0 = false }
         var fbo: GLint = 0
         glGetIntegerv(GLenum(GL_FRAMEBUFFER_BINDING), &fbo)
+        if fbo != 0 {
+            lastFBO = fbo
+        }
         var viewport = [GLint](repeating: 0, count: 4)
         glGetIntegerv(GLenum(GL_VIEWPORT), &viewport)
-        drawFrame?(Int32(fbo), Int32(viewport[2]), Int32(viewport[3]))
-        openGLContext.flushBuffer()
+        render?(Int32(lastFBO), Int32(viewport[2]), Int32(viewport[3]))
+        glFlush()
+        didPresent?()
+    }
+
+    override func display() {
+        displayLock.lock()
+        defer { displayLock.unlock() }
+        if Thread.isMainThread {
+            super.display()
+        } else {
+            // Off-main draws need an explicit transaction and flush, otherwise
+            // the frame is not committed.
+            CATransaction.begin()
+            super.display()
+            CATransaction.commit()
+        }
+        CATransaction.flush()
+    }
+
+    private static func makePixelFormat() -> CGLPixelFormatObj {
+        let profiles: [CGLOpenGLProfile] = [kCGLOGLPVersion_3_2_Core, kCGLOGLPVersion_Legacy]
+        for profile in profiles {
+            var attributes: [CGLPixelFormatAttribute] = [
+                kCGLPFAOpenGLProfile,
+                CGLPixelFormatAttribute(profile.rawValue),
+                kCGLPFAAccelerated,
+                kCGLPFADoubleBuffer,
+                kCGLPFAColorSize,
+                CGLPixelFormatAttribute(32),
+                kCGLPFAAllowOfflineRenderers,
+                CGLPixelFormatAttribute(0),
+            ]
+            var pixelFormat: CGLPixelFormatObj?
+            var count: GLint = 0
+            if CGLChoosePixelFormat(&attributes, &pixelFormat, &count) == kCGLNoError, let pixelFormat {
+                return pixelFormat
+            }
+        }
+        fatalError("Unable to create an OpenGL pixel format for video playback")
+    }
+
+    private static func makeContext(pixelFormat: CGLPixelFormatObj) -> CGLContextObj {
+        var context: CGLContextObj?
+        guard CGLCreateContext(pixelFormat, nil, &context) == kCGLNoError, let context else {
+            fatalError("Unable to create an OpenGL context for video playback")
+        }
+        var swapInterval: GLint = 1
+        CGLSetParameter(context, kCGLCPSwapInterval, &swapInterval)
+        CGLEnable(context, kCGLCEMPEngine)
+        return context
+    }
+}
+
+/// Hosts `MPVVideoLayer` as its backing layer.
+final class MPVVideoView: NSView {
+    let videoLayer: MPVVideoLayer
+
+    override init(frame frameRect: NSRect) {
+        videoLayer = MPVVideoLayer()
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer = videoLayer
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let window else { return }
+        videoLayer.contentsScale = window.backingScaleFactor
+        videoLayer.requestFrame()
+    }
+
+    override func viewDidChangeBackingProperties() {
+        super.viewDidChangeBackingProperties()
+        videoLayer.contentsScale = window?.backingScaleFactor ?? 2
+        videoLayer.requestFrame()
     }
 }
 
@@ -398,7 +552,7 @@ final class MPVPlayerEngine: PlayerEngine {
     var onTracksChange: (() -> Void)?
 
     private var core: MPVPlayerCore?
-    private var videoView: MPVGLView?
+    private var videoView: MPVVideoView?
     private var state: PlayerEngineState = .idle
     private var loadContinuation: CheckedContinuation<Void, Error>?
     private var loadTimeoutTask: Task<Void, Never>?
@@ -567,18 +721,20 @@ final class MPVPlayerEngine: PlayerEngine {
     }
 
     func updateVideoSurface(_ view: NSView) {
-        guard let view = view as? MPVGLView else { return }
+        guard let view = view as? MPVVideoView, let core = ensureCore() else { return }
+        let isNewSurface = videoView !== view
         videoView = view
-        if let core = ensureCore(), core.attachRenderContext(to: view) {
-            view.needsDisplay = true
+        configure(videoLayer: view.videoLayer, core: core)
+        if core.attachRenderContext(to: view.videoLayer), isNewSurface {
+            view.videoLayer.requestFrame()
         }
     }
 
     func shutdown() {
         failPendingLoad(with: CancellationError())
         let view = videoView
-        videoView?.drawFrame = nil
         videoView = nil
+        view?.videoLayer.detach()
         core?.shutdown(view: view)
         core = nil
         isLoaded = false
@@ -602,18 +758,28 @@ final class MPVPlayerEngine: PlayerEngine {
         return core
     }
 
-    private func ensureVideoView() -> MPVGLView {
+    private func ensureVideoView() -> MPVVideoView {
         if let videoView { return videoView }
-        let view = MPVGLView(frame: .zero)
-        view.wantsBestResolutionOpenGLSurface = true
-        view.drawFrame = { [weak self] fbo, width, height in
-            self?.core?.render(fbo: fbo, width: width, height: height)
-        }
+        let view = MPVVideoView(frame: .zero)
         videoView = view
         if let core = ensureCore() {
-            _ = core.attachRenderContext(to: view)
+            configure(videoLayer: view.videoLayer, core: core)
+            _ = core.attachRenderContext(to: view.videoLayer)
         }
         return view
+    }
+
+    private func configure(videoLayer: MPVVideoLayer, core: MPVPlayerCore) {
+        if videoLayer.render == nil {
+            videoLayer.render = { [weak core] fbo, width, height in
+                core?.render(fbo: fbo, width: width, height: height)
+            }
+        }
+        if videoLayer.didPresent == nil {
+            videoLayer.didPresent = { [weak core] in
+                core?.reportSwap()
+            }
+        }
     }
 
     // MARK: Events

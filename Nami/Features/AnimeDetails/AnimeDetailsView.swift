@@ -510,10 +510,13 @@ struct AnimeDetailsView: View {
                 EpisodeListRow(
                     episode: episode,
                     fallbackImageURL: model.selectedAnime?.bannerURL
-                        ?? model.selectedAnime?.posterURL
-                ) {
-                    play(episode: episode)
-                }
+                        ?? model.selectedAnime?.posterURL,
+                    isWatched: model.isWatched(episode),
+                    onPlay: { play(episode: episode) },
+                    onToggleWatched: {
+                        Task { await model.toggleEpisodeWatched(episode) }
+                    }
+                )
                 .contextMenu { watchedMenu(episode) }
             }
         }
@@ -526,10 +529,13 @@ struct AnimeDetailsView: View {
                     EpisodeCard(
                         episode: episode,
                         fallbackImageURL: model.selectedAnime?.bannerURL
-                            ?? model.selectedAnime?.posterURL
-                    ) {
-                        play(episode: episode)
-                    }
+                            ?? model.selectedAnime?.posterURL,
+                        isWatched: model.isWatched(episode),
+                        onPlay: { play(episode: episode) },
+                        onToggleWatched: {
+                            Task { await model.toggleEpisodeWatched(episode) }
+                        }
+                    )
                     .frame(width: 360)
                     .contextMenu { watchedMenu(episode) }
                 }
@@ -540,8 +546,14 @@ struct AnimeDetailsView: View {
 
     @ViewBuilder
     private func watchedMenu(_ episode: Episode) -> some View {
-        Button("Mark Episode \(episode.displayNumber) as Watched") {
-            Task { await model.markEpisodeWatched(episode) }
+        let watched = model.isWatched(episode)
+        Button(
+            watched
+                ? "Mark Episode \(episode.displayNumber) as Unwatched"
+                : "Mark Episode \(episode.displayNumber) as Watched",
+            systemImage: watched ? "eye.slash" : "eye"
+        ) {
+            Task { await model.toggleEpisodeWatched(episode) }
         }
     }
 
@@ -663,51 +675,79 @@ private enum EpisodeViewMode: String, CaseIterable, Identifiable {
 private struct EpisodeListRow: View {
     let episode: Episode
     let fallbackImageURL: URL?
+    let isWatched: Bool
     let onPlay: () -> Void
+    let onToggleWatched: () -> Void
 
     @State private var isHovered = false
 
     var body: some View {
-        Button(action: onPlay) {
-            HStack(spacing: Spacing.sm) {
-                thumbnail
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(episode.displayTitle)
-                        .font(AppFont.cardTitle)
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                    if !subtitle.isEmpty {
-                        Text(subtitle)
-                            .font(AppFont.cardMeta)
-                            .foregroundStyle(.secondary)
+        HStack(spacing: Spacing.xxs) {
+            Button(action: onPlay) {
+                HStack(spacing: Spacing.sm) {
+                    thumbnail
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(episode.displayTitle)
+                            .font(AppFont.cardTitle)
+                            .foregroundStyle(isWatched ? .secondary : .primary)
                             .lineLimit(1)
+                        if !subtitle.isEmpty {
+                            Text(subtitle)
+                                .font(AppFont.cardMeta)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
                     }
+                    Spacer(minLength: Spacing.sm)
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(AppColor.brand)
+                        .opacity(isHovered ? 1 : 0)
                 }
-                Spacer(minLength: Spacing.sm)
-                Image(systemName: "play.fill")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(AppColor.brand)
-                    .opacity(isHovered ? 1 : 0)
+                .contentShape(Rectangle())
             }
-            .padding(.horizontal, Spacing.sm)
-            .padding(.vertical, Spacing.xs)
-            .background(
-                AppColor.surface,
-                in: RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
-                    .strokeBorder(isHovered ? AppColor.brand.opacity(0.45) : AppColor.stroke, lineWidth: 0.5)
-            }
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .accessibilityLabel("Play \(episode.displayTitle)")
+
+            watchedToggle
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xs)
+        .background(
+            AppColor.surface,
+            in: RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
+                .strokeBorder(isHovered ? AppColor.brand.opacity(0.45) : AppColor.stroke, lineWidth: 0.5)
+        }
         .onHover { hovering in
             withAnimation(.easeOut(duration: Motion.hover)) {
                 isHovered = hovering
             }
         }
-        .accessibilityLabel("Play \(episode.displayTitle)")
+    }
+
+    private var watchedToggle: some View {
+        Button(action: onToggleWatched) {
+            Image(systemName: isWatched ? "eye.fill" : "eye.slash")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isWatched ? AppColor.buttonLabel : Color.secondary)
+                .frame(width: 26, height: 24)
+                .background(
+                    isWatched ? AppColor.brand : Color.primary.opacity(0.06),
+                    in: RoundedRectangle(cornerRadius: 6, style: .continuous)
+                )
+                .contentShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .hoverFeedback(scale: 1.05)
+        .help(isWatched ? "Mark as Unwatched" : "Mark as Watched")
+        .accessibilityLabel(
+            isWatched
+                ? "Mark \(episode.displayTitle) as unwatched"
+                : "Mark \(episode.displayTitle) as watched"
+        )
     }
 
     private var thumbnail: some View {
@@ -721,6 +761,7 @@ private struct EpisodeListRow: View {
                 RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
                     .strokeBorder(AppColor.stroke, lineWidth: 0.5)
             }
+            .opacity(isWatched ? 0.55 : 1)
     }
 
     private var subtitle: String {
@@ -741,35 +782,72 @@ private struct EpisodeListRow: View {
 private struct EpisodeCard: View {
     let episode: Episode
     let fallbackImageURL: URL?
+    let isWatched: Bool
     let onPlay: () -> Void
+    let onToggleWatched: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovered = false
 
     var body: some View {
-        Button(action: onPlay) {
-            Color.clear
-                .aspectRatio(16.0 / 9.0, contentMode: .fit)
-                .overlay {
-                    RemoteImage(url: episode.thumbnailURL ?? fallbackImageURL, contentMode: .fill)
-                }
-                .overlay { scrim }
-                .overlay(alignment: .center) { playGlyph }
-                .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-                        .strokeBorder(AppColor.stroke, lineWidth: 0.5)
-                }
-                .contentShape(Rectangle())
+        ZStack(alignment: .topTrailing) {
+            Button(action: onPlay) {
+                Color.clear
+                    .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                    .overlay {
+                        RemoteImage(url: episode.thumbnailURL ?? fallbackImageURL, contentMode: .fill)
+                    }
+                    .overlay { scrim }
+                    .overlay(alignment: .center) { playGlyph }
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+                            .strokeBorder(AppColor.stroke, lineWidth: 0.5)
+                    }
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .opacity(isWatched ? 0.6 : 1)
+            .accessibilityLabel("Play \(episode.displayTitle)")
+
+            watchedToggle
+                .padding(Spacing.xs)
         }
-        .buttonStyle(.plain)
         .onHover { hovering in
             withAnimation(.easeOut(duration: Motion.hover)) {
                 isHovered = hovering
             }
         }
         .scaleEffect(isHovered && !reduceMotion ? 1.02 : 1)
-        .accessibilityLabel("Play \(episode.displayTitle)")
+    }
+
+    private var watchedToggle: some View {
+        Button(action: onToggleWatched) {
+            Image(systemName: isWatched ? "eye.fill" : "eye.slash")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(isWatched ? AppColor.buttonLabel : .white)
+                .frame(width: 26, height: 26)
+                .background {
+                    if isWatched {
+                        Circle().fill(AppColor.brand)
+                    } else {
+                        Circle().fill(.ultraThinMaterial)
+                    }
+                }
+                .overlay {
+                    Circle().strokeBorder(AppColor.stroke, lineWidth: 0.5)
+                }
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .opacity(isHovered || isWatched ? 1 : 0)
+        .allowsHitTesting(isHovered || isWatched)
+        .help(isWatched ? "Mark as Unwatched" : "Mark as Watched")
+        .accessibilityLabel(
+            isWatched
+                ? "Mark \(episode.displayTitle) as unwatched"
+                : "Mark \(episode.displayTitle) as watched"
+        )
     }
 
     private var scrim: some View {

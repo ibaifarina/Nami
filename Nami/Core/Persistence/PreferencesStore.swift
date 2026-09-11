@@ -71,9 +71,14 @@ final class PreferencesStore {
         set { update { $0.minimumSeedersForUncached = max(0, newValue) } }
     }
 
-    var maximumFileSizeBytes: Int64 {
-        get { preferences.maximumFileSizeBytes }
-        set { update { $0.maximumFileSizeBytes = max(0, newValue) } }
+    var maximumEpisodeFileSizeBytes: Int64 {
+        get { preferences.maximumEpisodeFileSizeBytes }
+        set { update { $0.maximumEpisodeFileSizeBytes = max(0, newValue) } }
+    }
+
+    var maximumMovieFileSizeBytes: Int64 {
+        get { preferences.maximumMovieFileSizeBytes }
+        set { update { $0.maximumMovieFileSizeBytes = max(0, newValue) } }
     }
 
     var autoSelectConfidenceThreshold: Double {

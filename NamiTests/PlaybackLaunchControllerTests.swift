@@ -169,7 +169,8 @@ struct PlaybackLaunchControllerTests {
         let playback = PlaybackCoordinator(
             engine: engine,
             progressStore: InMemoryPlaybackProgressStore(),
-            preferences: preferences
+            preferences: preferences,
+            library: StubLibraryRepository()
         )
         let preloader = StubPreloader(result: result)
         preloader.latency = latency
