@@ -3,11 +3,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-SCHEME="AnimeStreaming"
-PROJECT="AnimeStreaming.xcodeproj"
+SCHEME="Nami"
+PROJECT="Nami.xcodeproj"
 CONFIG="${CONFIG:-Debug}"
 DERIVED_DATA="build"
-APP_NAME="AnimeStreaming"
+APP_NAME="Nami"
 APP_PATH="${DERIVED_DATA}/Build/Products/${CONFIG}/${APP_NAME}.app"
 
 if ! command -v xcodegen >/dev/null 2>&1; then

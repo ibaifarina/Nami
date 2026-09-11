@@ -196,9 +196,14 @@ Known limitations carried into a future release:
   live trending and anime-details fetches through the real client were verified
   working. AniList remains in a degraded state (docs mention a 30 req/min limit), so
   behavior may change again.
-- **AVPlayer** cannot play MKV/ASS/SSA; libmpv (MPVKit, LGPL-3.0) is the documented
-  follow-up and requires `allow-unsigned-executable-memory` +
-  `disable-library-validation` entitlements plus licensing review.
+- **Playback engine.** MPVPlayerEngine (MPVKit 1.0.0, LGPL target) is now the
+  default, and AVPlayerEngine remains selectable under Settings → Playback as a
+  fallback. Verified 2026-09-11 on Apple Silicon: remote HTTPS MP4 and MKV
+  playback, seeking, pause/resume, volume, speed, HEVC/VideoToolbox hardware
+  decoding (`hwdec=auto-safe`), embedded multiple audio tracks, and embedded
+  ASS/SSA subtitle tracks. The app bundles only the LGPL MPVKit product; the
+  GPL product is not linked. Distribution still requires the LGPL notice/relink
+  obligations to be shipped with the app.
 - Real-Debrid availability probing uses the add/select/inspect/delete workaround
   because `/torrents/instantAvailability` was removed by Real-Debrid.
 - Stremio addons require ID namespaces the app can resolve; no external ID mapping
