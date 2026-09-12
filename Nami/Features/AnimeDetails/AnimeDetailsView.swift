@@ -298,6 +298,7 @@ struct AnimeDetailsView: View {
                 RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                     .strokeBorder(AppColor.stroke, lineWidth: 0.5)
             }
+            .tiltCard()
             .shadow(color: .black.opacity(0.35), radius: 16, y: 8)
             .accessibilityHidden(true)
     }
