@@ -6,6 +6,7 @@ struct PlayerView: View {
 
     @State private var controlsVisible = true
     @State private var controlsTracker = ControlsVisibilityTracker()
+    @State private var displaySleepPreventer = DisplaySleepPreventer()
     @State private var nextSelectionRequest: PlaybackRequest?
     @FocusState private var isFocused: Bool
 
@@ -48,11 +49,16 @@ struct PlayerView: View {
         .focused($isFocused)
         .onAppear {
             isFocused = true
+            displaySleepPreventer.setPlaying(playback.isPlaying)
             scheduleHide()
         }
         .onDisappear {
             controlsTracker.cancel()
+            displaySleepPreventer.setPlaying(false)
             NSCursor.setHiddenUntilMouseMoves(false)
+        }
+        .onChange(of: playback.isPlaying) { _, isPlaying in
+            displaySleepPreventer.setPlaying(isPlaying)
         }
         .sheet(item: $nextSelectionRequest) { request in
             StreamSelectionView(request: request, environment: environment)
@@ -502,6 +508,31 @@ private final class ControlsVisibilityTracker {
     func cancel() {
         hideTask?.cancel()
         hideTask = nil
+    }
+}
+
+/// Holds a power activity for as long as video is playing so macOS does not
+/// sleep the display during playback, even without user input.
+private final class DisplaySleepPreventer {
+    private var activity: NSObjectProtocol?
+
+    func setPlaying(_ isPlaying: Bool) {
+        if isPlaying {
+            guard activity == nil else { return }
+            activity = ProcessInfo.processInfo.beginActivity(
+                options: [.userInitiated, .idleDisplaySleepDisabled],
+                reason: "Video playback is in progress"
+            )
+        } else if let activity {
+            ProcessInfo.processInfo.endActivity(activity)
+            self.activity = nil
+        }
+    }
+
+    deinit {
+        if let activity {
+            ProcessInfo.processInfo.endActivity(activity)
+        }
     }
 }
 
