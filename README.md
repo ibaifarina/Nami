@@ -20,7 +20,7 @@ An anime-first streaming app that turns a stack of addons, debrid services, and 
 
 ## Overview
 
-Nami is a native macOS streaming client built around AniList metadata, a safe modular addon system, and Real-Debrid.
+Nami is a native macOS streaming client built around Kitsu metadata, a safe modular addon system, and Real-Debrid.
 
 It discovers anime, resolves episodes across addons, parses and deduplicates release candidates, ranks every source with a transparent scoring engine, and plays the best release through an embedded libmpv engine — while keeping manual source selection one click away.
 
@@ -46,12 +46,12 @@ Built for:
 <tr>
 <td>
 
-* AniList metadata
+* Kitsu metadata
 * Trending and seasonal
 * Search with history
 * Anime details and episode lists
 * Continue Watching shelf
-* AniList account sync
+* Local library and progress
 
 </td>
 
