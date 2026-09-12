@@ -38,14 +38,26 @@ struct RealDebridAPIError: Error, Equatable, Sendable {
     var isDisabledEndpoint: Bool {
         code == 37
     }
+
+    /// The file itself is gone (removed, invalid or filtered) rather than the
+    /// hoster or account being temporarily unavailable.
+    var isFileUnavailable: Bool {
+        guard let code else {
+            return httpStatus == 404 || httpStatus == 410
+        }
+        return [24, 28, 29, 30, 35].contains(code) || isInfringing
+    }
 }
 
 enum DebridError: Error, Equatable, Sendable {
     case notConfigured
     case unauthorized
     case accountLocked
+    case accountRestricted(String)
     case notPremium
     case rateLimited
+    case trafficExceeded
+    case fairUseLimit
     case infringingContent
     case torrentTooBig
     case itemNotReady
@@ -53,6 +65,30 @@ enum DebridError: Error, Equatable, Sendable {
     case unresolvableCandidate
     case invalidResponse
     case requestFailed(String)
+}
+
+extension DebridError {
+    /// Account-level problems: every source will fail the same way, so trying
+    /// another candidate is pointless.
+    var isGlobal: Bool {
+        switch self {
+        case .notConfigured, .unauthorized, .accountLocked, .accountRestricted,
+             .notPremium, .rateLimited, .trafficExceeded, .fairUseLimit:
+            true
+        default:
+            false
+        }
+    }
+
+    /// The candidate itself is known to be unusable and can be skipped.
+    var isSourceSpecific: Bool {
+        switch self {
+        case .infringingContent, .torrentTooBig, .fileSelectionFailed, .unresolvableCandidate:
+            true
+        default:
+            false
+        }
+    }
 }
 
 extension DebridError: LocalizedError {
@@ -64,10 +100,16 @@ extension DebridError: LocalizedError {
             "Real-Debrid rejected the request. Check your API token in Settings."
         case .accountLocked:
             "Your Real-Debrid account is locked."
+        case .accountRestricted(let reason):
+            reason
         case .notPremium:
             "Resolving torrents requires an active Real-Debrid premium account."
         case .rateLimited:
             "Real-Debrid is rate limiting requests. Please wait a moment and try again."
+        case .trafficExceeded:
+            "Your Real-Debrid traffic is exhausted. Wait for it to reset or add more traffic."
+        case .fairUseLimit:
+            "Your Real-Debrid fair-use limit was reached. Try again later."
         case .infringingContent:
             "Real-Debrid cannot download this torrent because of a copyright filter."
         case .torrentTooBig:
@@ -152,10 +194,22 @@ extension DebridError: LocalizedError {
         switch apiError.code {
         case 14:
             return .accountLocked
-        case 9:
+        case 15:
+            return .accountRestricted(
+                apiError.error ?? "Your Real-Debrid account is not activated."
+            )
+        case 22:
+            return .accountRestricted(
+                apiError.error ?? "Real-Debrid blocked this IP address."
+            )
+        case 9, 20:
             return .notPremium
-        case 34, 5:
+        case 21, 34, 5:
             return .rateLimited
+        case 18, 23:
+            return .trafficExceeded
+        case 36:
+            return .fairUseLimit
         case 29, 30:
             return .torrentTooBig
         case 24, 25, 26, 27, 28:

@@ -119,6 +119,28 @@ extension AddonManifest {
         endpoints?["streams"]
     }
 
+    /// Media types the addon's stream resource actually serves. Detailed
+    /// `resources` win over the top-level `types` because providers such as
+    /// Torrentio and Comet declare extra types top-level that their stream
+    /// endpoint does not handle.
+    var streamTypes: [String] {
+        var result: [String] = []
+        for resource in resources ?? [] {
+            guard
+                resource.resourceName.lowercased() == "stream",
+                case .detailed(_, let types, _) = resource
+            else {
+                continue
+            }
+            for type in types ?? [] {
+                let lowered = type.lowercased()
+                if !result.contains(lowered) { result.append(lowered) }
+            }
+        }
+        if !result.isEmpty { return result }
+        return (types ?? []).map { $0.lowercased() }
+    }
+
     func validated() throws -> AddonManifest {
         let trimmedID = id.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -140,7 +162,11 @@ extension AddonManifest {
     static func namespaces(fromPrefixes prefixes: [String]) -> [AddonIDNamespace] {
         var result: [AddonIDNamespace] = []
         for prefix in prefixes {
-            let namespace: AddonIDNamespace? = switch prefix.lowercased() {
+            let key = prefix
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .trimmingCharacters(in: CharacterSet(charactersIn: ":"))
+                .lowercased()
+            let namespace: AddonIDNamespace? = switch key {
             case "tt", "imdb": .imdb
             case "kitsu": .kitsu
             case "mal", "myanimelist": .mal
@@ -194,7 +220,7 @@ struct AddonInstallPreview: Identifiable, Sendable {
             capabilities: capabilities,
             idNamespaces: idNamespaces,
             streamsPath: manifest.streamsEndpointPath,
-            supportedTypes: (manifest.types ?? []).map { $0.lowercased() }
+            supportedTypes: manifest.streamTypes
         )
     }
 }

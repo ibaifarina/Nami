@@ -255,8 +255,6 @@ struct StreamSelectionView: View {
                     actionTitle: "Try Again",
                     action: { Task { await model.retry() } }
                 )
-                Button("Close") { dismiss() }
-                    .hoverFeedback(scale: 1.03)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }

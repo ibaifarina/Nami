@@ -111,6 +111,21 @@ enum KitsuMapping {
         return hasUsefulID ? identity : nil
     }
 
+    /// Kitsu stores TheTVDB series IDs either bare or suffixed with a season
+    /// (`267440` or `267440/1`). Used as the exact input for IMDb resolution.
+    static func theTVDBID(
+        from mappings: [JSONAPIResource<KitsuMappingAttributes>]
+    ) -> String? {
+        for mapping in mappings {
+            let site = mapping.attributes.externalSite?.lowercased() ?? ""
+            guard site == "thetvdb" || site == "thetvdb/series" else { continue }
+            guard let externalID = cleaned(mapping.attributes.externalId) else { continue }
+            let identifier = externalID.split(separator: "/").first.map(String.init) ?? externalID
+            if !identifier.isEmpty { return identifier }
+        }
+        return nil
+    }
+
     static func date(from string: String?) -> Date? {
         guard let string, string.count >= 10 else { return nil }
         return KitsuDateParser.date(from: String(string.prefix(10)))

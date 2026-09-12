@@ -121,9 +121,22 @@ struct AddonQueryResult: Identifiable, Sendable {
 protocol StreamAddon: Sendable {
     var descriptor: AddonDescriptor { get }
 
-    func streams(for media: MediaIdentity, episode: Episode) async throws -> [RawStreamResult]
+    func streams(
+        for media: MediaIdentity,
+        episode: Episode,
+        isMovie: Bool
+    ) async throws -> [RawStreamResult]
 
     func healthCheck() async -> AddonHealthStatus
+}
+
+extension StreamAddon {
+    func streams(
+        for media: MediaIdentity,
+        episode: Episode
+    ) async throws -> [RawStreamResult] {
+        try await streams(for: media, episode: episode, isMovie: false)
+    }
 }
 
 enum AddonError: Error, Equatable, Sendable {

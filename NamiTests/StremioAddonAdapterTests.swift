@@ -116,6 +116,74 @@ struct StremioAddonAdapterTests {
         )
     }
 
+    @Test func usesSeriesTypeForIMDbIDsEvenWhenAnimeIsDeclared() async throws {
+        let http = MockHTTPClient { _ in AddonFixtures.stremioStreamsJSON }
+        let adapter = StremioAddonAdapter(
+            descriptor: descriptor(namespaces: [.imdb, .kitsu]),
+            supportedTypes: ["movie", "series", "anime"],
+            http: http
+        )
+        let media = MediaIdentity(kitsuID: "999", imdbID: "tt1234567")
+
+        _ = try await adapter.streams(for: media, episode: episode)
+
+        let request = try #require(await http.lastRequest)
+        #expect(request.url?.absoluteString == "https://stremio.example/stream/series/tt1234567:1:7.json")
+    }
+
+    @Test func usesMovieTypeForMovies() async throws {
+        let http = MockHTTPClient { _ in AddonFixtures.stremioStreamsJSON }
+        let adapter = StremioAddonAdapter(
+            descriptor: descriptor(namespaces: [.imdb]),
+            supportedTypes: ["movie", "series"],
+            http: http
+        )
+        let media = MediaIdentity(kitsuID: "999", imdbID: "tt1234567")
+
+        _ = try await adapter.streams(for: media, episode: episode, isMovie: true)
+
+        let request = try #require(await http.lastRequest)
+        #expect(request.url?.absoluteString == "https://stremio.example/stream/movie/tt1234567.json")
+    }
+
+    @Test func streamTypeSelection() {
+        #expect(
+            StremioAddonAdapter.streamType(
+                namespace: .imdb,
+                isMovie: false,
+                supportedTypes: ["movie", "series", "anime"]
+            ) == "series"
+        )
+        #expect(
+            StremioAddonAdapter.streamType(
+                namespace: .kitsu,
+                isMovie: false,
+                supportedTypes: ["movie", "series", "anime"]
+            ) == "anime"
+        )
+        #expect(
+            StremioAddonAdapter.streamType(
+                namespace: .mal,
+                isMovie: false,
+                supportedTypes: ["movie", "series"]
+            ) == "series"
+        )
+        #expect(
+            StremioAddonAdapter.streamType(
+                namespace: .kitsu,
+                isMovie: true,
+                supportedTypes: ["movie", "series", "anime"]
+            ) == "movie"
+        )
+        #expect(
+            StremioAddonAdapter.streamType(
+                namespace: .kitsu,
+                isMovie: false,
+                supportedTypes: ["anime"]
+            ) == "anime"
+        )
+    }
+
     @Test func healthCheckReportsHealthy() async {
         let adapter = StremioAddonAdapter(
             descriptor: descriptor(),

@@ -22,7 +22,11 @@ struct GenericHTTPAddonAdapter: StreamAddon {
         self.maxResponseBytes = maxResponseBytes
     }
 
-    func streams(for media: MediaIdentity, episode: Episode) async throws -> [RawStreamResult] {
+    func streams(
+        for media: MediaIdentity,
+        episode: Episode,
+        isMovie: Bool
+    ) async throws -> [RawStreamResult] {
         guard let endpoint = URL(string: streamsPath, relativeTo: descriptor.baseURL)?.absoluteURL else {
             throw AddonError.invalidURL
         }

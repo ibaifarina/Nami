@@ -58,16 +58,35 @@ final class SourceResolver {
            fileID == nil || cached.fileID == fileID {
             return cached
         }
-        let stream = try await debrid.resolve(candidate, fileID: fileID)
-        if preferences.cacheResolvedSources {
-            await cache.store(
-                stream,
-                candidateID: candidate.id,
-                animeID: anime.id,
-                episodeNumber: episode.number
-            )
-        }
+        let stream = try await resolveUncached(candidate, fileID: fileID)
+        await store(stream, candidateID: candidate.id, anime: anime, episode: episode)
         return stream
+    }
+
+    /// Resolves through the debrid service without reading or writing the
+    /// persistent source cache. Callers that validate several candidates
+    /// before choosing one can keep the disk cache focused on the winner.
+    func resolveUncached(
+        _ candidate: StreamCandidate,
+        fileID: Int? = nil
+    ) async throws -> ResolvedStream {
+        try await debrid.resolve(candidate, fileID: fileID)
+    }
+
+    /// Persists a resolved source so returning to the episode can reuse it.
+    func store(
+        _ stream: ResolvedStream,
+        candidateID: String,
+        anime: Anime,
+        episode: Episode
+    ) async {
+        guard preferences.cacheResolvedSources else { return }
+        await cache.store(
+            stream,
+            candidateID: candidateID,
+            animeID: anime.id,
+            episodeNumber: episode.number
+        )
     }
 
     /// Drops the cached source for an episode. Called when playback of a

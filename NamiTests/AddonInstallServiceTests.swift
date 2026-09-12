@@ -42,6 +42,27 @@ struct AddonInstallServiceTests {
         #expect(installed.streamsPath == nil)
     }
 
+    @Test func previewsStremioManifestWithoutPrefixes() async throws {
+        let service = AddonInstallService(
+            http: MockHTTPClient { _ in
+                Data("""
+                {
+                  "id": "org.example.noprefixes",
+                  "name": "No Prefixes",
+                  "resources": ["stream"],
+                  "types": ["movie", "series"]
+                }
+                """.utf8)
+            }
+        )
+
+        let preview = try await service.preview(
+            manifestURL: testURL("https://stremio.example/manifest.json")
+        )
+
+        #expect(preview.idNamespaces == [.imdb, .kitsu])
+    }
+
     @Test func rejectsHTTPManifestByDefault() async {
         let service = AddonInstallService(http: MockHTTPClient())
         do {

@@ -92,7 +92,7 @@ actor RealDebridService: DebridService {
             if apiError.isUnauthorized {
                 throw DebridError.unauthorized
             }
-            if apiError.isInfringing {
+            if apiError.isFileUnavailable {
                 return DebridCheckResult(
                     candidateID: candidate.id,
                     availability: .unavailable,

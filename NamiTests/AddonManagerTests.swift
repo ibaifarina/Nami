@@ -127,6 +127,124 @@ struct AddonManagerTests {
         #expect(results.first?.failureMessage?.contains("not supported") == true)
     }
 
+    @Test func resolvesIMDbForAddonsThatRequireIt() async {
+        let http = MockHTTPClient { request in
+            switch request.url?.host {
+            case "kitsu.io":
+                return KitsuFixtures.mappingsJSON
+            case "api.tvmaze.com":
+                return Data("""
+                { "externals": { "imdb": "tt2560140" } }
+                """.utf8)
+            case "stremio.example":
+                return AddonFixtures.stremioStreamsJSON
+            default:
+                throw HTTPError.transport("unexpected host \(request.url?.host ?? "nil")")
+            }
+        }
+        let resolver = MediaIdentityResolver(
+            client: KitsuClient(http: http),
+            cache: MetadataCache(directory: nil),
+            imdbResolver: IMDbResolver(http: http, cache: MetadataCache(directory: nil))
+        )
+        let manager = AddonManager(http: http, identityResolver: resolver)
+        let addon = InstalledAddon(
+            id: "com.stremio.thepiratebay.plus",
+            name: "ThePirateBay+",
+            manifestURL: testURL("https://stremio.example/manifest.json"),
+            baseURL: testURL("https://stremio.example"),
+            protocolType: .stremio,
+            priority: 0,
+            idNamespaces: [.imdb],
+            supportedTypes: ["movie", "series"]
+        )
+
+        let results = await manager.queryStreams(
+            for: MediaIdentity(kitsuID: "7442"),
+            episode: Episode(id: "7442-7", animeID: "7442", number: 7),
+            titles: ["Attack on Titan"],
+            year: 2013,
+            addons: [addon],
+            timeout: .seconds(2)
+        )
+
+        #expect(results.first?.streams.count == 2)
+        #expect(
+            await http.lastRequest?.url?.absoluteString
+                == "https://stremio.example/stream/series/tt2560140:1:7.json"
+        )
+    }
+
+    @Test func fallsBackToDefaultNamespacesForStaleInstalls() async {
+        let http = MockHTTPClient { request in
+            switch request.url?.host {
+            case "kitsu.io":
+                return KitsuFixtures.mappingsJSON
+            case "api.tvmaze.com":
+                return Data("""
+                { "externals": { "imdb": "tt2560140" } }
+                """.utf8)
+            case "stremio.example":
+                return AddonFixtures.stremioStreamsJSON
+            default:
+                throw HTTPError.transport("unexpected host \(request.url?.host ?? "nil")")
+            }
+        }
+        let resolver = MediaIdentityResolver(
+            client: KitsuClient(http: http),
+            cache: MetadataCache(directory: nil),
+            imdbResolver: IMDbResolver(http: http, cache: MetadataCache(directory: nil))
+        )
+        let manager = AddonManager(http: http, identityResolver: resolver)
+        let addon = InstalledAddon(
+            id: "stale.stremio.addon",
+            name: "Stale Stremio",
+            manifestURL: testURL("https://stremio.example/manifest.json"),
+            baseURL: testURL("https://stremio.example"),
+            protocolType: .stremio,
+            priority: 0,
+            idNamespaces: [],
+            supportedTypes: ["movie", "series"]
+        )
+
+        let results = await manager.queryStreams(
+            for: MediaIdentity(kitsuID: "7442"),
+            episode: Episode(id: "7442-7", animeID: "7442", number: 7),
+            titles: ["Attack on Titan"],
+            addons: [addon],
+            timeout: .seconds(2)
+        )
+
+        #expect(results.first?.streams.count == 2)
+        #expect(
+            await http.lastRequest?.url?.absoluteString
+                == "https://stremio.example/stream/series/tt2560140:1:7.json"
+        )
+    }
+
+    @Test func effectiveNamespacesFallBackByProtocol() {
+        let stremio = AddonFixtures.addon(
+            id: "s",
+            baseURL: testURL("https://s.example"),
+            protocolType: .stremio,
+            idNamespaces: []
+        )
+        let generic = AddonFixtures.addon(
+            id: "g",
+            baseURL: testURL("https://g.example"),
+            idNamespaces: []
+        )
+        let animeStream = AddonFixtures.addon(
+            id: "a",
+            baseURL: testURL("https://a.example"),
+            idNamespaces: []
+        )
+
+        #expect(AddonManager.effectiveNamespaces(for: stremio) == [.imdb, .kitsu])
+        #expect(AddonManager.effectiveNamespaces(for: generic) == [.kitsu, .mal, .anilist])
+        #expect(AddonManager.effectiveNamespaces(for: animeStream) == [.kitsu, .mal, .anilist])
+    }
+
     @Test func healthCheckReportsStatus() async {
         let manager = AddonManager(
             http: MockHTTPClient(handler: routingHandler()),

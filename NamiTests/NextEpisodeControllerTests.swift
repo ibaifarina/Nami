@@ -64,12 +64,16 @@ struct NextEpisodeControllerTests {
             addonManager: AddonManager(http: http),
             debrid: debrid
         )
+        let resolver = SourceResolver(
+            debrid: debrid,
+            cache: ResolvedStreamCache(fileURL: nil),
+            preferences: preferences
+        )
         let controller = NextEpisodeController(
             discovery: discovery,
-            resolver: SourceResolver(
-                debrid: debrid,
-                cache: ResolvedStreamCache(fileURL: nil),
-                preferences: preferences
+            streamPlayback: StreamPlaybackService(
+                resolver: resolver,
+                validator: StubStreamValidator()
             ),
             preferences: preferences,
             registry: registry,

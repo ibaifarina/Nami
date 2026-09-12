@@ -16,6 +16,7 @@ actor StreamDiscoveryService {
         let media: MediaIdentity
         let episode: Episode
         let animeTitles: [String]
+        let premiereYear: Int?
         let totalEpisodes: Int?
         let durationMinutes: Int?
         let isMovie: Bool
@@ -27,6 +28,7 @@ actor StreamDiscoveryService {
             media: MediaIdentity,
             episode: Episode,
             animeTitles: [String],
+            premiereYear: Int? = nil,
             totalEpisodes: Int?,
             durationMinutes: Int?,
             isMovie: Bool = false,
@@ -37,6 +39,7 @@ actor StreamDiscoveryService {
             self.media = media
             self.episode = episode
             self.animeTitles = animeTitles
+            self.premiereYear = premiereYear
             self.totalEpisodes = totalEpisodes
             self.durationMinutes = durationMinutes
             self.isMovie = isMovie
@@ -60,6 +63,9 @@ actor StreamDiscoveryService {
         let addonResults = await addonManager.queryStreams(
             for: request.media,
             episode: request.episode,
+            titles: request.animeTitles,
+            year: request.premiereYear,
+            isMovie: request.isMovie,
             addons: request.addons
         )
 
@@ -146,6 +152,7 @@ extension StreamDiscoveryService.Request {
             episode: episode,
             animeTitles: [anime.englishTitle, anime.romajiTitle, anime.japaneseTitle, anime.title]
                 .compactMap { $0 },
+            premiereYear: anime.startYear,
             totalEpisodes: anime.episodesAvailable,
             durationMinutes: anime.durationMinutes,
             isMovie: anime.subtype?.isMovie ?? false,

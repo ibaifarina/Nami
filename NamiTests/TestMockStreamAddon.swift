@@ -19,7 +19,11 @@ struct MockStreamAddon: StreamAddon {
         self.failure = failure
     }
 
-    func streams(for media: MediaIdentity, episode: Episode) async throws -> [RawStreamResult] {
+    func streams(
+        for media: MediaIdentity,
+        episode: Episode,
+        isMovie: Bool
+    ) async throws -> [RawStreamResult] {
         if latency > .zero {
             try await Task.sleep(for: latency)
         }

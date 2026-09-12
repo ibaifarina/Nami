@@ -18,6 +18,9 @@ actor AddonManager {
     func queryStreams(
         for media: MediaIdentity,
         episode: Episode,
+        titles: [String] = [],
+        year: Int? = nil,
+        isMovie: Bool = false,
         addons: [InstalledAddon],
         timeout: Duration = .seconds(7)
     ) async -> [AddonQueryResult] {
@@ -28,6 +31,7 @@ actor AddonManager {
 
         let http = self.http
         let resolver = self.identityResolver
+        let context = AddonIdentityContext(titles: titles, year: year, isMovie: isMovie)
         return await withTaskGroup(of: AddonQueryResult.self) { group in
             for addon in enabled {
                 group.addTask {
@@ -41,13 +45,21 @@ actor AddonManager {
                     // cannot use the canonical Kitsu identity.
                     let resolvedMedia: MediaIdentity
                     if let resolver {
-                        resolvedMedia = await resolver.resolve(media, for: addon.idNamespaces)
+                        resolvedMedia = await resolver.resolve(
+                            media,
+                            for: Self.effectiveNamespaces(for: addon),
+                            context: context
+                        )
                     } else {
                         resolvedMedia = media
                     }
                     do {
                         let streams = try await withTimeout(timeout) {
-                            try await adapter.streams(for: resolvedMedia, episode: episode)
+                            try await adapter.streams(
+                                for: resolvedMedia,
+                                episode: episode,
+                                isMovie: isMovie
+                            )
                         }
                         return AddonQueryResult(addon: addon, outcome: .success(streams))
                     } catch TimeoutError.timedOut {
@@ -119,7 +131,7 @@ actor AddonManager {
             version: nil,
             protocolType: addon.protocolType,
             capabilities: addon.capabilities,
-            idNamespaces: addon.idNamespaces,
+            idNamespaces: effectiveNamespaces(for: addon),
             baseURL: addon.baseURL,
             manifestURL: addon.manifestURL
         )
@@ -139,6 +151,18 @@ actor AddonManager {
             )
         case .generic:
             return nil
+        }
+    }
+
+    /// Namespaces recorded at install time, with a protocol default for
+    /// addons installed before prefixes were captured (or manifests that
+    /// declare none). Keeps existing installs working without reinstalling.
+    static func effectiveNamespaces(for addon: InstalledAddon) -> [AddonIDNamespace] {
+        if !addon.idNamespaces.isEmpty { return addon.idNamespaces }
+        switch addon.protocolType {
+        case .animeStreamV1: return [.kitsu, .mal, .anilist]
+        case .stremio: return [.imdb, .kitsu]
+        case .generic: return []
         }
     }
 

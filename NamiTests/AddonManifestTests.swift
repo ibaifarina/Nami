@@ -205,4 +205,40 @@ struct AddonManifestTests {
         #expect(AddonManifest.namespaces(fromPrefixes: ["tt", "myanimelist", "kitsu"]) == [.imdb, .mal, .kitsu])
         #expect(AddonManifest.namespaces(fromPrefixes: ["unknown"]) == [])
     }
+
+    @Test func mapsPrefixedNamespaceColons() {
+        #expect(
+            AddonManifest.namespaces(fromPrefixes: ["tt", "tmdb:", "mal:", "tvdb:", "anilist:"])
+                == [.imdb, .tmdb, .mal, .anilist]
+        )
+    }
+
+    @Test func streamTypesPreferDetailedStreamResource() throws {
+        let manifest = try JSONDecoder().decode(
+            AddonManifest.self,
+            from: Data("""
+            {
+              "id": "stremio.addons.mediafusion",
+              "name": "MediaFusion",
+              "resources": [
+                "catalog",
+                {
+                  "name": "stream",
+                  "types": ["movie", "series", "tv"],
+                  "idPrefixes": ["tt", "mal:"]
+                }
+              ],
+              "types": ["movie", "series", "tv", "events"]
+            }
+            """.utf8)
+        )
+
+        #expect(manifest.streamTypes == ["movie", "series", "tv"])
+        #expect(manifest.resolvedNamespaces == [.imdb, .mal])
+    }
+
+    @Test func streamTypesFallBackToTopLevelTypes() throws {
+        let manifest = try JSONDecoder().decode(AddonManifest.self, from: AddonFixtures.stremioManifestJSON)
+        #expect(manifest.streamTypes == ["anime", "series"])
+    }
 }

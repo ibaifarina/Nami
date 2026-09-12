@@ -214,29 +214,33 @@ final class StreamSelectionViewModel {
     private func resolve(_ candidate: StreamCandidate, episode: Episode, fileID: Int? = nil) async {
         resolvingCandidateID = candidate.id
         defer { resolvingCandidateID = nil }
-        do {
-            let stream = try await environment.sourceResolver.resolve(
-                candidate,
-                anime: request.anime,
-                episode: episode,
-                fileID: fileID
+
+        // The validated lookup skips cached-known-bad sources and reuses a
+        // stream that the detail page already prefetched.
+        switch await environment.streamPlayback.stream(
+            for: candidate,
+            fileID: fileID,
+            anime: request.anime,
+            episode: episode
+        ) {
+        case .ready(let stream):
+            start(stream, episode: episode)
+        case .unavailable:
+            phase = .failed("This source is no longer available. Pick another one.")
+        case .blocked(let error):
+            phase = .failed(
+                error?.errorDescription ?? "Real-Debrid is unavailable right now."
             )
-            environment.playback.start(
-                stream: stream,
-                anime: request.anime,
-                episode: episode,
-                startAt: request.startPositionSeconds
-            )
-            phase = .started
-        } catch {
-            phase = .failed(Self.message(for: error))
         }
     }
 
-    private static func message(for error: Error) -> String {
-        if let debridError = error as? DebridError {
-            return debridError.errorDescription ?? "The stream could not be resolved."
-        }
-        return error.localizedDescription
+    private func start(_ stream: ResolvedStream, episode: Episode) {
+        environment.playback.start(
+            stream: stream,
+            anime: request.anime,
+            episode: episode,
+            startAt: request.startPositionSeconds
+        )
+        phase = .started
     }
 }

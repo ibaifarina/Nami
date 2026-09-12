@@ -22,9 +22,17 @@ struct StremioAddonAdapter: StreamAddon {
         self.maxResponseBytes = maxResponseBytes
     }
 
-    func streams(for media: MediaIdentity, episode: Episode) async throws -> [RawStreamResult] {
+    func streams(
+        for media: MediaIdentity,
+        episode: Episode,
+        isMovie: Bool
+    ) async throws -> [RawStreamResult] {
         let resolvedID = try Self.resolveID(for: media, namespaces: descriptor.idNamespaces)
-        let type = resolvedType
+        let type = Self.streamType(
+            namespace: resolvedID.namespace,
+            isMovie: isMovie,
+            supportedTypes: supportedTypes
+        )
         let identifier = Self.identifier(
             id: resolvedID.value,
             type: type,
@@ -128,10 +136,30 @@ struct StremioAddonAdapter: StreamAddon {
         throw AddonError.unresolvableMediaID(namespaces)
     }
 
-    private var resolvedType: String {
-        if supportedTypes.contains("anime") { return "anime" }
-        if supportedTypes.contains("series") { return "series" }
-        return "movie"
+    /// Picks the Stremio media type the addon can actually serve for this ID.
+    ///
+    /// Stremio's type/ID handling is inconsistent across providers: Torrentio
+    /// and Comet return nothing for `anime/tt...`, while kitsu/MAL-aware
+    /// anime addons only expose `anime`. Matching the namespace to the type
+    /// avoids those dead ends.
+    static func streamType(
+        namespace: AddonIDNamespace,
+        isMovie: Bool,
+        supportedTypes: [String]
+    ) -> String {
+        let supports: (String) -> Bool = { supportedTypes.contains($0) }
+        if isMovie {
+            if supports("movie") { return "movie" }
+            return supports("anime") ? "anime" : "series"
+        }
+        switch namespace {
+        case .imdb, .tmdb:
+            if supports("series") { return "series" }
+            return supports("anime") ? "anime" : "movie"
+        case .kitsu, .mal, .anilist:
+            if supports("anime") { return "anime" }
+            return supports("series") ? "series" : "movie"
+        }
     }
 
     static func identifier(

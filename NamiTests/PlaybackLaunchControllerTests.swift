@@ -16,9 +16,15 @@ private final class LaunchPlayerEngine: PlayerEngine {
     var rate: Double = 1
 
     private(set) var loadedURLs: [URL] = []
+    private(set) var loadAttempts = 0
+    var failuresBeforeSuccess = 0
 
     func load(_ stream: ResolvedStream) async throws {
         onStateChange?(.loading)
+        loadAttempts += 1
+        if loadAttempts <= failuresBeforeSuccess {
+            throw PlayerError.failedToLoad("Simulated stream failure")
+        }
         loadedURLs.append(stream.url)
         onStateChange?(.ready)
     }
@@ -76,6 +82,12 @@ private final class StubPreloader: StreamPreloading {
 }
 
 private actor FailingDebridService: DebridService {
+    private let error: DebridError
+
+    init(error: DebridError = .itemNotReady) {
+        self.error = error
+    }
+
     func validateAccount() async throws -> DebridAccount {
         throw DebridError.notConfigured
     }
@@ -89,11 +101,11 @@ private actor FailingDebridService: DebridService {
     }
 
     func files(for candidate: StreamCandidate) async throws -> [DebridFileInfo] {
-        throw DebridError.itemNotReady
+        throw error
     }
 
     func resolve(_ candidate: StreamCandidate, fileID: Int?) async throws -> ResolvedStream {
-        throw DebridError.itemNotReady
+        throw error
     }
 }
 
@@ -179,7 +191,8 @@ struct PlaybackLaunchControllerTests {
     private func makeSetup(
         result: StreamDiscoveryResult,
         latency: Duration = .zero,
-        debrid: (any DebridService)? = nil
+        debrid: (any DebridService)? = nil,
+        validator: (any StreamValidating)? = nil
     ) throws -> Setup {
         let suite = "launch-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
@@ -193,13 +206,19 @@ struct PlaybackLaunchControllerTests {
         )
         let preloader = StubPreloader(result: result)
         preloader.latency = latency
+        let resolver = SourceResolver(
+            debrid: debrid ?? StubDebridService(),
+            cache: ResolvedStreamCache(fileURL: nil),
+            preferences: preferences
+        )
+        let streamPlayback = StreamPlaybackService(
+            resolver: resolver,
+            validator: validator ?? StubStreamValidator()
+        )
         let controller = PlaybackLaunchController(
             preload: preloader,
-            resolver: SourceResolver(
-                debrid: debrid ?? StubDebridService(),
-                cache: ResolvedStreamCache(fileURL: nil),
-                preferences: preferences
-            ),
+            resolver: resolver,
+            streamPlayback: streamPlayback,
             playback: playback
         )
         return Setup(
@@ -209,6 +228,56 @@ struct PlaybackLaunchControllerTests {
             preloader: preloader,
             defaults: defaults,
             suite: suite
+        )
+    }
+
+    private func makeTwoCandidateResult() -> (result: StreamDiscoveryResult, first: StreamCandidate, second: StreamCandidate) {
+        let firstHash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        let secondHash = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        let first = StreamCandidate(
+            id: firstHash,
+            addonID: "one",
+            addonName: "One",
+            displayTitle: "Sousou no Frieren - 07 [1080p] BluRay HEVC",
+            infoHash: firstHash,
+            resolution: .p1080,
+            codec: .hevc,
+            source: .bluRay,
+            sizeBytes: 1_400_000_000,
+            seeders: 50,
+            debridStatus: .cached,
+            episodeMatchConfidence: 1
+        )
+        let second = StreamCandidate(
+            id: secondHash,
+            addonID: "one",
+            addonName: "One",
+            displayTitle: "Sousou no Frieren - 07 [720p] WEB-DL AVC",
+            infoHash: secondHash,
+            resolution: .p720,
+            codec: .avc,
+            source: .webDL,
+            sizeBytes: 700_000_000,
+            seeders: 30,
+            debridStatus: .cached,
+            episodeMatchConfidence: 1
+        )
+        let options = StreamScoringOptions()
+        let engine = StreamScoringEngine(options: options)
+        let context = ScoringContext(
+            episodeDurationMinutes: 24,
+            addonPriorities: ["one": 0],
+            debridAvailable: true
+        )
+        return (
+            StreamDiscoveryResult(
+                decision: engine.selectBest([first, second], context: context),
+                ranked: engine.rank([first, second], context: context),
+                addonResults: [],
+                debridAvailable: true
+            ),
+            first,
+            second
         )
     }
 
@@ -357,6 +426,84 @@ struct PlaybackLaunchControllerTests {
 
         #expect(setup.playback.isPresenting)
         #expect(setup.playback.isAwaitingSource)
+        #expect(setup.engine.loadedURLs.isEmpty)
+    }
+
+    @Test func invalidPreferredStreamFallsBackToNextCandidate() async throws {
+        let (result, first, second) = makeTwoCandidateResult()
+        let firstURL = testURL("https://resolved.example/first.mp4")
+        let secondURL = testURL("https://resolved.example/second.mp4")
+        let debrid = StubDebridService()
+        await debrid.configure(resolveURLs: [first.id: firstURL, second.id: secondURL])
+        let validator = StubStreamValidator()
+        await validator.setVerdict(
+            .candidateInvalid(StreamValidationIssue(kind: .infringing)),
+            for: firstURL
+        )
+        let setup = try makeSetup(result: result, debrid: debrid, validator: validator)
+        defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
+
+        setup.controller.play(request())
+        await waitUntil { setup.playback.state == .playing }
+
+        #expect(setup.controller.pickerRequest == nil)
+        #expect(setup.engine.loadedURLs == [secondURL])
+    }
+
+    @Test func playbackFailureTransparentlyFallsBackToNextCandidate() async throws {
+        let (result, first, second) = makeTwoCandidateResult()
+        let firstURL = testURL("https://resolved.example/first.mp4")
+        let secondURL = testURL("https://resolved.example/second.mp4")
+        let debrid = StubDebridService()
+        await debrid.configure(resolveURLs: [first.id: firstURL, second.id: secondURL])
+        let setup = try makeSetup(result: result, debrid: debrid)
+        defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
+        setup.engine.failuresBeforeSuccess = 1
+        setup.playback.onStreamFailed = { [weak controller = setup.controller] anime, episode in
+            controller?.streamFailed(anime: anime, episode: episode)
+        }
+
+        setup.controller.play(request())
+        await waitUntil { setup.engine.loadedURLs == [secondURL] }
+
+        #expect(setup.controller.pickerRequest == nil)
+        #expect(setup.engine.loadAttempts == 2)
+    }
+
+    @Test func cachedPlaybackFailureRecoversWithFreshSource() async throws {
+        let setup = try makeSetup(result: makeResult(autoPlay: true))
+        defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
+        setup.playback.onStreamFailed = { [weak controller = setup.controller] anime, episode in
+            controller?.streamFailed(anime: anime, episode: episode)
+        }
+
+        setup.controller.play(request())
+        await waitUntil { setup.playback.state == .playing }
+        setup.playback.close()
+
+        // The next load fails, which must invalidate the cached source and
+        // resolve a fresh one without surfacing an error.
+        setup.engine.failuresBeforeSuccess = 2
+        setup.controller.play(request())
+        await waitUntil { setup.playback.state == .playing && setup.engine.loadAttempts == 3 }
+
+        #expect(setup.controller.pickerRequest == nil)
+        #expect(setup.engine.loadedURLs.count == 2)
+        #expect(setup.preloader.streamsCallCount == 2)
+    }
+
+    @Test func accountErrorStopsFallbackAndShowsPicker() async throws {
+        let (result, _, _) = makeTwoCandidateResult()
+        let setup = try makeSetup(
+            result: result,
+            debrid: FailingDebridService(error: .accountLocked)
+        )
+        defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
+
+        setup.controller.play(request())
+        await waitUntil { setup.controller.pickerRequest != nil }
+
+        #expect(setup.playback.isPresenting)
         #expect(setup.engine.loadedURLs.isEmpty)
     }
 }

@@ -54,7 +54,9 @@ actor StubDebridService: DebridService {
     var availabilityByCandidateID: [String: DebridAvailability] = [:]
     var filesByCandidateID: [String: [DebridFileInfo]] = [:]
     var checkError: DebridError?
+    var resolveError: DebridError?
     var resolveURL: URL = testURL("https://resolved.example/video.mp4")
+    var resolveURLByCandidateID: [String: URL] = [:]
     private(set) var checkedCandidateIDs: [String] = []
     private(set) var resolvedCandidateIDs: [String] = []
     private(set) var resolvedFileIDs: [Int?] = []
@@ -69,6 +71,14 @@ actor StubDebridService: DebridService {
 
     func configure(checkError: DebridError?) {
         self.checkError = checkError
+    }
+
+    func configure(resolveError: DebridError?) {
+        self.resolveError = resolveError
+    }
+
+    func configure(resolveURLs: [String: URL]) {
+        resolveURLByCandidateID = resolveURLs
     }
 
     func validateAccount() async throws -> DebridAccount {
@@ -106,13 +116,36 @@ actor StubDebridService: DebridService {
     func resolve(_ candidate: StreamCandidate, fileID: Int?) async throws -> ResolvedStream {
         resolvedCandidateIDs.append(candidate.id)
         resolvedFileIDs.append(fileID)
+        if let resolveError { throw resolveError }
         return ResolvedStream(
-            url: resolveURL,
+            url: resolveURLByCandidateID[candidate.id] ?? resolveURL,
             filename: candidate.displayTitle,
             sizeBytes: candidate.sizeBytes,
             streamable: true,
             fileID: fileID ?? 1
         )
+    }
+}
+
+actor StubStreamValidator: StreamValidating {
+    private var defaultVerdict: StreamValidationVerdict
+    private var verdictsByURL: [String: StreamValidationVerdict] = [:]
+    private(set) var validatedURLs: [URL] = []
+
+    init(verdict: StreamValidationVerdict = .playable) {
+        defaultVerdict = verdict
+    }
+
+    func setVerdict(_ verdict: StreamValidationVerdict, for url: URL) {
+        verdictsByURL[url.absoluteString] = verdict
+    }
+
+    func validate(
+        _ stream: ResolvedStream,
+        context: StreamValidationContext
+    ) async -> StreamValidationVerdict {
+        validatedURLs.append(stream.url)
+        return verdictsByURL[stream.url.absoluteString] ?? defaultVerdict
     }
 }
 

@@ -29,6 +29,7 @@ final class StreamPreloadService: StreamPreloading {
     private let episodes: any EpisodeRepository
     private let preferences: PreferencesStore
     private let registry: AddonRegistry
+    private let prefetcher: (any StreamPlaybackProviding)?
     private let cacheTTL: TimeInterval
 
     private var entries: [Key: Entry] = [:]
@@ -40,12 +41,14 @@ final class StreamPreloadService: StreamPreloading {
         episodes: any EpisodeRepository,
         preferences: PreferencesStore,
         registry: AddonRegistry,
+        prefetcher: (any StreamPlaybackProviding)? = nil,
         cacheTTL: TimeInterval = 300
     ) {
         self.discovery = discovery
         self.episodes = episodes
         self.preferences = preferences
         self.registry = registry
+        self.prefetcher = prefetcher
         self.cacheTTL = cacheTTL
     }
 
@@ -91,6 +94,7 @@ final class StreamPreloadService: StreamPreloading {
             task.cancel()
         }
         inFlight.removeAll()
+        prefetcher?.clear()
     }
 
     private func currentOptions() -> StreamScoringOptions {
@@ -113,18 +117,29 @@ final class StreamPreloadService: StreamPreloading {
             options: options
         )
         let discovery = self.discovery
+        let prefetcher = self.prefetcher
         let generation = self.generation
         return Task { [weak self] in
             let result = await discovery.discover(request)
-            self?.store(result, for: key, generation: generation)
+            guard let self, self.store(result, for: key, generation: generation) else {
+                return result
+            }
+            // Warm the top candidates while the user is still browsing the
+            // detail page so Play can start instantly.
+            prefetcher?.prefetch(
+                anime: anime,
+                episode: episode,
+                candidates: result.ranked.filter(\.isAutoEligible).map(\.candidate)
+            )
             return result
         }
     }
 
-    private func store(_ result: StreamDiscoveryResult, for key: Key, generation: Int) {
-        guard generation == self.generation else { return }
+    private func store(_ result: StreamDiscoveryResult, for key: Key, generation: Int) -> Bool {
+        guard generation == self.generation else { return false }
         inFlight[key] = nil
         entries[key] = Entry(result: result, createdAt: Date())
+        return true
     }
 
     private func entry(for key: Key) -> Entry? {

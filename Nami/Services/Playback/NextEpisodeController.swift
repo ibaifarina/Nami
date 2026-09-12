@@ -18,7 +18,7 @@ final class NextEpisodeController {
     }
 
     private let discovery: StreamDiscoveryService
-    private let resolver: SourceResolver
+    private let streamPlayback: any StreamPlaybackProviding
     private let preferences: PreferencesStore
     private let registry: AddonRegistry
 
@@ -49,7 +49,7 @@ final class NextEpisodeController {
 
     init(
         discovery: StreamDiscoveryService,
-        resolver: SourceResolver,
+        streamPlayback: any StreamPlaybackProviding,
         preferences: PreferencesStore,
         registry: AddonRegistry,
         prefetchFraction: Double = 0.75,
@@ -59,7 +59,7 @@ final class NextEpisodeController {
         cacheTTL: TimeInterval = 600
     ) {
         self.discovery = discovery
-        self.resolver = resolver
+        self.streamPlayback = streamPlayback
         self.preferences = preferences
         self.registry = registry
         self.prefetchFraction = prefetchFraction
@@ -285,17 +285,38 @@ final class NextEpisodeController {
                 self.advanceInFlight = false
                 return
             }
-            do {
-                let stream = try await self.resolver.resolve(candidate, anime: anime, episode: episode)
-                self.advanceInFlight = false
-                self.startPlayback?(stream, anime, episode)
-            } catch {
-                self.advanceInFlight = false
-                self.prepareError = (error as? DebridError)?.errorDescription
-                    ?? error.localizedDescription
-                self.setOverlay(.readyToChoose)
+            for next in self.candidateChain(primary: candidate, result: prepared.result) {
+                switch await self.streamPlayback.stream(for: next, anime: anime, episode: episode) {
+                case .ready(let stream):
+                    self.advanceInFlight = false
+                    self.startPlayback?(stream, anime, episode)
+                    return
+                case .unavailable:
+                    continue
+                case .blocked(let error):
+                    self.advanceInFlight = false
+                    self.prepareError = error?.errorDescription
+                        ?? "Real-Debrid is unavailable right now."
+                    self.setOverlay(.readyToChoose)
+                    return
+                }
             }
+            self.advanceInFlight = false
+            self.prepareError = "No playable source was found for the next episode."
+            self.setOverlay(.readyToChoose)
         }
+    }
+
+    private func candidateChain(
+        primary: StreamCandidate,
+        result: StreamDiscoveryResult
+    ) -> [StreamCandidate] {
+        var chain = [primary]
+        for scored in result.ranked
+        where scored.isAutoEligible && scored.candidate.id != primary.id {
+            chain.append(scored.candidate)
+        }
+        return chain
     }
 
     private func resetForSession(anime: Anime, episode: Episode) {

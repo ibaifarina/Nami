@@ -9,6 +9,8 @@ actor MetadataCache {
         case details(AnimeDetails)
         case episodes([Episode])
         case identity(MediaIdentity)
+        /// An IMDb ID, or an empty string for a cached miss.
+        case imdbID(String)
     }
 
     private struct Entry: Codable {
@@ -122,4 +124,6 @@ enum CacheTTL {
     static let airingEpisodes: TimeInterval = 6 * 60 * 60
     /// ID mappings used for addon interoperability.
     static let mappings: TimeInterval = 7 * 24 * 60 * 60
+    /// Failed IMDb lookups, retried sooner than successful mappings.
+    static let imdbMiss: TimeInterval = 60 * 60
 }

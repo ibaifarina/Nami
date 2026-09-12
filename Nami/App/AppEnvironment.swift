@@ -16,6 +16,8 @@ final class AppEnvironment {
     let debridAuth: RealDebridAuthService
     let streamDiscovery: StreamDiscoveryService
     let streamPreload: StreamPreloadService
+    let streamValidation: StreamValidationService
+    let streamPlayback: StreamPlaybackService
     let sourceResolver: SourceResolver
     let playback: PlaybackCoordinator
     let playbackLaunch: PlaybackLaunchController
@@ -88,6 +90,14 @@ final class AppEnvironment {
             preferences: preferences
         )
 
+        let validation = StreamValidationService()
+        streamValidation = validation
+        let playbackService = StreamPlaybackService(
+            resolver: sourceResolver,
+            validator: validation
+        )
+        streamPlayback = playbackService
+
         let persistence: any AddonPersistence
         if let providedPersistence = addonPersistence {
             persistence = providedPersistence
@@ -99,7 +109,11 @@ final class AppEnvironment {
         }
         let registry = AddonRegistry(persistence: persistence)
         addons = registry
-        let identityResolver = MediaIdentityResolver(client: client, cache: cache)
+        let identityResolver = MediaIdentityResolver(
+            client: client,
+            cache: cache,
+            imdbResolver: IMDbResolver(http: http, cache: cache)
+        )
         let manager = AddonManager(identityResolver: identityResolver)
         addonManager = manager
         addonInstaller = AddonInstallService()
@@ -109,12 +123,13 @@ final class AppEnvironment {
             discovery: discoveryService,
             episodes: episodes,
             preferences: preferences,
-            registry: registry
+            registry: registry,
+            prefetcher: playbackService
         )
 
         let nextEpisodeController = NextEpisodeController(
             discovery: discoveryService,
-            resolver: sourceResolver,
+            streamPlayback: playbackService,
             preferences: preferences,
             registry: registry
         )
@@ -158,11 +173,6 @@ final class AppEnvironment {
             nextEpisodeController?.reset()
             skipIntroController?.reset()
         }
-        coordinator.onStreamFailed = { [weak streamCache] anime, episode in
-            Task {
-                await streamCache?.remove(animeID: anime.id, episodeNumber: episode.number)
-            }
-        }
         nextEpisodeController.startPlayback = { [weak coordinator] stream, anime, episode in
             coordinator?.start(
                 stream: stream,
@@ -175,11 +185,19 @@ final class AppEnvironment {
             coordinator?.seek(to: target)
         }
         playback = coordinator
-        playbackLaunch = PlaybackLaunchController(
+        let launchController = PlaybackLaunchController(
             preload: streamPreload,
             resolver: sourceResolver,
+            streamPlayback: playbackService,
             playback: coordinator
         )
+        playbackLaunch = launchController
+        coordinator.onStreamFailed = { [weak streamCache, weak launch = launchController] anime, episode in
+            Task {
+                await streamCache?.remove(animeID: anime.id, episodeNumber: episode.number)
+            }
+            launch?.streamFailed(anime: anime, episode: episode)
+        }
         coordinator.onProgressSaved = { [weak self] _ in
             self?.progressRevision += 1
         }
@@ -189,6 +207,7 @@ final class AppEnvironment {
         await metadataCache.removeAll()
         await sourceCache.removeAll()
         streamPreload.clear()
+        streamPlayback.clear()
         ImageCache.shared.removeAll()
     }
 }
