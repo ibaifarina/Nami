@@ -27,7 +27,43 @@ struct StremioAddonAdapter: StreamAddon {
         episode: Episode,
         isMovie: Bool
     ) async throws -> [RawStreamResult] {
-        let resolvedID = try Self.resolveID(for: media, namespaces: descriptor.idNamespaces)
+        let resolvedIDs = try Self.resolveIDs(for: media, namespaces: descriptor.idNamespaces)
+        var receivedValidResponse = false
+        var lastError: Error?
+
+        for resolvedID in resolvedIDs {
+            do {
+                let streams = try await streams(
+                    resolvedID: resolvedID,
+                    episode: episode,
+                    isMovie: isMovie
+                )
+                receivedValidResponse = true
+                if !streams.isEmpty {
+                    return streams
+                }
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                lastError = error
+            }
+        }
+
+        if !receivedValidResponse, let lastError {
+            throw lastError
+        }
+        return []
+    }
+
+    /// Stremio addons can advertise multiple ID prefixes for the same stream
+    /// resource, but their indexes are not always equivalent. Torrentio, for
+    /// example, may have no IMDb result while its Kitsu route has the anime
+    /// release. Try the declared namespaces in order until one returns streams.
+    private func streams(
+        resolvedID: ResolvedID,
+        episode: Episode,
+        isMovie: Bool
+    ) async throws -> [RawStreamResult] {
         let type = Self.streamType(
             namespace: resolvedID.namespace,
             isMovie: isMovie,
@@ -106,34 +142,48 @@ struct StremioAddonAdapter: StreamAddon {
         for media: MediaIdentity,
         namespaces: [AddonIDNamespace]
     ) throws -> ResolvedID {
+        guard let resolved = try resolveIDs(for: media, namespaces: namespaces).first else {
+            throw AddonError.unresolvableMediaID(namespaces)
+        }
+        return resolved
+    }
+
+    static func resolveIDs(
+        for media: MediaIdentity,
+        namespaces: [AddonIDNamespace]
+    ) throws -> [ResolvedID] {
+        var resolved: [ResolvedID] = []
         for namespace in namespaces {
             switch namespace {
             case .imdb:
                 if let imdbID = media.imdbID {
                     let trimmed = imdbID.trimmingCharacters(in: .whitespaces)
                     let value = trimmed.hasPrefix("tt") ? trimmed : "tt\(trimmed)"
-                    return ResolvedID(namespace: .imdb, value: value)
+                    resolved.append(ResolvedID(namespace: .imdb, value: value))
                 }
             case .kitsu:
                 let kitsuID = media.kitsuID.trimmingCharacters(in: .whitespaces)
                 if !kitsuID.isEmpty {
-                    return ResolvedID(namespace: .kitsu, value: "kitsu:\(kitsuID)")
+                    resolved.append(ResolvedID(namespace: .kitsu, value: "kitsu:\(kitsuID)"))
                 }
             case .mal:
                 if let malID = media.malID {
-                    return ResolvedID(namespace: .mal, value: "mal:\(malID)")
+                    resolved.append(ResolvedID(namespace: .mal, value: "mal:\(malID)"))
                 }
             case .anilist:
                 if let anilistID = media.anilistID {
-                    return ResolvedID(namespace: .anilist, value: "anilist:\(anilistID)")
+                    resolved.append(ResolvedID(namespace: .anilist, value: "anilist:\(anilistID)"))
                 }
             case .tmdb:
                 if let tmdbID = media.tmdbID {
-                    return ResolvedID(namespace: .tmdb, value: "tmdb:\(tmdbID)")
+                    resolved.append(ResolvedID(namespace: .tmdb, value: "tmdb:\(tmdbID)"))
                 }
             }
         }
-        throw AddonError.unresolvableMediaID(namespaces)
+        guard !resolved.isEmpty else {
+            throw AddonError.unresolvableMediaID(namespaces)
+        }
+        return resolved
     }
 
     /// Picks the Stremio media type the addon can actually serve for this ID.

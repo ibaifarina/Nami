@@ -28,6 +28,8 @@ struct RemoteImage: View {
                 placeholder
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
         .task(id: url) {
             await load()
         }

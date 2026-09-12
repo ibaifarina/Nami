@@ -3,6 +3,7 @@ import SwiftUI
 struct AnimePosterCard: View {
     let anime: Anime
     var metaOverride: String? = nil
+    var onRemove: (() -> Void)? = nil
     var onOpen: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -11,23 +12,26 @@ struct AnimePosterCard: View {
     @State private var isHovered = false
 
     var body: some View {
-        Button(action: onOpen) {
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                poster
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(AppFont.cardTitle)
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                    Text(metaOverride ?? metaLine)
-                        .font(AppFont.cardMeta)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+        ZStack {
+            Button(action: onOpen) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    poster
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(title)
+                            .font(AppFont.cardTitle)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        Text(metaOverride ?? metaLine)
+                            .font(AppFont.cardMeta)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
                 }
+                .contentShape(Rectangle())
             }
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .overlay(alignment: .topTrailing) { removeButton }
         .onHover { hovering in
             withAnimation(.easeOut(duration: Motion.hover)) {
                 isHovered = hovering
@@ -43,6 +47,24 @@ struct AnimePosterCard: View {
             }
         }
         .accessibilityLabel("\(title), \(metaOverride ?? metaLine)")
+    }
+
+    @ViewBuilder
+    private var removeButton: some View {
+        if isHovered, let onRemove {
+            Button(action: onRemove) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(6)
+                    .background(.black.opacity(0.55), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .hoverFeedback(scale: 1.15)
+            .padding(Spacing.xs)
+            .transition(.opacity)
+            .accessibilityLabel("Remove \(title) from Library")
+        }
     }
 
     private var title: String {

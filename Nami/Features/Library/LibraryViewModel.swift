@@ -29,6 +29,7 @@ final class LibraryViewModel {
     var entries: [LibraryEntry] = []
     var state: LoadingState<[LibraryEntry]> = .idle
     var filter: Filter = .watching
+    var removalError: CatalogError?
 
     init(environment: AppEnvironment) {
         library = environment.library
@@ -61,8 +62,22 @@ final class LibraryViewModel {
         }
     }
 
+    func remove(_ entry: LibraryEntry) async {
+        do {
+            try await library.remove(animeID: entry.animeID)
+            entries.removeAll { $0.id == entry.id }
+            state = .loaded(entries)
+            removalError = nil
+        } catch is CancellationError {
+            return
+        } catch {
+            removalError = CatalogError.map(error)
+        }
+    }
+
     func reset() {
         entries = []
         state = .idle
+        removalError = nil
     }
 }

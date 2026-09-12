@@ -177,6 +177,37 @@ struct StremioAddonAdapterTests {
         #expect(request.url?.absoluteString == "https://stremio.example/stream/series/tt1234567:1:7.json")
     }
 
+    @Test func fallsBackToKitsuWhenIMDbRouteHasNoStreams() async throws {
+        let http = MockHTTPClient { request in
+            if request.url?.path.contains("/stream/series/tt39287518:1:1.json") == true {
+                return Data(#"{ "streams": [] }"#.utf8)
+            }
+            if request.url?.path.contains("/stream/anime/kitsu:49998:1.json") == true {
+                return AddonFixtures.stremioStreamsJSON
+            }
+            throw HTTPError.transport("unexpected route")
+        }
+        let adapter = StremioAddonAdapter(
+            descriptor: descriptor(namespaces: [.imdb, .kitsu]),
+            supportedTypes: ["movie", "series", "anime"],
+            http: http
+        )
+        let media = MediaIdentity(
+            kitsuID: "49998",
+            imdbID: "tt39287518"
+        )
+        let episode = Episode(id: "49998-1", animeID: "49998", number: 1)
+
+        let results = try await adapter.streams(for: media, episode: episode)
+
+        #expect(results.count == 2)
+        #expect(await http.requestCount == 2)
+        #expect(
+            await http.lastRequest?.url?.absoluteString
+                == "https://stremio.example/stream/anime/kitsu:49998:1.json"
+        )
+    }
+
     @Test func usesMovieTypeForMovies() async throws {
         let http = MockHTTPClient { _ in AddonFixtures.stremioStreamsJSON }
         let adapter = StremioAddonAdapter(

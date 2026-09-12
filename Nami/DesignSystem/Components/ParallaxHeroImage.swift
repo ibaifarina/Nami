@@ -10,18 +10,30 @@ struct ParallaxHeroImage: View {
     @State private var scrollOffset: CGFloat = 0
 
     var body: some View {
-        ZStack {
-            Color.clear
-                .onGeometryChange(for: CGFloat.self) { proxy in
-                    -proxy.frame(in: .scrollView).minY
-                } action: { newValue in
-                    scrollOffset = max(0, newValue)
-                }
-            RemoteImage(url: url, contentMode: .fill)
-                .scaleEffect(scale)
-                .blur(radius: blurRadius, opaque: true)
-                .offset(y: progress * Motion.heroParallaxFactor)
+        GeometryReader { proxy in
+            ZStack {
+                Color.clear
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        -proxy.frame(in: .scrollView).minY
+                    } action: { newValue in
+                        scrollOffset = max(0, newValue)
+                    }
+                RemoteImage(url: url, contentMode: .fill)
+                    .frame(
+                        width: proxy.size.width,
+                        height: proxy.size.height
+                    )
+                    .scaleEffect(scale)
+                    .blur(radius: blurRadius, opaque: true)
+                    .offset(y: progress * Motion.heroParallaxFactor)
+            }
+            .frame(
+                width: proxy.size.width,
+                height: proxy.size.height
+            )
+            .clipped()
         }
+        .frame(height: height)
     }
 
     private var progress: CGFloat {

@@ -92,6 +92,44 @@ struct LibraryViewModelTests {
         #expect(error == .server("boom"))
     }
 
+    @Test func removeDeletesEntryFromRepositoryAndModel() async throws {
+        let item = entry(
+            id: "46474",
+            status: .watching,
+            progress: 5,
+            updatedAt: Date(),
+            anime: SampleCatalog.anime[0]
+        )
+        let repository = StubLibraryRepository(entries: [item])
+        let model = LibraryViewModel(library: repository)
+        await model.load()
+
+        await model.remove(item)
+
+        #expect(model.entries.isEmpty)
+        #expect(try await repository.entry(animeID: item.animeID) == nil)
+        #expect(model.removalError == nil)
+    }
+
+    @Test func removeFailureKeepsEntryAndExposesError() async {
+        let item = entry(
+            id: "46474",
+            status: .watching,
+            progress: 5,
+            updatedAt: Date(),
+            anime: SampleCatalog.anime[0]
+        )
+        let repository = StubLibraryRepository(entries: [item])
+        let model = LibraryViewModel(library: repository)
+        await model.load()
+        await repository.configure(error: .server("boom"))
+
+        await model.remove(item)
+
+        #expect(model.entries == [item])
+        #expect(model.removalError == .server("boom"))
+    }
+
     @Test func resetClearsEntries() async {
         let repository = StubLibraryRepository(entries: [
             entry(

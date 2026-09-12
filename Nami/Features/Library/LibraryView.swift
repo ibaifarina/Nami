@@ -30,6 +30,18 @@ struct LibraryView: View {
         .background(AppColor.background)
         .navigationTitle("Library")
         .task { await model.load() }
+        .alert(
+            "Couldn't remove anime",
+            isPresented: Binding(
+                get: { model.removalError != nil },
+                set: { if !$0 { model.removalError = nil } }
+            ),
+            presenting: model.removalError
+        ) { _ in
+            Button("OK") {}
+        } message: { error in
+            Text(error.errorDescription ?? "Please try again.")
+        }
     }
 
     private var listsContent: some View {
@@ -67,9 +79,16 @@ struct LibraryView: View {
             ScrollView {
                 LazyVGrid(columns: gridColumns, alignment: .leading, spacing: Spacing.lg) {
                     ForEach(model.filteredEntries) { entry in
-                        AnimePosterCard(anime: entry.anime, metaOverride: progressLabel(entry)) {
-                            environment.router.push(.anime(id: entry.anime.id), in: .library)
-                        }
+                        AnimePosterCard(
+                            anime: entry.anime,
+                            metaOverride: progressLabel(entry),
+                            onRemove: {
+                                Task { await model.remove(entry) }
+                            },
+                            onOpen: {
+                                environment.router.push(.anime(id: entry.anime.id), in: .library)
+                            }
+                        )
                     }
                 }
                 .contentPadding()
