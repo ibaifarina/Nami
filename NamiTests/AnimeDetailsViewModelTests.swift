@@ -108,6 +108,35 @@ struct AnimeDetailsViewModelTests {
         #expect(model.progress == nil)
     }
 
+    @Test func unstartedNextEpisodeIsNotTreatedAsInProgress() async throws {
+        let store = InMemoryPlaybackProgressStore(items: [
+            PlaybackProgress(
+                animeID: "46474",
+                episodeNumber: 1,
+                positionSeconds: 0,
+                durationSeconds: 1400,
+                isCompleted: true,
+                updatedAt: Date().addingTimeInterval(-60)
+            ),
+            PlaybackProgress(
+                animeID: "46474",
+                episodeNumber: 2,
+                positionSeconds: 0,
+                durationSeconds: 1400,
+                updatedAt: Date()
+            ),
+        ])
+        let model = makeModel(progressStore: store)
+
+        await model.load()
+
+        let episodeTwo = try #require(model.episodes.dropFirst().first)
+        #expect(!model.continuesFromProgress)
+        #expect(model.episodeProgress(for: episodeTwo) == nil)
+        #expect(model.primaryActionTitle == "Play Episode 2")
+        #expect(model.currentEpisode?.displayNumber == 2)
+    }
+
     @Test func movieInsideSequentialChainIsNotReplacedBySeasons() async {
         let movie = SampleCatalog.make(
             id: "48323", title: "Chainsaw Man: Reze-hen",

@@ -413,6 +413,7 @@ final class PlaybackCoordinator {
         }
         hasCompletedSession = true
         writeProgress(force: true)
+        seedNextEpisodeProgress()
     }
 
     private func tracksChanged() {
@@ -498,6 +499,47 @@ final class PlaybackCoordinator {
         Task { [weak self] in
             await store.save(progress)
             self?.onProgressSaved?(progress)
+        }
+    }
+
+    /// Seeds the following episode as an unfinished, not-started record so the
+    /// series stays in Continue Watching after the current episode completes.
+    /// Completed episodes are filtered out of the shelf, so without a record
+    /// for the next episode the show would simply disappear.
+    private func seedNextEpisodeProgress() {
+        guard let session else { return }
+        let available = session.anime.episodesAvailable ?? 0
+        let nextEpisodeNumber = session.episode.displayNumber + 1
+        guard nextEpisodeNumber <= available else { return }
+
+        let anime = session.anime
+        let episode = session.episode
+        let next = PlaybackProgress(
+            animeID: anime.id,
+            episodeID: "\(anime.id)-\(nextEpisodeNumber)",
+            episodeNumber: nextEpisodeNumber,
+            absoluteEpisodeNumber: episode.absoluteNumber.map { $0 + 1 },
+            positionSeconds: 0,
+            durationSeconds: duration,
+            isCompleted: false,
+            updatedAt: Date(),
+            animeTitle: anime.displayTitle(for: preferences.animeTitleLanguage),
+            posterURL: anime.posterURL,
+            bannerURL: anime.bannerURL,
+            episodeCount: anime.episodeCount
+        )
+        let store = progressStore
+        Task { [weak self] in
+            // Never clobber progress the viewer already has for that episode:
+            // a partial watch or autoplay may have recorded it already.
+            guard await store.progress(
+                animeID: next.animeID,
+                episodeNumber: nextEpisodeNumber
+            ) == nil else {
+                return
+            }
+            await store.save(next)
+            self?.onProgressSaved?(next)
         }
     }
 

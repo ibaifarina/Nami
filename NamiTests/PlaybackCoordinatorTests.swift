@@ -375,6 +375,58 @@ struct PlaybackCoordinatorTests {
         #expect(saved?.animeTitle == anime.displayTitle)
     }
 
+    @Test func completionSeedsNextEpisodeForContinueWatching() async throws {
+        let setup = try makeSetup()
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(7), startAt: nil)
+        await waitUntil { setup.coordinator.state == .playing }
+
+        setup.engine.emitTime(590)
+
+        await waitUntil { await setup.store.progress(animeID: anime.id, episodeNumber: 8) != nil }
+        let next = await setup.store.progress(animeID: anime.id, episodeNumber: 8)
+        #expect(next?.isCompleted == false)
+        #expect(next?.positionSeconds == 0)
+        #expect(next?.episodeID == "\(anime.id)-8")
+    }
+
+    @Test func completionSkipsSeedOnFinalEpisode() async throws {
+        let setup = try makeSetup()
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(28), startAt: nil)
+        await waitUntil { setup.coordinator.state == .playing }
+
+        setup.engine.emitTime(590)
+
+        await waitUntil {
+            await setup.store.progress(animeID: anime.id, episodeNumber: 28)?.isCompleted == true
+        }
+        try? await Task.sleep(for: .milliseconds(50))
+        #expect(await setup.store.progress(animeID: anime.id, episodeNumber: 29) == nil)
+    }
+
+    @Test func completionKeepsExistingNextEpisodeProgress() async throws {
+        let setup = try makeSetup()
+        await setup.store.save(
+            PlaybackProgress(
+                animeID: anime.id,
+                episodeNumber: 8,
+                positionSeconds: 300,
+                durationSeconds: 600,
+                updatedAt: Date().addingTimeInterval(-60)
+            )
+        )
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(7), startAt: nil)
+        await waitUntil { setup.coordinator.state == .playing }
+
+        setup.engine.emitTime(590)
+
+        await waitUntil {
+            await setup.store.progress(animeID: anime.id, episodeNumber: 7)?.isCompleted == true
+        }
+        try? await Task.sleep(for: .milliseconds(50))
+        let next = await setup.store.progress(animeID: anime.id, episodeNumber: 8)
+        #expect(next?.positionSeconds == 300)
+    }
+
     @Test func progressPersistenceNotifiesObserver() async throws {
         let setup = try makeSetup()
         var persisted: PlaybackProgress?

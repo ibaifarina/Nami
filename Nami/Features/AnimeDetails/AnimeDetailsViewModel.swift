@@ -79,7 +79,7 @@ final class AnimeDetailsViewModel {
 
     var continuesFromProgress: Bool {
         guard let progress, !progress.isCompleted else { return false }
-        return progress.fraction < 0.95
+        return progress.positionSeconds > 0 && progress.fraction < 0.95
     }
 
     var isMovie: Bool {
@@ -262,7 +262,8 @@ final class AnimeDetailsViewModel {
     func episodeProgress(for episode: Episode) -> PlaybackProgress? {
         guard
             let entry = episodeProgressByNumber[episode.displayNumber],
-            !entry.isCompleted
+            !entry.isCompleted,
+            entry.positionSeconds > 0
         else {
             return nil
         }
