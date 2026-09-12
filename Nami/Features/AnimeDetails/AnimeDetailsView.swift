@@ -339,9 +339,16 @@ struct AnimeDetailsView: View {
         } label: {
             Label(
                 model.libraryEntry?.status.displayName ?? "Add to Library",
-                systemImage: model.libraryEntry == nil ? "bookmark" : "bookmark.fill"
+                systemImage: model.libraryEntry?.status.systemImage ?? "bookmark"
             )
             .labelStyle(.iconOnly)
+            .symbolVariant(model.libraryEntry == nil ? .none : .fill)
+            .contentTransition(.symbolEffect(.replace))
+            .symbolEffect(.bounce, options: .nonRepeating, value: model.libraryEntry?.status)
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: Motion.transition),
+                value: model.libraryEntry?.status
+            )
         }
         .buttonStyle(GlassButtonStyle())
         .fixedSize()
@@ -683,7 +690,7 @@ struct AnimeDetailsView: View {
         else {
             return nil
         }
-        return "\(anime.id)-\(episode.displayNumber)"
+        return "\(anime.id)-\(episode.displayNumber)-\(environment.addons.revision)"
     }
 
     /// Changes whenever the episode that should be scrolled into view changes,

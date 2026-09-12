@@ -1,6 +1,11 @@
 import Foundation
 
 struct AddonManifest: Decodable, Sendable {
+    struct BehaviorHints: Decodable, Sendable {
+        let configurable: Bool?
+        let configurationRequired: Bool?
+    }
+
     let id: String
     let name: String
     let version: String?
@@ -13,6 +18,7 @@ struct AddonManifest: Decodable, Sendable {
     let types: [String]?
     let idPrefixes: [String]?
     let idNamespaces: [String]?
+    let behaviorHints: BehaviorHints?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -27,6 +33,7 @@ struct AddonManifest: Decodable, Sendable {
         case types
         case idPrefixes
         case idNamespaces
+        case behaviorHints
     }
 }
 
@@ -154,7 +161,7 @@ extension AddonManifest {
             throw AddonError.unsupportedProtocol
         }
         guard declaredCapabilities.contains(.streams) else {
-            throw AddonError.invalidManifest("The addon does not declare stream support.")
+            throw AddonError.noStreamResources
         }
         return self
     }

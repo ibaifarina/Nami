@@ -127,7 +127,8 @@ struct HomeViewModelTests {
         ])
         let model = HomeViewModel(
             media: StubMediaRepository(),
-            progressStore: progressStore
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
         )
 
         await model.load()
@@ -150,7 +151,8 @@ struct HomeViewModelTests {
         ])
         let model = HomeViewModel(
             media: StubMediaRepository(),
-            progressStore: progressStore
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
         )
 
         await model.load()
@@ -185,7 +187,8 @@ struct HomeViewModelTests {
         ])
         let model = HomeViewModel(
             media: StubMediaRepository(),
-            progressStore: progressStore
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
         )
 
         await model.load()
@@ -194,6 +197,96 @@ struct HomeViewModelTests {
         let frieren = model.continueWatching.first { $0.anime.id == "46474" }
         #expect(frieren?.progress.episodeNumber == 2)
         #expect(model.continueWatching.first { $0.anime.id == "46474" }?.id == "46474-2")
+    }
+
+    @Test func continueWatchingCollapsesSeasonsOfOneSeries() async throws {
+        let season1 = try #require(SampleCatalog.anime(withID: "7442"))
+        let season2 = try #require(SampleCatalog.anime(withID: "8671"))
+        var media = StubMediaRepository()
+        media.details = [
+            season1.id: AnimeDetails(
+                anime: season1,
+                relations: [AnimeRelation(role: .sequel, anime: season2)]
+            ),
+            season2.id: AnimeDetails(
+                anime: season2,
+                relations: [AnimeRelation(role: .prequel, anime: season1)]
+            ),
+        ]
+        let now = Date()
+        let progressStore = InMemoryPlaybackProgressStore(items: [
+            PlaybackProgress(
+                animeID: season1.id,
+                episodeNumber: 5,
+                positionSeconds: 300,
+                durationSeconds: 1400,
+                updatedAt: now.addingTimeInterval(-600)
+            ),
+            PlaybackProgress(
+                animeID: season2.id,
+                episodeNumber: 1,
+                positionSeconds: 120,
+                durationSeconds: 1400,
+                updatedAt: now
+            ),
+        ])
+        let model = HomeViewModel(
+            media: media,
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
+        )
+
+        await model.load()
+
+        #expect(model.continueWatching.count == 1)
+        #expect(model.continueWatching.first?.anime.id == season2.id)
+        #expect(model.continueWatching.first?.progress.episodeNumber == 1)
+    }
+
+    @Test func removeFromContinueWatchingClearsEverySeasonOfTheSeries() async throws {
+        let season1 = try #require(SampleCatalog.anime(withID: "7442"))
+        let season2 = try #require(SampleCatalog.anime(withID: "8671"))
+        var media = StubMediaRepository()
+        media.details = [
+            season1.id: AnimeDetails(
+                anime: season1,
+                relations: [AnimeRelation(role: .sequel, anime: season2)]
+            ),
+            season2.id: AnimeDetails(
+                anime: season2,
+                relations: [AnimeRelation(role: .prequel, anime: season1)]
+            ),
+        ]
+        let now = Date()
+        let progressStore = InMemoryPlaybackProgressStore(items: [
+            PlaybackProgress(
+                animeID: season1.id,
+                episodeNumber: 5,
+                positionSeconds: 300,
+                durationSeconds: 1400,
+                updatedAt: now.addingTimeInterval(-600)
+            ),
+            PlaybackProgress(
+                animeID: season2.id,
+                episodeNumber: 1,
+                positionSeconds: 120,
+                durationSeconds: 1400,
+                updatedAt: now
+            ),
+        ])
+        let model = HomeViewModel(
+            media: media,
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
+        )
+        await model.load()
+        let entry = try #require(model.continueWatching.first)
+
+        await model.removeFromContinueWatching(entry)
+
+        #expect(model.continueWatching.isEmpty)
+        #expect(await progressStore.progress(forAnimeID: season1.id).isEmpty)
+        #expect(await progressStore.progress(forAnimeID: season2.id).isEmpty)
     }
 
     @Test func continueWatchingFallsBackToSnapshotWhenMediaUnavailable() async {
@@ -210,7 +303,8 @@ struct HomeViewModelTests {
         ])
         let model = HomeViewModel(
             media: StubMediaRepository(),
-            progressStore: progressStore
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
         )
 
         await model.load()
@@ -223,7 +317,8 @@ struct HomeViewModelTests {
         let progressStore = InMemoryPlaybackProgressStore()
         let model = HomeViewModel(
             media: StubMediaRepository(),
-            progressStore: progressStore
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
         )
 
         await model.load()
@@ -244,5 +339,137 @@ struct HomeViewModelTests {
         #expect(model.continueWatching.count == 1)
         #expect(model.continueWatching.first?.anime.id == "46474")
         #expect(model.continueWatching.first?.progress.episodeNumber == 3)
+    }
+
+    @Test func continueWatchingKeepsResolvedCardsDuringRefresh() async throws {
+        var media = StubMediaRepository()
+        media.requestDelay = .milliseconds(150)
+        let episodes = StubEpisodeRepository(episodesByAnimeID: [
+            "46474": [
+                Episode(
+                    id: "46474-5",
+                    animeID: "46474",
+                    number: 5,
+                    relativeNumber: 5,
+                    title: "The Journey Begins"
+                ),
+            ],
+        ])
+        let progressStore = InMemoryPlaybackProgressStore(items: [
+            PlaybackProgress(
+                animeID: "46474",
+                episodeNumber: 5,
+                positionSeconds: 100,
+                durationSeconds: 1400,
+                updatedAt: Date(),
+                animeTitle: "Frieren"
+            ),
+        ])
+        let model = HomeViewModel(
+            media: media,
+            progressStore: progressStore,
+            episodes: episodes
+        )
+        await model.load()
+        #expect(model.continueWatching.first?.episode?.title == "The Journey Begins")
+
+        await progressStore.save(
+            PlaybackProgress(
+                animeID: "41370",
+                episodeNumber: 3,
+                positionSeconds: 200,
+                durationSeconds: 1400,
+                updatedAt: Date(),
+                animeTitle: "Demon Slayer"
+            )
+        )
+        let refresh = Task { await model.refreshContinueWatching() }
+        try await Task.sleep(for: .milliseconds(50))
+        // Mid-refresh the resolved Frieren card stays put. Snapshot
+        // placeholders would have dropped its episode title.
+        #expect(model.continueWatching.count == 1)
+        #expect(model.continueWatching.first?.episode?.title == "The Journey Begins")
+
+        await refresh.value
+        #expect(model.continueWatching.count == 2)
+    }
+
+    @Test func continueWatchingResolvesShowsConcurrently() async {
+        let tracker = MediaRequestTracker()
+        var media = StubMediaRepository()
+        media.requestDelay = .milliseconds(80)
+        media.requestTracker = tracker
+        let now = Date()
+        let progressStore = InMemoryPlaybackProgressStore(
+            items: ["46474", "7442", "41370", "12"].enumerated().map { offset, animeID in
+                PlaybackProgress(
+                    animeID: animeID,
+                    episodeNumber: 1,
+                    positionSeconds: 100,
+                    durationSeconds: 1400,
+                    updatedAt: now.addingTimeInterval(TimeInterval(-offset)),
+                    animeTitle: "Show \(animeID)"
+                )
+            }
+        )
+        let model = HomeViewModel(
+            media: media,
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
+        )
+
+        await model.load()
+
+        #expect(model.continueWatching.count == 4)
+        #expect(await tracker.maxInFlight > 1)
+    }
+
+    @Test func continueWatchingCarriesEpisodeTitleAndSeason() async throws {
+        let season1 = try #require(SampleCatalog.anime(withID: "7442"))
+        let season2 = try #require(SampleCatalog.anime(withID: "8671"))
+        var media = StubMediaRepository()
+        media.details = [
+            season1.id: AnimeDetails(
+                anime: season1,
+                relations: [AnimeRelation(role: .sequel, anime: season2)]
+            ),
+            season2.id: AnimeDetails(
+                anime: season2,
+                relations: [AnimeRelation(role: .prequel, anime: season1)]
+            ),
+        ]
+        var episodes = StubEpisodeRepository()
+        episodes.episodesByAnimeID = [
+            season2.id: [
+                Episode(
+                    id: "\(season2.id)-4",
+                    animeID: season2.id,
+                    number: 4,
+                    relativeNumber: 4,
+                    title: "The Hero's Resolve"
+                ),
+            ],
+        ]
+        let progressStore = InMemoryPlaybackProgressStore(items: [
+            PlaybackProgress(
+                animeID: season2.id,
+                episodeNumber: 4,
+                positionSeconds: 1_038,
+                durationSeconds: 1_440,
+                updatedAt: Date()
+            ),
+        ])
+        let model = HomeViewModel(
+            media: media,
+            progressStore: progressStore,
+            episodes: episodes
+        )
+
+        await model.load()
+
+        let entry = try #require(model.continueWatching.first)
+        #expect(entry.anime.id == season2.id)
+        #expect(entry.seasonNumber == 2)
+        #expect(entry.episode?.title == "The Hero's Resolve")
     }
 }

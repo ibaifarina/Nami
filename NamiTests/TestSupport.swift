@@ -149,6 +149,20 @@ actor StubStreamValidator: StreamValidating {
     }
 }
 
+actor MediaRequestTracker {
+    private var inFlight = 0
+    private(set) var maxInFlight = 0
+
+    func begin() {
+        inFlight += 1
+        maxInFlight = max(maxInFlight, inFlight)
+    }
+
+    func end() {
+        inFlight -= 1
+    }
+}
+
 struct StubMediaRepository: MediaRepository {
     var details: [String: AnimeDetails] = [:]
     var popularResult: [Anime] = []
@@ -157,14 +171,26 @@ struct StubMediaRepository: MediaRepository {
     var upcomingResult: [Anime] = []
     var recentResult: [Anime] = []
     var pages: [[Anime]] = []
+    var discoverDelays: [Int: Duration] = [:]
+    var requestDelay: Duration?
+    var requestTracker: MediaRequestTracker?
     var error: CatalogError?
     var onDiscover: @Sendable () async -> Void = {}
 
     func anime(id: String) async throws -> AnimeDetails {
-        if let details = details[id] { return details }
+        await requestTracker?.begin()
+        if let requestDelay {
+            try? await Task.sleep(for: requestDelay)
+        }
+        if let details = details[id] {
+            await requestTracker?.end()
+            return details
+        }
         if let anime = SampleCatalog.anime(withID: id) {
+            await requestTracker?.end()
             return AnimeDetails(anime: anime, relations: [])
         }
+        await requestTracker?.end()
         throw CatalogError.notFound
     }
 
@@ -194,6 +220,9 @@ struct StubMediaRepository: MediaRepository {
 
     func discover(query: String?, filters: DiscoverFilters, page: Int) async throws -> [Anime] {
         await onDiscover()
+        if let delay = discoverDelays[page] {
+            try await Task.sleep(for: delay)
+        }
         if let error { throw error }
         guard page >= 0, page < pages.count else { return [] }
         return pages[page]

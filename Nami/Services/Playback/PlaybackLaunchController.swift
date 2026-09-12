@@ -145,35 +145,48 @@ final class PlaybackLaunchController {
             return
         }
 
-        let result = await preload.streams(anime: request.anime, episode: request.episode)
-        guard !Task.isCancelled, isCurrent(expectedGeneration) else { return }
-
-        guard result.decision.shouldAutoPlay, let candidate = result.decision.candidate else {
-            pickerRequest = manualRequest(for: request)
-            return
-        }
-
-        // Movie releases are occasionally packaged as several files. Hand the
-        // choice back to the user instead of guessing which part to play.
-        // Auto-selection stays enabled so the picker can jump straight to the
-        // file list for the best source.
-        if request.anime.subtype?.isMovie == true,
-           let files = try? await resolver.files(for: candidate),
-           TorrentFileSelector.playableFiles(from: files).count > 1 {
+        // Sources are consumed as they arrive: the first addon that offers a
+        // confident match starts playback without waiting for slower addons.
+        for await update in preload.stream(anime: request.anime, episode: request.episode) {
             guard !Task.isCancelled, isCurrent(expectedGeneration) else { return }
-            pickerRequest = PlaybackRequest(
-                anime: request.anime,
-                episode: request.episode,
-                startPositionSeconds: request.startPositionSeconds
+
+            guard
+                update.result.decision.shouldAutoPlay,
+                let candidate = update.result.decision.candidate
+            else {
+                if update.isFinal {
+                    pickerRequest = manualRequest(for: request)
+                    return
+                }
+                continue
+            }
+
+            // Movie releases are occasionally packaged as several files. Hand
+            // the choice back to the user instead of guessing which part to
+            // play. Auto-selection stays enabled so the picker can jump
+            // straight to the file list for the best source.
+            if request.anime.subtype?.isMovie == true,
+               let files = try? await resolver.files(for: candidate),
+               TorrentFileSelector.playableFiles(from: files).count > 1 {
+                guard !Task.isCancelled, isCurrent(expectedGeneration) else { return }
+                pickerRequest = PlaybackRequest(
+                    anime: request.anime,
+                    episode: request.episode,
+                    startPositionSeconds: request.startPositionSeconds
+                )
+                return
+            }
+
+            await startFirstAvailable(
+                candidateChain(primary: candidate, result: update.result),
+                request: request,
+                expectedGeneration: expectedGeneration
             )
             return
         }
 
-        await startFirstAvailable(
-            candidateChain(primary: candidate, result: result),
-            request: request,
-            expectedGeneration: expectedGeneration
-        )
+        guard !Task.isCancelled, isCurrent(expectedGeneration) else { return }
+        pickerRequest = manualRequest(for: request)
     }
 
     /// Resolves candidates in preference order and starts the first usable

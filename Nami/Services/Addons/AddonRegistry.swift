@@ -14,6 +14,10 @@ final class AddonRegistry {
     private(set) var installed: [InstalledAddon] = []
     private(set) var lastError: String?
 
+    private(set) var revision = 0
+
+    var onConfigurationChange: (() -> Void)?
+
     init(persistence: any AddonPersistence) {
         self.persistence = persistence
         if let loaded = try? persistence.load() {
@@ -36,19 +40,23 @@ final class AddonRegistry {
         let nextPriority = (installed.map(\.priority).max() ?? -1) + 1
         let addon = preview.makeInstalledAddon(priority: nextPriority)
         installed.append(addon)
+        configurationDidChange()
         try persist()
         return addon
     }
 
     func remove(id: String) throws {
+        guard installed.contains(where: { $0.id == id }) else { return }
         installed.removeAll { $0.id == id }
         normalizePriorities()
+        configurationDidChange()
         try persist()
     }
 
     func setEnabled(id: String, isEnabled: Bool) throws {
         guard let index = installed.firstIndex(where: { $0.id == id }) else { return }
         installed[index].isEnabled = isEnabled
+        configurationDidChange()
         try persist()
     }
 
@@ -69,6 +77,7 @@ final class AddonRegistry {
         let insertionIndex = min(max(toOffset - shift, 0), installed.count)
         installed.insert(contentsOf: moving, at: insertionIndex)
         normalizePriorities()
+        configurationDidChange()
         try persist()
     }
 
@@ -78,7 +87,13 @@ final class AddonRegistry {
         guard installed.indices.contains(target) else { return }
         installed.swapAt(index, target)
         normalizePriorities()
+        configurationDidChange()
         try persist()
+    }
+
+    func configurationDidChange() {
+        revision += 1
+        onConfigurationChange?()
     }
 
     private func normalizePriorities() {

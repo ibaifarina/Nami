@@ -12,6 +12,7 @@ final class AppEnvironment {
     let addons: AddonRegistry
     let addonManager: AddonManager
     let addonInstaller: AddonInstallService
+    let addonCalibration: AddonCalibrationService
     let debrid: RealDebridService
     let debridAuth: RealDebridAuthService
     let streamDiscovery: StreamDiscoveryService
@@ -44,6 +45,7 @@ final class AppEnvironment {
         libraryPersistence: (any LibraryPersistence)? = nil,
         metadataCache: MetadataCache? = nil,
         resolvedStreamCache: ResolvedStreamCache? = nil,
+        parsingProfileStore: ParsingProfileStore? = nil,
         http: any HTTPClient = URLSessionHTTPClient()
     ) {
         self.preferences = preferences
@@ -117,7 +119,16 @@ final class AppEnvironment {
         let manager = AddonManager(identityResolver: identityResolver)
         addonManager = manager
         addonInstaller = AddonInstallService()
-        let discoveryService = StreamDiscoveryService(addonManager: manager, debrid: debridService)
+        let profiles = parsingProfileStore ?? ParsingProfileStore()
+        addonCalibration = AddonCalibrationService(
+            addonManager: manager,
+            profileStore: profiles
+        )
+        let discoveryService = StreamDiscoveryService(
+            addonManager: manager,
+            debrid: debridService,
+            profileStore: profiles
+        )
         streamDiscovery = discoveryService
         streamPreload = StreamPreloadService(
             discovery: discoveryService,
@@ -225,7 +236,8 @@ extension AppEnvironment {
             addonPersistence: InMemoryAddonPersistence(),
             libraryPersistence: InMemoryLibraryPersistence(),
             metadataCache: MetadataCache(directory: nil),
-            resolvedStreamCache: ResolvedStreamCache(fileURL: nil)
+            resolvedStreamCache: ResolvedStreamCache(fileURL: nil),
+            parsingProfileStore: ParsingProfileStore(directory: nil)
         )
     }
 }

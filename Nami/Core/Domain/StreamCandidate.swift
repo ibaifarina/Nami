@@ -26,6 +26,24 @@ enum VideoCodec: String, Codable, CaseIterable, Sendable, Identifiable {
     }
 }
 
+enum DynamicRange: String, Codable, CaseIterable, Sendable, Identifiable {
+    case hdr
+    case hdr10
+    case hdr10Plus = "hdr10+"
+    case dolbyVision = "dolbyVision"
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .hdr: "HDR"
+        case .hdr10: "HDR10"
+        case .hdr10Plus: "HDR10+"
+        case .dolbyVision: "DV"
+        }
+    }
+}
+
 enum ReleaseSource: String, Codable, CaseIterable, Sendable, Identifiable {
     case bluRay
     case webDL
@@ -95,11 +113,15 @@ struct StreamCandidate: Identifiable, Hashable, Codable, Sendable {
 
     let resolution: VideoResolution?
     let codec: VideoCodec?
+    let dynamicRange: DynamicRange?
     let source: ReleaseSource?
     let releaseGroup: String?
 
     let sizeBytes: Int64?
     let seeders: Int?
+    /// Text-level hint that the addon marks this result as cached. The
+    /// authoritative value still comes from the debrid service probe.
+    let isCachedHint: Bool
 
     let audioLanguages: Set<String>
     let subtitleLanguages: Set<String>
@@ -124,10 +146,12 @@ struct StreamCandidate: Identifiable, Hashable, Codable, Sendable {
         fileIndex: Int? = nil,
         resolution: VideoResolution? = nil,
         codec: VideoCodec? = nil,
+        dynamicRange: DynamicRange? = nil,
         source: ReleaseSource? = nil,
         releaseGroup: String? = nil,
         sizeBytes: Int64? = nil,
         seeders: Int? = nil,
+        isCachedHint: Bool = false,
         audioLanguages: Set<String> = [],
         subtitleLanguages: Set<String> = [],
         parsedEpisode: ParsedEpisodeInfo? = nil,
@@ -148,10 +172,12 @@ struct StreamCandidate: Identifiable, Hashable, Codable, Sendable {
         self.fileIndex = fileIndex
         self.resolution = resolution
         self.codec = codec
+        self.dynamicRange = dynamicRange
         self.source = source
         self.releaseGroup = releaseGroup
         self.sizeBytes = sizeBytes
         self.seeders = seeders
+        self.isCachedHint = isCachedHint
         self.audioLanguages = audioLanguages
         self.subtitleLanguages = subtitleLanguages
         self.parsedEpisode = parsedEpisode

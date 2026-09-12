@@ -22,10 +22,8 @@ struct StreamSelectionView: View {
         }
         .padding(Spacing.xl)
         .frame(width: 600, height: 560)
-        .task {
-            if case .loading = model.phase {
-                await model.start()
-            }
+        .task(id: environment.addons.revision) {
+            await model.refreshForAddonChange()
         }
         .onChange(of: model.phase) { _, phase in
             if phase == .started {
@@ -72,7 +70,13 @@ struct StreamSelectionView: View {
     private var content: some View {
         switch model.phase {
         case .loading:
-            loadingView
+            if model.isChoosingFile {
+                filePickerView
+            } else if model.hasAnyCandidates {
+                pickerView
+            } else {
+                loadingView
+            }
         case .picker:
             if model.isChoosingFile {
                 filePickerView
@@ -111,9 +115,10 @@ struct StreamSelectionView: View {
             emptyResultsView
         } else {
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.lg) {
+                LazyVStack(alignment: .leading, spacing: Spacing.lg) {
                     if let decision = model.decision,
                        !decision.shouldAutoPlay,
+                       !model.isDiscovering,
                        !request.prefersManualSelection {
                         Text("We couldn't confidently choose a source. Pick one below.")
                             .font(AppFont.body)
@@ -141,10 +146,10 @@ struct StreamSelectionView: View {
                     }
 
                     if !model.otherStreams.isEmpty {
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                        LazyVStack(alignment: .leading, spacing: Spacing.sm) {
                             SectionHeader(
                                 title: "Other Sources",
-                                subtitle: "\(model.otherStreams.count) more option\(model.otherStreams.count == 1 ? "" : "s")"
+                                subtitle: "\(model.otherSourceCount) more option\(model.otherSourceCount == 1 ? "" : "s")"
                             )
                             ForEach(model.otherStreams) { scored in
                                 SourceRow(
@@ -157,13 +162,13 @@ struct StreamSelectionView: View {
                         }
                     }
 
-                    if !model.rejectedStreams.isEmpty {
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                    if !model.visibleRejectedStreams.isEmpty {
+                        LazyVStack(alignment: .leading, spacing: Spacing.sm) {
                             SectionHeader(
                                 title: "Low Confidence",
                                 subtitle: "These aren't auto-selected. Choose manually only if you're sure."
                             )
-                            ForEach(model.rejectedStreams) { scored in
+                            ForEach(model.visibleRejectedStreams) { scored in
                                 SourceRow(
                                     scored: scored,
                                     isResolving: model.resolvingCandidateID == scored.candidate.id,
@@ -183,6 +188,20 @@ struct StreamSelectionView: View {
                                     .foregroundStyle(.tertiary)
                             }
                         }
+                    }
+
+                    if model.hasMoreSources {
+                        HStack(spacing: Spacing.xs) {
+                            ProgressView()
+                                .controlSize(.small)
+                            Text("Showing \(model.visibleSourceLimit) of \(model.totalSourceCount) sources")
+                                .font(AppFont.cardMeta)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Spacing.xs)
+                        .id(model.visibleSourceLimit)
+                        .onAppear { model.showMoreSources() }
                     }
                 }
                 .padding(.bottom, Spacing.xs)
@@ -319,7 +338,8 @@ private struct SourceRow: View {
                 VStack(alignment: .trailing, spacing: Spacing.xs) {
                     CacheIndicator(
                         status: scored.candidate.debridStatus,
-                        hasTorrentSource: hasTorrentSource
+                        hasTorrentSource: hasTorrentSource,
+                        isCachedHint: scored.candidate.isCachedHint
                     )
                     if isResolving {
                         LoadingSpinner(size: 16, lineWidth: 2)
@@ -377,6 +397,7 @@ private struct SourceRow: View {
         var parts: [String] = []
         if let source = scored.candidate.source { parts.append(source.label) }
         if let codec = scored.candidate.codec { parts.append(codec.label) }
+        if let dynamicRange = scored.candidate.dynamicRange { parts.append(dynamicRange.label) }
         if parts.isEmpty, scored.candidate.resolution == nil { parts.append("Unknown quality") }
         return parts.joined(separator: " \u{00B7} ")
     }
@@ -559,6 +580,7 @@ private struct MovieFileRow: View {
 private struct CacheIndicator: View {
     let status: DebridAvailability
     let hasTorrentSource: Bool
+    var isCachedHint = false
 
     var body: some View {
         Image(systemName: symbol)
@@ -590,7 +612,7 @@ private struct CacheIndicator: View {
         case .cached: "bolt.fill"
         case .notCached: "bolt.slash"
         case .unavailable: "bolt.slash.fill"
-        case .unknown: "bolt"
+        case .unknown: isCachedHint ? "bolt.fill" : "bolt"
         }
     }
 
@@ -599,16 +621,21 @@ private struct CacheIndicator: View {
         case .cached: .green
         case .notCached: .secondary
         case .unavailable: .red.opacity(0.85)
-        case .unknown: .secondary.opacity(0.55)
+        case .unknown: isCachedHint ? .yellow : .secondary.opacity(0.55)
         }
     }
 
     private var background: Color {
-        status == .cached ? .green.opacity(0.14) : .clear
+        if status == .cached { return .green.opacity(0.14) }
+        if status == .unknown, isCachedHint { return .yellow.opacity(0.14) }
+        return .clear
     }
 
     private var description: String {
-        Self.label(for: status, hasTorrentSource: hasTorrentSource)
+        if status == .unknown, isCachedHint {
+            return "The addon lists this source as cached; not yet verified"
+        }
+        return Self.label(for: status, hasTorrentSource: hasTorrentSource)
     }
 }
 

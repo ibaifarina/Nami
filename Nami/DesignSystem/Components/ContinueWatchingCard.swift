@@ -3,6 +3,9 @@ import SwiftUI
 struct ContinueWatchingCard: View {
     let anime: Anime
     let progress: PlaybackProgress
+    var episode: Episode? = nil
+    var seasonNumber: Int? = nil
+    var onOpen: () -> Void
     var onResume: () -> Void
     var onRemove: () -> Void
 
@@ -11,23 +14,16 @@ struct ContinueWatchingCard: View {
     @State private var isHovered = false
 
     var body: some View {
-        Button(action: onResume) {
-            Color.clear
-                .aspectRatio(16.0 / 9.0, contentMode: .fit)
-                .overlay {
-                    RemoteImage(url: anime.bannerURL ?? anime.posterURL, contentMode: .fill)
-                }
-                .overlay { scrim }
-                .overlay { resumeButton }
-                .overlay(alignment: .bottom) { progressBar }
-                .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-                        .strokeBorder(AppColor.stroke, lineWidth: 0.5)
-                }
-                .contentShape(Rectangle())
+        ZStack {
+            Button(action: onOpen) {
+                cardContent
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(title), \(accessibilityEpisodeLine)")
+            .accessibilityHint("Opens anime details")
+
+            resumeButton
         }
-        .buttonStyle(.plain)
         .overlay(alignment: .topTrailing) { removeButton }
         .onHover { hovering in
             withAnimation(.easeOut(duration: Motion.hover)) {
@@ -35,9 +31,18 @@ struct ContinueWatchingCard: View {
             }
         }
         .scaleEffect(isHovered && !reduceMotion ? 1.015 : 1)
-        .accessibilityLabel(
-            "Resume \(title), episode \(progress.episodeNumber), \(progress.timecode)"
-        )
+    }
+
+    private var cardContent: some View {
+        Color.clear
+            .aspectRatio(16.0 / 9.0, contentMode: .fit)
+            .overlay {
+                RemoteImage(url: anime.bannerURL ?? anime.posterURL, contentMode: .fill)
+            }
+            .overlay { scrim }
+            .overlay(alignment: .bottom) { progressBar }
+            .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            .contentShape(Rectangle())
     }
 
     private var title: String {
@@ -59,26 +64,56 @@ struct ContinueWatchingCard: View {
                     .font(AppFont.cardTitle)
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                HStack(spacing: Spacing.xs) {
-                    Text("Episode \(progress.episodeNumber)")
-                    Text(progress.timecode)
-                        .foregroundStyle(.white.opacity(0.7))
-                }
-                .font(AppFont.cardMeta)
-                .foregroundStyle(.white.opacity(0.85))
+                Text(episodeLine)
+                    .font(AppFont.cardMeta)
+                    .foregroundStyle(.white.opacity(0.85))
+                    .lineLimit(1)
+                Text(progress.timecode)
+                    .font(AppFont.cardMeta)
+                    .foregroundStyle(.white.opacity(0.7))
             }
             .padding(Spacing.sm)
         }
     }
 
+    private var episodeLine: String {
+        var line = "E\(progress.episodeNumber)"
+        if let seasonNumber {
+            line = "S\(seasonNumber) \u{00B7} " + line
+        }
+        if let episodeTitle = episode?.title, !episodeTitle.isEmpty {
+            line += " \u{2014} \(episodeTitle)"
+        }
+        return line
+    }
+
+    private var accessibilityEpisodeLine: String {
+        var parts: [String] = []
+        if let seasonNumber {
+            parts.append("season \(seasonNumber)")
+        }
+        parts.append("episode \(progress.episodeNumber)")
+        if let episodeTitle = episode?.title, !episodeTitle.isEmpty {
+            parts.append(episodeTitle)
+        }
+        return parts.joined(separator: ", ")
+    }
+
     @ViewBuilder
     private var resumeButton: some View {
         if isHovered {
-            Image(systemName: "play.circle.fill")
-                .font(.system(size: 38))
-                .foregroundStyle(.white)
-                .shadow(radius: 8)
-                .transition(.opacity)
+            Button(action: onResume) {
+                Image(systemName: "play.circle.fill")
+                    .font(.system(size: 38))
+                    .foregroundStyle(.white)
+                    .shadow(radius: 8)
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .hoverFeedback(scale: 1.12, shadowRadius: 10, shadowY: 2)
+            .transition(.opacity)
+            .accessibilityLabel("Resume \(title), \(accessibilityEpisodeLine), \(progress.timecode)")
+            .accessibilityHint("Resumes this episode immediately")
         }
     }
 

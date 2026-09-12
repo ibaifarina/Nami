@@ -49,6 +49,18 @@ struct AddonDescriptor: Hashable, Sendable {
     let manifestURL: URL
 }
 
+/// Text field on a raw Stremio/Generic stream result that a parsing rule can
+/// read. Calibration profiles only ever reference these fields, never arbitrary
+/// keys or executable expressions.
+enum StreamField: String, Codable, CaseIterable, Sendable {
+    case title
+    case name
+    case description
+    case filename
+
+    var displayName: String { rawValue }
+}
+
 struct RawStreamResult: Hashable, Sendable {
     let addonID: String
     let addonName: String
@@ -62,6 +74,10 @@ struct RawStreamResult: Hashable, Sendable {
     let seeders: Int?
     let providerName: String?
     let providerMetadata: [String: String]
+    /// Verbatim text fields exactly as the addon returned them. Used by the
+    /// calibrated format parser and by calibration sampling. Never contains
+    /// playback URLs, hashes, or credentials.
+    let sourceFields: [StreamField: String]
 
     init(
         addonID: String,
@@ -75,7 +91,8 @@ struct RawStreamResult: Hashable, Sendable {
         sizeBytes: Int64? = nil,
         seeders: Int? = nil,
         providerName: String? = nil,
-        providerMetadata: [String: String] = [:]
+        providerMetadata: [String: String] = [:],
+        sourceFields: [StreamField: String] = [:]
     ) {
         self.addonID = addonID
         self.addonName = addonName
@@ -89,6 +106,18 @@ struct RawStreamResult: Hashable, Sendable {
         self.seeders = seeders
         self.providerName = providerName
         self.providerMetadata = providerMetadata
+        self.sourceFields = sourceFields
+    }
+
+    /// Text fields considered by calibrated parsing profiles.
+    var profileFields: [StreamField: String] {
+        var fields = sourceFields
+        if fields[.title] == nil, let rawTitle { fields[.title] = rawTitle }
+        if fields[.name] == nil, let providerName { fields[.name] = providerName }
+        if fields[.filename] == nil, let filename = providerMetadata["filename"] {
+            fields[.filename] = filename
+        }
+        return fields
     }
 }
 
@@ -147,6 +176,10 @@ enum AddonError: Error, Equatable, Sendable {
     case manifestTooLarge
     case responseTooLarge
     case invalidManifest(String)
+    /// The manifest is valid JSON but declares no stream resource, which is
+    /// what configurable addons such as AIOStreams return when their saved
+    /// configuration has no providers enabled.
+    case noStreamResources
     case unsupportedProtocol
     case alreadyInstalled(String)
     case unsupportedCapability(String)
@@ -172,6 +205,8 @@ extension AddonError: LocalizedError {
             "The addon returned more data than allowed."
         case .invalidManifest(let detail):
             "This addon returned an invalid manifest. \(detail)"
+        case .noStreamResources:
+            "This addon's manifest doesn't declare any stream providers. If it's configurable, open its configuration, enable at least one stream provider, then add the addon again."
         case .unsupportedProtocol:
             "This addon uses a protocol the app does not support yet."
         case .alreadyInstalled(let name):

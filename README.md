@@ -1,6 +1,6 @@
-<div align="center">
 
-<img src="assets/logo.png" width="140" alt="Nami App Icon" />
+
+![Nami App Icon](assets/logo.png)
 
 # Nami
 
@@ -8,7 +8,6 @@
 
 An anime-first streaming app that turns a stack of addons, debrid services, and release files into one clean Play button.
 
-</div>
 
 
 ---
@@ -29,17 +28,16 @@ Built for:
 
 ---
 
+
+
 ## Features
 
-<table>
-<tr>
-<th align="left">Discovery</th>
-<th align="left">Auto-Select</th>
-<th align="left">Playback</th>
-</tr>
 
-<tr>
-<td>
+| Discovery | Auto-Select | Playback |
+| --------- | ----------- | -------- |
+
+
+
 
 - AniList metadata
 - Trending and seasonal
@@ -48,9 +46,9 @@ Built for:
 - Continue Watching shelf
 - AniList account sync
 
-</td>
 
-<td>
+
+
 
 - Stremio-compatible addons
 - Generic HTTP addon protocol
@@ -62,9 +60,9 @@ Built for:
 - "Why this stream?" breakdown
 - Manual source picker
 
-</td>
 
-<td>
+
+
 
 - libmpv + AVPlayer engines
 - Embedded ASS/SSA subtitles
@@ -76,15 +74,29 @@ Built for:
 - Hardware decoding
 - Speed and volume controls
 
-</td>
-</tr>
-</table>
+
 
 > **Minimum target:** macOS 15.0+ (Apple Silicon recommended)
 
 ---
 
+
+
+## Addon Support
+
+Nami works with Stremio-compatible addons.
+
+- **Torrentio** and **Comet** are supported out of the box. Nami already understands their result format and uses a built-in optimized parser, so no format analysis is needed.
+- **Any other Stremio-compatible addon** can be added as well. When it is installed, Nami analyzes the addon's stream format on-device with Apple's AI (Foundation Models with Apple Intelligence on macOS 26+). On Macs where that isn't available, Nami falls back to its built-in parser automatically, although its prone to fail.
+- With every addon — including Torrentio and Comet — results are best when the addon puts as much information as possible into the stream format text, such as resolution, codec, dynamic range, audio and subtitle languages, release group, and file size. Nami reads this text to match episodes and rank sources accurately.
+
+---
+
+
+
 ## Quick Start
+
+
 
 ### Run with Xcode
 
@@ -95,14 +107,19 @@ xcodegen generate
 open Nami.xcodeproj
 ```
 
+
+
 ### Run with the helper script
 
 ```bash
 ./build_and_run.sh
 ```
 
+
+
 ### Run the tests
 
 ```bash
 xcodebuild -project Nami.xcodeproj -scheme Nami -destination platform=macOS test
 ```
+

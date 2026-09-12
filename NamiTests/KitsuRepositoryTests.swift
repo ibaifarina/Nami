@@ -28,8 +28,8 @@ struct KitsuRepositoryTests {
         let request = try #require(await http.lastRequest)
         let url = request.url?.absoluteString ?? ""
         #expect(url.contains("/api/edge/anime"))
-        #expect(url.contains("page%5Blimit%5D=20") || url.contains("page[limit]=20"))
-        #expect(url.contains("page%5Boffset%5D=0") || url.contains("page[offset]=0"))
+        #expect(url.contains("page%5Bsize%5D=20") || url.contains("page[size]=20"))
+        #expect(url.contains("page%5Bnumber%5D=1") || url.contains("page[number]=1"))
         #expect(url.contains("sort=popularityRank"))
         #expect(request.value(forHTTPHeaderField: "Accept") == "application/vnd.api+json")
     }
@@ -45,6 +45,19 @@ struct KitsuRepositoryTests {
         _ = try await repository.popular(page: 0)
 
         #expect(await http.requestCount == 1)
+    }
+
+    @Test func nsfwTitlesAreFilteredFromLists() async throws {
+        let http = MockHTTPClient { _ in KitsuFixtures.animePageWithNSFWJSON }
+        let repository = KitsuMediaRepository(
+            client: KitsuClient(http: http),
+            cache: MetadataCache(directory: nil)
+        )
+
+        let items = try await repository.popular(page: 0)
+
+        #expect(items.count == 1)
+        #expect(!items.contains { $0.id == "999" })
     }
 
     @Test func searchSendsTextFilter() async throws {
@@ -67,7 +80,7 @@ struct KitsuRepositoryTests {
             cache: MetadataCache(directory: nil)
         )
         var filters = DiscoverFilters()
-        filters.genre = "sci-fi"
+        filters.genre = "science-fiction"
         filters.year = 2024
         filters.status = .current
         filters.subtype = .tv
@@ -77,13 +90,36 @@ struct KitsuRepositoryTests {
         _ = try await repository.discover(query: nil, filters: filters, page: 1)
 
         let url = try #require(await http.lastRequest?.url?.absoluteString)
-        #expect(url.contains("filter%5Bcategories%5D=sci-fi") || url.contains("filter[categories]=sci-fi"))
+        #expect(url.contains("filter%5Bcategories%5D=science-fiction") || url.contains("filter[categories]=science-fiction"))
         #expect(url.contains("filter%5BseasonYear%5D=2024") || url.contains("filter[seasonYear]=2024"))
         #expect(url.contains("filter%5Bstatus%5D=current") || url.contains("filter[status]=current"))
         #expect(url.contains("filter%5Bsubtype%5D=TV") || url.contains("filter[subtype]=TV"))
         #expect(url.contains("filter%5Bseason%5D=fall") || url.contains("filter[season]=fall"))
         #expect(url.contains("sort=ratingRank"))
-        #expect(url.contains("page%5Boffset%5D=20") || url.contains("page[offset]=20"))
+        #expect(url.contains("page%5Bnumber%5D=2") || url.contains("page[number]=2"))
+    }
+
+    @Test func filteredDiscoverPagesForward() async throws {
+        let http = MockHTTPClient { request in
+            let url = request.url?.absoluteString ?? ""
+            if url.contains("page%5Bnumber%5D=2") || url.contains("page[number]=2") {
+                return KitsuFixtures.animePageTwoJSON
+            }
+            return KitsuFixtures.animePageOneJSON
+        }
+        let repository = KitsuMediaRepository(
+            client: KitsuClient(http: http),
+            cache: MetadataCache(directory: nil)
+        )
+        var filters = DiscoverFilters()
+        filters.genre = "action"
+        filters.year = 2024
+
+        let first = try await repository.discover(query: "naruto", filters: filters, page: 0)
+        let second = try await repository.discover(query: "naruto", filters: filters, page: 1)
+
+        #expect(first.map(\.id) == ["7442", "46474"])
+        #expect(second.map(\.id) == ["8671"])
     }
 
     @Test func detailsDecodeRelationsAndIdentity() async throws {

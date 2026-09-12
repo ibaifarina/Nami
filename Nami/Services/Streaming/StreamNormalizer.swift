@@ -1,32 +1,48 @@
 import Foundation
 
+/// Turns raw addon results into `StreamCandidate`s.
+///
+/// Structured addon fields always win. The generic release parser runs on the
+/// release title, and — when a calibrated profile exists for the addon — the
+/// deterministic profile parser fills in metadata the generic parser missed.
+/// Unknown metadata merely stays unknown.
 struct StreamNormalizer: Sendable {
     private let matcher = EpisodeMatcher()
+    private let profileParser = ProfileStreamParser()
 
-    func normalize(_ raw: RawStreamResult) -> StreamCandidate {
-        makeCandidate(from: raw, match: nil)
+    func normalize(
+        _ raw: RawStreamResult,
+        profile: ContentParsingProfile? = nil
+    ) -> StreamCandidate {
+        makeCandidate(from: raw, match: nil, profile: profile)
     }
 
     func normalize(
         _ raw: RawStreamResult,
-        matching context: EpisodeMatcher.Context
+        matching context: EpisodeMatcher.Context,
+        profile: ContentParsingProfile? = nil
     ) -> StreamCandidate {
         let parsed = ReleaseParser.parse(raw.displayTitle)
         let match = matcher.match(parsed, context: context)
-        return makeCandidate(from: raw, match: match)
+        return makeCandidate(from: raw, match: match, profile: profile)
     }
 
     func normalize(
         _ raws: [RawStreamResult],
-        matching context: EpisodeMatcher.Context
+        matching context: EpisodeMatcher.Context,
+        profile: ContentParsingProfile? = nil
     ) -> [StreamCandidate] {
-        raws.map { normalize($0, matching: context) }
+        raws.map { normalize($0, matching: context, profile: profile) }
     }
 
     private func makeCandidate(
         from raw: RawStreamResult,
-        match: EpisodeMatchResult?
+        match: EpisodeMatchResult?,
+        profile: ContentParsingProfile?
     ) -> StreamCandidate {
+        let extraction = profile.map {
+            profileParser.parse(fields: raw.profileFields, profile: $0)
+        }
         let parsed = ReleaseParser.parse(raw.displayTitle)
         let hash = raw.infoHash?.lowercased()
         let magnetHash = raw.magnetURI.flatMap { StreamDeduplicator.hash(fromMagnet: $0.absoluteString) }
@@ -45,14 +61,24 @@ struct StreamNormalizer: Sendable {
             magnetURI: raw.magnetURI,
             directURL: raw.directURL,
             fileIndex: raw.fileIndex,
-            resolution: parsed.resolution,
-            codec: parsed.codec,
-            source: parsed.source,
-            releaseGroup: parsed.releaseGroup,
-            sizeBytes: raw.sizeBytes ?? parsed.sizeBytes,
-            seeders: raw.seeders ?? parsed.seeders,
-            audioLanguages: parsed.audioLanguages.union(Self.languages(from: raw.providerMetadata["audio"])),
-            subtitleLanguages: parsed.subtitleLanguages.union(Self.languages(from: raw.providerMetadata["subtitles"])),
+            resolution: Self.resolution(from: raw.providerMetadata["quality"])
+                ?? parsed.resolution
+                ?? extraction?.resolution,
+            codec: parsed.codec ?? extraction?.codec,
+            dynamicRange: parsed.dynamicRange ?? extraction?.dynamicRange,
+            source: parsed.source ?? extraction?.source,
+            releaseGroup: raw.providerMetadata["group"]
+                ?? parsed.releaseGroup
+                ?? extraction?.releaseGroup,
+            sizeBytes: raw.sizeBytes ?? parsed.sizeBytes ?? extraction?.sizeBytes,
+            seeders: raw.seeders ?? parsed.seeders ?? extraction?.seeders,
+            isCachedHint: extraction?.isCached ?? false,
+            audioLanguages: parsed.audioLanguages
+                .union(Self.languages(from: raw.providerMetadata["audio"]))
+                .union(extraction?.audioLanguages ?? []),
+            subtitleLanguages: parsed.subtitleLanguages
+                .union(Self.languages(from: raw.providerMetadata["subtitles"]))
+                .union(extraction?.subtitleLanguages ?? []),
             parsedEpisode: ParsedEpisodeInfo(
                 season: parsed.season,
                 episode: parsed.episode,
@@ -69,11 +95,13 @@ struct StreamNormalizer: Sendable {
     static func languages(from value: String?) -> Set<String> {
         guard let value else { return [] }
         let lowered = value.lowercased()
-        return Set(knownLanguages.filter { lowered.contains($0) })
+        return Set(LanguageVocabulary.known.filter { lowered.contains($0) })
     }
 
-    private static let knownLanguages = [
-        "japanese", "english", "spanish", "french", "german",
-        "italian", "portuguese", "russian", "korean", "chinese",
-    ]
+    /// Structured addon quality strings (for example `"1080p"` from the
+    /// generic protocol) take priority over text inference.
+    static func resolution(from value: String?) -> VideoResolution? {
+        guard let value else { return nil }
+        return ProfileValueNormalizer.videoResolution(value)
+    }
 }

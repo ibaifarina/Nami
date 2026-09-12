@@ -158,6 +158,74 @@ struct StreamDiscoveryServiceTests {
         #expect(result.ranked.first?.candidate.debridStatus == .unknown)
     }
 
+    @Test func streamsPartialResultsAsAddonsFinish() async {
+        let fastHash = "6666666666666666666666666666666666666666"
+        let slowHash = "7777777777777777777777777777777777777777"
+
+        let http = MockHTTPClient { request in
+            switch request.url?.host {
+            case "fast.example":
+                return self.streamsJSON([("Sousou no Frieren - 07 [1080p] BluRay", fastHash)])
+            case "slow.example":
+                try await Task.sleep(for: .milliseconds(80))
+                return self.streamsJSON([("Sousou no Frieren - 07 [720p] WEB", slowHash)])
+            default:
+                throw HTTPError.transport("unexpected host")
+            }
+        }
+
+        let service = StreamDiscoveryService(
+            addonManager: AddonManager(http: http),
+            debrid: nil
+        )
+        let request = request(addons: [
+            AddonFixtures.addon(
+                id: "slow",
+                baseURL: testURL("https://slow.example"),
+                priority: 0
+            ),
+            AddonFixtures.addon(
+                id: "fast",
+                baseURL: testURL("https://fast.example"),
+                priority: 1
+            ),
+        ])
+
+        var events: [StreamDiscoveryEvent] = []
+        for await event in await service.discoverStream(request) {
+            events.append(event)
+        }
+
+        // One snapshot per addon plus a final snapshot.
+        #expect(events.count == 3)
+        #expect(events.first?.isFinal == false)
+        #expect(events.first?.result.ranked.map(\.candidate.id) == [fastHash])
+        #expect(events.last?.isFinal == true)
+        #expect(events.last?.result.ranked.count == 2)
+    }
+
+    @Test func discoverWaitsForEveryAddonAndProbesDebrid() async {
+        let hash = "8888888888888888888888888888888888888888"
+        let http = MockHTTPClient { _ in
+            self.streamsJSON([("Sousou no Frieren - 07 [1080p] BluRay", hash)])
+        }
+        let debrid = StubDebridService()
+        await debrid.configure(availability: [hash: .cached])
+
+        let service = StreamDiscoveryService(
+            addonManager: AddonManager(http: http),
+            debrid: debrid
+        )
+        let result = await service.discover(
+            request(addons: [
+                AddonFixtures.addon(id: "one", baseURL: testURL("https://one.example"), priority: 0),
+            ])
+        )
+
+        #expect(result.ranked.first?.candidate.debridStatus == .cached)
+        #expect(result.decision.candidate?.id == hash)
+    }
+
     @Test func noAddonsYieldsEmptyResult() async {
         let service = StreamDiscoveryService(
             addonManager: AddonManager(http: MockHTTPClient()),

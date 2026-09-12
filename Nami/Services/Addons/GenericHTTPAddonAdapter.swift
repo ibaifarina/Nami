@@ -108,6 +108,9 @@ struct GenericHTTPAddonAdapter: StreamAddon {
         if let audio = stream.audio { metadata["audio"] = audio }
         if let subtitles = stream.subtitles { metadata["subtitles"] = subtitles }
         if let group = stream.group { metadata["group"] = group }
+        var sourceFields: [StreamField: String] = [:]
+        if let title = stream.title { sourceFields[.title] = title }
+        if let name = stream.name { sourceFields[.name] = name }
         return RawStreamResult(
             addonID: descriptor.id,
             addonName: descriptor.name,
@@ -120,7 +123,8 @@ struct GenericHTTPAddonAdapter: StreamAddon {
             sizeBytes: stream.sizeBytes,
             seeders: stream.seeders,
             providerName: stream.provider ?? descriptor.name,
-            providerMetadata: metadata
+            providerMetadata: metadata,
+            sourceFields: sourceFields
         )
     }
 

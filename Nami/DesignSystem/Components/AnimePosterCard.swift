@@ -57,10 +57,6 @@ struct AnimePosterCard: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-                    .strokeBorder(AppColor.stroke, lineWidth: 0.5)
-            }
-            .overlay {
                 if isHovered {
                     hoverOverlay
                 }
@@ -122,14 +118,26 @@ struct AnimePosterCard: View {
         anime: PreviewFixtures.anime,
         progress: PlaybackProgress(
             animeID: "7442",
-            episodeNumber: 7,
-            positionSeconds: 1_111,
-            durationSeconds: 1_452,
+            episodeNumber: 4,
+            positionSeconds: 1_038,
+            durationSeconds: 1_440,
             updatedAt: Date()
-        )
-    ) {
-    } onRemove: {
-    }
+        ),
+        episode: Episode(
+            id: "7442-4",
+            animeID: "7442",
+            number: 4,
+            relativeNumber: 4,
+            title: "The Hero's Resolve"
+        ),
+        seasonNumber: 2,
+        onOpen: {
+        },
+        onResume: {
+        },
+        onRemove: {
+        }
+    )
     .frame(width: 280)
     .padding()
 }

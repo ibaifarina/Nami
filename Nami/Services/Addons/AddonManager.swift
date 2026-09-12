@@ -15,6 +15,8 @@ actor AddonManager {
         self.identityResolver = identityResolver
     }
 
+    /// Queries every enabled addon concurrently and returns the combined
+    /// results once all of them have finished, sorted by addon priority.
     func queryStreams(
         for media: MediaIdentity,
         episode: Episode,
@@ -29,55 +31,73 @@ actor AddonManager {
             .sorted { $0.priority < $1.priority }
         guard !enabled.isEmpty else { return [] }
 
-        let http = self.http
-        let resolver = self.identityResolver
-        let context = AddonIdentityContext(titles: titles, year: year, isMovie: isMovie)
         return await withTaskGroup(of: AddonQueryResult.self) { group in
             for addon in enabled {
                 group.addTask {
-                    guard let adapter = Self.makeAdapter(for: addon, http: http) else {
-                        return AddonQueryResult(
-                            addon: addon,
-                            outcome: .failure("This addon's protocol is not supported yet.")
-                        )
-                    }
-                    // Resolve interoperability IDs only for addons that
-                    // cannot use the canonical Kitsu identity.
-                    let resolvedMedia: MediaIdentity
-                    if let resolver {
-                        resolvedMedia = await resolver.resolve(
-                            media,
-                            for: Self.effectiveNamespaces(for: addon),
-                            context: context
-                        )
-                    } else {
-                        resolvedMedia = media
-                    }
-                    do {
-                        let streams = try await withTimeout(timeout) {
-                            try await adapter.streams(
-                                for: resolvedMedia,
-                                episode: episode,
-                                isMovie: isMovie
-                            )
-                        }
-                        return AddonQueryResult(addon: addon, outcome: .success(streams))
-                    } catch TimeoutError.timedOut {
-                        return AddonQueryResult(addon: addon, outcome: .timedOut)
-                    } catch {
-                        return AddonQueryResult(
-                            addon: addon,
-                            outcome: .failure(Self.failureMessage(for: error))
-                        )
-                    }
+                    await self.query(
+                        addon: addon,
+                        for: media,
+                        episode: episode,
+                        titles: titles,
+                        year: year,
+                        isMovie: isMovie,
+                        timeout: timeout
+                    )
                 }
             }
-
             var results: [AddonQueryResult] = []
             for await result in group {
                 results.append(result)
             }
             return results.sorted { $0.addon.priority < $1.addon.priority }
+        }
+    }
+
+    /// Queries a single addon. Used by the streaming discovery pipeline so
+    /// results can be processed in completion order.
+    func query(
+        addon: InstalledAddon,
+        for media: MediaIdentity,
+        episode: Episode,
+        titles: [String] = [],
+        year: Int? = nil,
+        isMovie: Bool = false,
+        timeout: Duration = .seconds(7)
+    ) async -> AddonQueryResult {
+        guard let adapter = Self.makeAdapter(for: addon, http: http) else {
+            return AddonQueryResult(
+                addon: addon,
+                outcome: .failure("This addon's protocol is not supported yet.")
+            )
+        }
+        // Resolve interoperability IDs only for addons that cannot use the
+        // canonical Kitsu identity.
+        let resolvedMedia: MediaIdentity
+        if let identityResolver {
+            resolvedMedia = await identityResolver.resolve(
+                media,
+                for: Self.effectiveNamespaces(for: addon),
+                context: AddonIdentityContext(titles: titles, year: year, isMovie: isMovie)
+            )
+        } else {
+            resolvedMedia = media
+        }
+        do {
+            let streams = try await withTimeout(timeout) {
+                try await adapter.streams(
+                    for: resolvedMedia,
+                    episode: episode,
+                    isMovie: isMovie
+                )
+            }
+            return AddonQueryResult(addon: addon, outcome: .success(streams))
+        } catch TimeoutError.timedOut {
+            return AddonQueryResult(addon: addon, outcome: .timedOut)
+        } catch {
+            return AddonQueryResult(
+                addon: addon,
+                outcome: .failure(Self.failureMessage(for: error))
+            )
         }
     }
 

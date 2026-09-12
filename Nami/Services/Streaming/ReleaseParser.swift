@@ -5,6 +5,7 @@ struct ParsedRelease: Hashable, Sendable {
 
     let resolution: VideoResolution?
     let codec: VideoCodec?
+    let dynamicRange: DynamicRange?
     let source: ReleaseSource?
     let releaseGroup: String?
 
@@ -44,6 +45,7 @@ enum ReleaseParser {
             rawTitle: rawTitle,
             resolution: resolution(from: rawTitle),
             codec: codec(from: rawTitle),
+            dynamicRange: dynamicRange(from: rawTitle),
             source: source(from: rawTitle),
             releaseGroup: releaseGroup(from: rawTitle),
             season: episodeInfo.season,
@@ -175,6 +177,14 @@ enum ReleaseParser {
         return nil
     }
 
+    static func dynamicRange(from rawTitle: String) -> DynamicRange? {
+        if contains(Self.dolbyVision, in: rawTitle) { return .dolbyVision }
+        if contains(Self.hdr10Plus, in: rawTitle) { return .hdr10Plus }
+        if contains(Self.hdr10, in: rawTitle) { return .hdr10 }
+        if contains(Self.hdrGeneric, in: rawTitle) { return .hdr }
+        return nil
+    }
+
     static func source(from rawTitle: String) -> ReleaseSource? {
         if contains(Self.sourceBluRay, in: rawTitle) { return .bluRay }
         if contains(Self.sourceWebDL, in: rawTitle) { return .webDL }
@@ -264,7 +274,7 @@ enum ReleaseParser {
         "mkv", "mp4", "avi", "mov", "webm",
         "aac", "flac", "opus", "ac3", "dts", "eac3",
         "multi", "dual", "sub", "subs", "dub", "dubbed",
-        "10bit", "8bit", "hdr", "sdr", "remux", "complete", "batch",
+        "10bit", "8bit", "hdr", "sdr", "hdr10", "hdr10+", "dovi", "dv", "remux", "complete", "batch",
     ]
 
     // MARK: - Patterns
@@ -287,6 +297,11 @@ enum ReleaseParser {
     private static let codecAV1 = "\\bav1\\b"
     private static let codecHEVC = "\\b(?:hevc|h\\.?265|x265|h265)\\b"
     private static let codecAVC = "\\b(?:avc|h\\.?264|x264|h264)\\b"
+
+    private static let dolbyVision = "\\b(?:dolby[\\s._-]*vision|dovi|dv)\\b"
+    private static let hdr10Plus = "\\b(?:hdr10\\+|hdr10plus)"
+    private static let hdr10 = "\\bhdr10\\b"
+    private static let hdrGeneric = "\\bhdr\\b"
 
     private static let sourceBluRay = "\\b(?:blu-?ray|bdrip|bdremux|brrip|bdmv|remux)\\b"
     private static let sourceWebDL = "\\b(?:web-?dl|webdl)\\b"
@@ -318,6 +333,7 @@ enum ReleaseParser {
     private static let noisePatterns: [String] = [
         resolution2160, resolution1080, resolution720, resolution480,
         codecAV1, codecHEVC, codecAVC,
+        dolbyVision, hdr10Plus, hdr10, hdrGeneric,
         sourceBluRay, sourceWebDL, sourceWebRip, sourceHDTV, sourceDVD, sourceCAM, sourceTS,
         special, extra, dualAudio, dubbed, subbed,
         seasonEpisode, episodeWord, nthSeason, seasonWord, dashEpisode,

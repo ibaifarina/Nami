@@ -329,6 +329,41 @@ enum KitsuFixtures {
     }
     """.utf8)
 
+    static let animePageWithNSFWJSON = Data("""
+    {
+      "data": [
+        {
+          "id": "7442",
+          "type": "anime",
+          "attributes": {
+            "canonicalTitle": "Attack on Titan",
+            "titles": { "en": "Attack on Titan" },
+            "subtype": "TV",
+            "status": "finished",
+            "ageRating": "R",
+            "nsfw": false
+          },
+          "relationships": {}
+        },
+        {
+          "id": "999",
+          "type": "anime",
+          "attributes": {
+            "canonicalTitle": "Adult Title",
+            "titles": { "en": "Adult Title" },
+            "subtype": "TV",
+            "status": "finished",
+            "ageRating": "R18",
+            "nsfw": true
+          },
+          "relationships": {}
+        }
+      ],
+      "meta": { "count": 2 },
+      "links": {}
+    }
+    """.utf8)
+
     static let emptyCollectionJSON = Data("""
     {
       "data": [],

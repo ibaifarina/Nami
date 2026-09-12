@@ -158,4 +158,132 @@ struct StreamNormalizerTests {
         #expect(candidates.count == 2)
         #expect(candidates[0].episodeMatchConfidence > candidates[1].episodeMatchConfidence)
     }
+
+    // MARK: Calibrated profile
+
+    private var customProfile: ContentParsingProfile {
+        ContentParsingProfile(
+            rules: [
+                AddonParsingRule(
+                    attribute: .resolution,
+                    field: .title,
+                    kind: .keyword,
+                    pattern: "|FULLHD|",
+                    value: "1080p"
+                ),
+                AddonParsingRule(
+                    attribute: .codec,
+                    field: .title,
+                    kind: .keyword,
+                    pattern: "(x265)",
+                    value: "hevc"
+                ),
+                AddonParsingRule(
+                    attribute: .cached,
+                    field: .name,
+                    kind: .flag,
+                    pattern: "RD+"
+                ),
+            ],
+            confidence: 0.9,
+            coverage: 0.9,
+            sampleCount: 6
+        )
+    }
+
+    @Test func profileFillsMetadataTheGenericParserMisses() {
+        let candidate = normalizer.normalize(
+            raw(title: "Custom Show E10 |FULLHD| (x265)", provider: "RD+ cached"),
+            profile: customProfile
+        )
+
+        #expect(candidate.resolution == .p1080)
+        #expect(candidate.codec == .hevc)
+        #expect(candidate.isCachedHint)
+    }
+
+    @Test func genericParserWinsOverProfileForStandardNames() {
+        let conflicting = ContentParsingProfile(
+            rules: [
+                AddonParsingRule(
+                    attribute: .resolution,
+                    field: .title,
+                    kind: .keyword,
+                    pattern: "|FULLHD|",
+                    value: "2160p"
+                ),
+                AddonParsingRule(
+                    attribute: .codec,
+                    field: .title,
+                    kind: .keyword,
+                    pattern: "(x265)",
+                    value: "avc"
+                ),
+            ],
+            confidence: 0.9,
+            coverage: 0.9,
+            sampleCount: 6
+        )
+
+        let candidate = normalizer.normalize(
+            raw(title: "Show - 07 [720p][AVC] |FULLHD| (x265)"),
+            profile: conflicting
+        )
+
+        #expect(candidate.resolution == .p720)
+        #expect(candidate.codec == .hevc)
+    }
+
+    @Test func structuredSizeWinsOverProfile() {
+        let sizeProfile = ContentParsingProfile(
+            rules: [
+                AddonParsingRule(
+                    attribute: .fileSize,
+                    field: .description,
+                    kind: .fileSize,
+                    pattern: "size"
+                ),
+            ],
+            confidence: 1,
+            coverage: 1,
+            sampleCount: 4
+        )
+        let result = RawStreamResult(
+            addonID: "sample.sources",
+            addonName: "Sample Sources",
+            displayTitle: "Show - 07",
+            sizeBytes: 2_000_000_000,
+            sourceFields: [.title: "Show - 07", .description: "3.5 GB"]
+        )
+
+        let candidate = normalizer.normalize(result, profile: sizeProfile)
+
+        #expect(candidate.sizeBytes == 2_000_000_000)
+    }
+
+    @Test func profileDoesNothingWhenNoRulesMatch() {
+        let empty = ContentParsingProfile(
+            rules: [
+                AddonParsingRule(
+                    attribute: .resolution,
+                    field: .title,
+                    kind: .keyword,
+                    pattern: "4320p",
+                    value: "4320p"
+                ),
+            ],
+            confidence: 1,
+            coverage: 1,
+            sampleCount: 4
+        )
+
+        let candidate = normalizer.normalize(
+            raw(title: "Mystery source with no metadata"),
+            profile: empty
+        )
+
+        #expect(candidate.resolution == nil)
+        #expect(candidate.codec == nil)
+        #expect(candidate.sizeBytes == nil)
+    }
 }

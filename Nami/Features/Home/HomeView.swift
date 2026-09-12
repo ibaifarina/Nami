@@ -68,6 +68,11 @@ struct HomeView: View {
                         ContinueWatchingCard(
                             anime: entry.anime,
                             progress: entry.progress,
+                            episode: entry.episode,
+                            seasonNumber: entry.seasonNumber,
+                            onOpen: {
+                                open(entry.anime)
+                            },
                             onResume: {
                                 environment.playbackLaunch.play(
                                     PlaybackRequest(

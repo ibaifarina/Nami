@@ -1,17 +1,39 @@
 import Foundation
 
+/// One snapshot of a discovery run delivered to streaming subscribers.
+struct StreamPreloadUpdate: Sendable {
+    let result: StreamDiscoveryResult
+    let isFinal: Bool
+}
+
 @MainActor
 protocol StreamPreloading: AnyObject {
     /// Warms the cache for an episode the user is likely to play next.
     func prepare(anime: Anime, episode: Episode)
-    /// Returns stream discovery results, reusing an in-flight or cached run.
+    /// Streams discovery snapshots, reusing an in-flight or cached run.
+    func stream(anime: Anime, episode: Episode) -> AsyncStream<StreamPreloadUpdate>
+    /// Returns the final discovery result, reusing an in-flight or cached run.
     func streams(anime: Anime, episode: Episode) async -> StreamDiscoveryResult
     /// Drops every cached and in-flight discovery.
     func clear()
 }
 
-/// Caches stream discovery results so playback can reuse the work started
-/// while the user was browsing an anime's detail page.
+extension StreamPreloading {
+    func stream(anime: Anime, episode: Episode) -> AsyncStream<StreamPreloadUpdate> {
+        AsyncStream { continuation in
+            let task = Task { @MainActor in
+                let result = await streams(anime: anime, episode: episode)
+                continuation.yield(StreamPreloadUpdate(result: result, isFinal: true))
+                continuation.finish()
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+}
+
+/// Runs one discovery per anime/episode/options combination and fans the
+/// snapshots out to every subscriber, so a prefetch started while browsing and
+/// a playback launch that arrives later share the same work.
 @MainActor
 final class StreamPreloadService: StreamPreloading {
     private struct Key: Hashable {
@@ -25,6 +47,13 @@ final class StreamPreloadService: StreamPreloading {
         let createdAt: Date
     }
 
+    private final class Run {
+        var subscribers: [UUID: AsyncStream<StreamPreloadUpdate>.Continuation] = [:]
+        var latest: StreamPreloadUpdate?
+        var isFinished = false
+        var task: Task<Void, Never>?
+    }
+
     private let discovery: StreamDiscoveryService
     private let episodes: any EpisodeRepository
     private let preferences: PreferencesStore
@@ -33,7 +62,7 @@ final class StreamPreloadService: StreamPreloading {
     private let cacheTTL: TimeInterval
 
     private var entries: [Key: Entry] = [:]
-    private var inFlight: [Key: Task<StreamDiscoveryResult, Never>] = [:]
+    private var runs: [Key: Run] = [:]
     private var generation = 0
 
     init(
@@ -55,91 +84,145 @@ final class StreamPreloadService: StreamPreloading {
     func prepare(anime: Anime, episode: Episode) {
         guard !registry.enabledAddons.isEmpty else { return }
         let options = currentOptions()
-        let key = Key(
-            animeID: anime.id,
-            episodeNumber: episode.displayNumber,
-            options: options
-        )
-        guard entry(for: key) == nil, inFlight[key] == nil else { return }
-        inFlight[key] = makeTask(anime: anime, episode: episode, options: options, key: key)
+        let key = key(anime: anime, episode: episode, options: options)
+        guard entry(for: key) == nil, runs[key] == nil else { return }
+        _ = startRun(anime: anime, episode: episode, options: options, key: key)
+    }
+
+    func stream(anime: Anime, episode: Episode) -> AsyncStream<StreamPreloadUpdate> {
+        let options = currentOptions()
+        let key = key(anime: anime, episode: episode, options: options)
+        if let entry = entry(for: key) {
+            return Self.single(update: StreamPreloadUpdate(result: entry.result, isFinal: true))
+        }
+        guard !registry.enabledAddons.isEmpty else {
+            return Self.single(update: StreamPreloadUpdate(result: .empty, isFinal: true))
+        }
+        let run = runs[key] ?? startRun(anime: anime, episode: episode, options: options, key: key)
+        return AsyncStream { continuation in
+            if let latest = run.latest, latest.isFinal || run.isFinished {
+                continuation.yield(latest)
+                continuation.finish()
+                return
+            }
+            let id = UUID()
+            run.subscribers[id] = continuation
+            if let latest = run.latest {
+                continuation.yield(latest)
+            }
+            continuation.onTermination = { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.runs[key]?.subscribers[id] = nil
+                }
+            }
+        }
     }
 
     func streams(anime: Anime, episode: Episode) async -> StreamDiscoveryResult {
-        let episode = await episodeWithAbsoluteNumber(episode, anime: anime)
-        let options = currentOptions()
-        let key = Key(
-            animeID: anime.id,
-            episodeNumber: episode.displayNumber,
-            options: options
-        )
-        if let entry = entry(for: key) {
-            return entry.result
+        var latest: StreamDiscoveryResult?
+        for await update in stream(anime: anime, episode: episode) {
+            latest = update.result
+            if update.isFinal { break }
         }
-
-        let task: Task<StreamDiscoveryResult, Never>
-        if let existing = inFlight[key] {
-            task = existing
-        } else {
-            let created = makeTask(anime: anime, episode: episode, options: options, key: key)
-            inFlight[key] = created
-            task = created
-        }
-        return await task.value
+        return latest ?? .empty
     }
 
     func clear() {
         generation += 1
         entries.removeAll()
-        for task in inFlight.values {
-            task.cancel()
+        for run in runs.values {
+            run.task?.cancel()
+            for continuation in run.subscribers.values {
+                continuation.finish()
+            }
         }
-        inFlight.removeAll()
+        runs.removeAll()
         prefetcher?.clear()
     }
 
-    private func currentOptions() -> StreamScoringOptions {
-        StreamScoringOptions(
-            preferences: preferences.preferences,
-            debridAvailable: true
-        )
-    }
-
-    private func makeTask(
+    private func startRun(
         anime: Anime,
         episode: Episode,
         options: StreamScoringOptions,
         key: Key
-    ) -> Task<StreamDiscoveryResult, Never> {
-        let request = StreamDiscoveryService.Request(
-            anime: anime,
-            episode: episode,
-            addons: registry.enabledAddons,
-            options: options
-        )
+    ) -> Run {
+        let run = Run()
+        runs[key] = run
         let discovery = self.discovery
-        let prefetcher = self.prefetcher
         let generation = self.generation
-        return Task { [weak self] in
-            let result = await discovery.discover(request)
-            guard let self, self.store(result, for: key, generation: generation) else {
-                return result
-            }
-            // Warm the top candidates while the user is still browsing the
-            // detail page so Play can start instantly.
-            prefetcher?.prefetch(
+        run.task = Task { [weak self] in
+            guard let self else { return }
+            let enriched = await self.episodeWithAbsoluteNumber(episode, anime: anime)
+            guard !Task.isCancelled, generation == self.generation else { return }
+            let request = StreamDiscoveryService.Request(
                 anime: anime,
-                episode: episode,
-                candidates: result.ranked.filter(\.isAutoEligible).map(\.candidate)
+                episode: enriched,
+                addons: self.registry.enabledAddons,
+                options: options
             )
-            return result
+            var latest: StreamDiscoveryResult?
+            var emittedFinal = false
+            for await event in await discovery.discoverStream(request) {
+                guard !Task.isCancelled, generation == self.generation else { return }
+                latest = event.result
+                self.broadcast(
+                    StreamPreloadUpdate(result: event.result, isFinal: event.isFinal),
+                    for: key
+                )
+                if event.isFinal {
+                    emittedFinal = true
+                    break
+                }
+            }
+            guard !Task.isCancelled, generation == self.generation, let latest else { return }
+            self.finishRun(
+                key,
+                result: latest,
+                emittedFinal: emittedFinal,
+                anime: anime,
+                episode: episode
+            )
+        }
+        return run
+    }
+
+    private func broadcast(_ update: StreamPreloadUpdate, for key: Key) {
+        guard let run = runs[key] else { return }
+        run.latest = update
+        for continuation in run.subscribers.values {
+            continuation.yield(update)
         }
     }
 
-    private func store(_ result: StreamDiscoveryResult, for key: Key, generation: Int) -> Bool {
-        guard generation == self.generation else { return false }
-        inFlight[key] = nil
+    private func finishRun(
+        _ key: Key,
+        result: StreamDiscoveryResult,
+        emittedFinal: Bool,
+        anime: Anime,
+        episode: Episode
+    ) {
+        guard let run = runs[key] else { return }
+        let finalUpdate = StreamPreloadUpdate(result: result, isFinal: true)
+        run.isFinished = true
+        run.latest = finalUpdate
+        if !emittedFinal {
+            for continuation in run.subscribers.values {
+                continuation.yield(finalUpdate)
+            }
+        }
+        for continuation in run.subscribers.values {
+            continuation.finish()
+        }
+        run.subscribers.removeAll()
+        runs[key] = nil
         entries[key] = Entry(result: result, createdAt: Date())
-        return true
+        // Warm the top candidates while the user is still browsing the detail
+        // page so Play can start instantly.
+        prefetcher?.prefetch(
+            anime: anime,
+            episode: episode,
+            candidates: result.ranked.filter(\.isAutoEligible).map(\.candidate)
+        )
     }
 
     private func entry(for key: Key) -> Entry? {
@@ -149,6 +232,32 @@ final class StreamPreloadService: StreamPreloading {
             return nil
         }
         return entry
+    }
+
+    private func key(
+        anime: Anime,
+        episode: Episode,
+        options: StreamScoringOptions
+    ) -> Key {
+        Key(
+            animeID: anime.id,
+            episodeNumber: episode.displayNumber,
+            options: options
+        )
+    }
+
+    private func currentOptions() -> StreamScoringOptions {
+        StreamScoringOptions(
+            preferences: preferences.preferences,
+            debridAvailable: true
+        )
+    }
+
+    private static func single(update: StreamPreloadUpdate) -> AsyncStream<StreamPreloadUpdate> {
+        AsyncStream { continuation in
+            continuation.yield(update)
+            continuation.finish()
+        }
     }
 
     private func episodeWithAbsoluteNumber(_ episode: Episode, anime: Anime) async -> Episode {

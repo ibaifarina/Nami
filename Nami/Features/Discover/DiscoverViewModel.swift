@@ -111,9 +111,18 @@ final class DiscoverViewModel {
             results = []
             page = 0
             canLoadMore = true
+            isLoadingMore = false
         } else {
             token = generation
             isLoadingMore = true
+        }
+
+        defer {
+            // A superseded load-more must not clear the flag of the request
+            // that replaced it, otherwise paging silently stops.
+            if !reset, generation == token {
+                isLoadingMore = false
+            }
         }
 
         let request = Query(text: trimmedQuery, filters: filters, page: reset ? 0 : page)

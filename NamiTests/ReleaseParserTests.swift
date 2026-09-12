@@ -32,6 +32,20 @@ struct ReleaseParserTests {
         #expect(ReleaseParser.parse("Show [1080p]").codec == nil)
     }
 
+    // MARK: Dynamic range
+
+    @Test func parsesDynamicRange() {
+        #expect(ReleaseParser.parse("Show [Dolby Vision]").dynamicRange == .dolbyVision)
+        #expect(ReleaseParser.parse("Show DV").dynamicRange == .dolbyVision)
+        #expect(ReleaseParser.parse("Show DoVi").dynamicRange == .dolbyVision)
+        #expect(ReleaseParser.parse("Show HDR10+").dynamicRange == .hdr10Plus)
+        #expect(ReleaseParser.parse("Show HDR10").dynamicRange == .hdr10)
+        #expect(ReleaseParser.parse("Show HDR").dynamicRange == .hdr)
+        #expect(ReleaseParser.parse("Show SDR 1080p").dynamicRange == nil)
+        // DVDRip must not be mistaken for Dolby Vision.
+        #expect(ReleaseParser.parse("Show DVDRip").dynamicRange == nil)
+    }
+
     // MARK: Source
 
     @Test func parsesSources() {

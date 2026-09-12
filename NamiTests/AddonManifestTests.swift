@@ -58,6 +58,26 @@ enum AddonFixtures {
     }
     """.utf8)
 
+    /// Mirrors an AIOStreams manifest whose saved configuration currently has
+    /// no stream providers enabled: valid JSON, empty resources and types.
+    static let emptyResourcesManifestJSON = Data("""
+    {
+      "name": "AIOStreams | ElfHosted",
+      "id": "com.aiostreams.viren070.e9cc0617-ee0",
+      "version": "2.34.0",
+      "description": "Consolidates multiple Stremio addons and debrid services.",
+      "catalogs": [],
+      "resources": [],
+      "types": [],
+      "logo": "https://example.com/logo.png",
+      "behaviorHints": {
+        "configurable": true,
+        "configurationRequired": false
+      },
+      "addonCatalogs": []
+    }
+    """.utf8)
+
     static let unsupportedManifestJSON = Data("""
     {
       "id": "unsupported.addon",
@@ -117,6 +137,23 @@ enum AddonFixtures {
         },
         {
           "title": "Nothing usable"
+        }
+      ]
+    }
+    """.utf8)
+
+    static let filenameOnlyStreamsJSON = Data("""
+    {
+      "streams": [
+        {
+          "name": "1080P  \u{26A1}  \u{2605}\u{2605}\u{2605}\u{2605}\u{2605}",
+          "url": "https://aiostreams.example/playback/abc123",
+          "behaviorHints": {
+            "filename": "Frieren Beyond Journey's End - S01E01 (BD Remux 1080p AVC FLAC AAC) [Dual Audio] [PMR].mkv",
+            "videoSize": 7500699108,
+            "bingeGroup": "comet|realdebrid|abc123",
+            "folderSize": 403294486670
+          }
         }
       ]
     }
@@ -183,14 +220,22 @@ struct AddonManifestTests {
 
     @Test func validationRejectsMissingStreamsCapability() throws {
         let manifest = try JSONDecoder().decode(AddonManifest.self, from: AddonFixtures.manifestWithoutStreamsJSON)
-        do {
-            _ = try manifest.validated()
-            Issue.record("Expected validation failure")
-        } catch let error as AddonError {
-            guard case .invalidManifest = error else {
-                Issue.record("Unexpected error: \(error)")
-                return
-            }
+        #expect(throws: AddonError.noStreamResources) {
+            try manifest.validated()
+        }
+    }
+
+    @Test func validationRejectsConfigurableManifestWithEmptyResources() throws {
+        let manifest = try JSONDecoder().decode(
+            AddonManifest.self,
+            from: AddonFixtures.emptyResourcesManifestJSON
+        )
+
+        #expect(manifest.protocolType == .stremio)
+        #expect(manifest.behaviorHints?.configurable == true)
+        #expect(manifest.declaredCapabilities.isEmpty)
+        #expect(throws: AddonError.noStreamResources) {
+            try manifest.validated()
         }
     }
 

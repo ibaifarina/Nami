@@ -57,12 +57,21 @@ final class StreamSelectionViewModel {
     let request: PlaybackRequest
     private let environment: AppEnvironment
 
+    /// Number of source rows rendered before more are revealed on scroll.
+    static let sourcePageSize = 50
+
     var phase: Phase = .loading
     var decision: AutoSelectDecision?
     var ranked: [ScoredStream] = []
     var addonResults: [AddonQueryResult] = []
     var resolvingCandidateID: String?
     var debridAvailable = false
+    /// Upper bound on how many ranked sources are rendered; grows in pages as
+    /// the user scrolls to the end of the list.
+    private(set) var visibleSourceLimit = sourcePageSize
+    /// True while addons are still answering; partial results are already
+    /// displayed during this window.
+    private(set) var isDiscovering = true
 
     /// A source that contains several video files and therefore needs an
     /// explicit file choice from the user before it can be resolved.
@@ -91,12 +100,40 @@ final class StreamSelectionViewModel {
         ranked.filter { !$0.isAutoEligible }
     }
 
+    /// The ranked sources currently rendered. Sorted so eligible sources come
+    /// first, which keeps the best match and other sources on the first page.
+    var visibleStreams: [ScoredStream] {
+        Array(ranked.prefix(visibleSourceLimit))
+    }
+
     var bestMatch: ScoredStream? {
-        eligibleStreams.first
+        visibleStreams.first { $0.isAutoEligible }
     }
 
     var otherStreams: [ScoredStream] {
-        Array(eligibleStreams.dropFirst())
+        let bestID = bestMatch?.id
+        return visibleStreams.filter { $0.isAutoEligible && $0.id != bestID }
+    }
+
+    var visibleRejectedStreams: [ScoredStream] {
+        visibleStreams.filter { !$0.isAutoEligible }
+    }
+
+    var otherSourceCount: Int {
+        max(eligibleStreams.count - 1, 0)
+    }
+
+    var totalSourceCount: Int {
+        ranked.count
+    }
+
+    var hasMoreSources: Bool {
+        visibleSourceLimit < ranked.count
+    }
+
+    func showMoreSources() {
+        guard hasMoreSources else { return }
+        visibleSourceLimit += Self.sourcePageSize
     }
 
     var hasAnyCandidates: Bool {
@@ -120,10 +157,22 @@ final class StreamSelectionViewModel {
     }
 
     func start() async {
+        await start(allowAutoPlay: true)
+    }
+
+    func refreshForAddonChange() async {
+        guard resolvingCandidateID == nil, phase != .started else { return }
+        await start(allowAutoPlay: phase == .loading)
+    }
+
+    private func start(allowAutoPlay: Bool) async {
         phase = .loading
         decision = nil
         ranked = []
         addonResults = []
+        debridAvailable = false
+        visibleSourceLimit = Self.sourcePageSize
+        isDiscovering = true
 
         let anime = request.anime
         var episode = request.episode
@@ -132,22 +181,36 @@ final class StreamSelectionViewModel {
         }
         effectiveEpisode = episode
 
-        let result = await environment.streamPreload.streams(anime: anime, episode: episode)
+        for await update in environment.streamPreload.stream(anime: anime, episode: episode) {
+            if Task.isCancelled { return }
 
-        decision = result.decision
-        ranked = result.ranked
-        addonResults = result.addonResults
-        debridAvailable = result.debridAvailable
-
-        if !request.prefersManualSelection,
-           result.decision.shouldAutoPlay,
-           let candidate = result.decision.candidate {
-            if await offerFileSelection(for: candidate) {
-                phase = .picker
-            } else {
-                await resolve(candidate, episode: episode)
+            decision = update.result.decision
+            ranked = update.result.ranked
+            addonResults = update.result.addonResults
+            debridAvailable = update.result.debridAvailable
+            if update.isFinal {
+                isDiscovering = false
             }
-        } else {
+
+            // Start playback as soon as any addon offers a confident source;
+            // slower addons keep running in the background for next time.
+            if allowAutoPlay,
+               !request.prefersManualSelection,
+               phase == .loading,
+               resolvingCandidateID == nil,
+               update.result.decision.shouldAutoPlay,
+               let candidate = update.result.decision.candidate {
+                if await offerFileSelection(for: candidate) {
+                    phase = .picker
+                } else {
+                    await resolve(candidate, episode: episode)
+                }
+                return
+            }
+            if update.isFinal { break }
+        }
+        isDiscovering = false
+        if phase == .loading {
             phase = .picker
         }
     }

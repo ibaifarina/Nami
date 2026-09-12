@@ -116,6 +116,52 @@ struct StremioAddonAdapterTests {
         )
     }
 
+    @Test func usesBehaviorHintsFilenameWhenTitleIsMissing() async throws {
+        let http = MockHTTPClient { _ in AddonFixtures.filenameOnlyStreamsJSON }
+        let adapter = StremioAddonAdapter(
+            descriptor: descriptor(namespaces: [.imdb]),
+            supportedTypes: ["movie", "series", "anime"],
+            http: http
+        )
+        let media = MediaIdentity(kitsuID: "46474", imdbID: "tt22248376")
+
+        let results = try await adapter.streams(for: media, episode: episode)
+
+        let first = try #require(results.first)
+        #expect(
+            first.rawTitle
+                == "Frieren Beyond Journey's End - S01E01 (BD Remux 1080p AVC FLAC AAC) [Dual Audio] [PMR].mkv"
+        )
+        #expect(first.displayTitle == first.rawTitle)
+        #expect(first.sizeBytes == 7_500_699_108)
+        #expect(first.directURL?.absoluteString == "https://aiostreams.example/playback/abc123")
+        #expect(first.providerName == "1080P  \u{26A1}  \u{2605}\u{2605}\u{2605}\u{2605}\u{2605}")
+    }
+
+    @Test func filenameOnlyStreamsPassEpisodeMatching() async throws {
+        let http = MockHTTPClient { _ in AddonFixtures.filenameOnlyStreamsJSON }
+        let adapter = StremioAddonAdapter(
+            descriptor: descriptor(namespaces: [.imdb]),
+            supportedTypes: ["movie", "series", "anime"],
+            http: http
+        )
+        let media = MediaIdentity(kitsuID: "46474", imdbID: "tt22248376")
+        let episode = Episode(id: "46474-1", animeID: "46474", number: 1)
+
+        let results = try await adapter.streams(for: media, episode: episode)
+        let raw = try #require(results.first)
+        let candidate = StreamNormalizer().normalize(
+            raw,
+            matching: EpisodeMatcher.Context(
+                requestedEpisode: 1,
+                animeTitles: ["Frieren: Beyond Journey's End", "Sousou no Frieren"]
+            )
+        )
+
+        #expect(candidate.episodeMatchConfidence >= EpisodeMatchResult.safeForAutoSelectionThreshold)
+        #expect(candidate.parsedEpisode?.episode == 1)
+    }
+
     @Test func usesSeriesTypeForIMDbIDsEvenWhenAnimeIsDeclared() async throws {
         let http = MockHTTPClient { _ in AddonFixtures.stremioStreamsJSON }
         let adapter = StremioAddonAdapter(

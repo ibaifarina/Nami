@@ -56,6 +56,12 @@ struct DiscoverViewModelTests {
         #expect(callCount == 1)
     }
 
+    @Test func genreSlugsMatchKitsuCategories() {
+        #expect(DiscoverFilters.genres.first { $0.title == "Sci-Fi" }?.slug == "science-fiction")
+        #expect(!DiscoverFilters.genres.contains { $0.slug == "sci-fi" })
+        #expect(DiscoverFilters.genres.contains { $0.slug == "ecchi" })
+    }
+
     @Test func failedSearchExposesFriendlyError() async throws {
         var repository = StubMediaRepository()
         repository.error = .unavailable
@@ -102,6 +108,33 @@ struct DiscoverViewModelTests {
 
         await model.loadMoreIfNeeded(currentItem: secondPage[4])
         #expect(model.results.count == 25)
+    }
+
+    @Test func filterChangeDuringLoadMoreKeepsPaginationUsable() async throws {
+        let firstPage = (0..<20).map(makeAnime)
+        let secondPage = (20..<40).map(makeAnime)
+        var repository = StubMediaRepository(pages: [firstPage, secondPage])
+        repository.discoverDelays = [1: .milliseconds(200)]
+        let model = DiscoverViewModel(media: repository)
+
+        await model.loadInitial()
+        #expect(model.results.count == 20)
+
+        let staleLoadMore = Task {
+            await model.loadMoreIfNeeded(currentItem: firstPage[19])
+        }
+        try await Task.sleep(for: .milliseconds(50))
+
+        model.filters.genre = "action"
+        model.filtersDidChange()
+        try await Task.sleep(for: .milliseconds(50))
+
+        await staleLoadMore.value
+        #expect(!model.isLoadingMore)
+        #expect(model.results.count == 20)
+
+        await model.loadMoreIfNeeded(currentItem: model.results[19])
+        #expect(model.results.count == 40)
     }
 
     @Test func recentSearchesAreRecordedAndReused() async {

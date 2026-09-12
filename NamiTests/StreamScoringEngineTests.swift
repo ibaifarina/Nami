@@ -356,16 +356,16 @@ struct StreamScoringEngineTests {
         let balanced = StreamScoringEngine(options: options(quality: .balanced))
         let dataSaver = StreamScoringEngine(options: options(quality: .dataSaver))
 
-        let normal = balanced.sizeScore(bytes: 400_000_000, durationMinutes: 24)
-        let tiny = balanced.sizeScore(bytes: 50_000_000, durationMinutes: 24)
-        let enormous = balanced.sizeScore(bytes: 12_000_000_000, durationMinutes: 24)
+        let normal = balanced.sizeScore(bytes: 400_000_000, durationMinutes: 24, codec: nil)
+        let tiny = balanced.sizeScore(bytes: 50_000_000, durationMinutes: 24, codec: nil)
+        let enormous = balanced.sizeScore(bytes: 12_000_000_000, durationMinutes: 24, codec: nil)
 
         #expect(normal == 8)
         #expect(tiny < 0)
         #expect(enormous < 0)
-        #expect(dataSaver.sizeScore(bytes: 400_000_000, durationMinutes: 24) == 8)
+        #expect(dataSaver.sizeScore(bytes: 400_000_000, durationMinutes: 24, codec: nil) == 8)
 
-        let longEpisode = balanced.sizeScore(bytes: 1_200_000_000, durationMinutes: 90)
+        let longEpisode = balanced.sizeScore(bytes: 1_200_000_000, durationMinutes: 90, codec: nil)
         #expect(longEpisode == 8)
     }
 

@@ -18,7 +18,8 @@ struct AddonRegistryTests {
                 resources: nil,
                 types: nil,
                 idPrefixes: nil,
-                idNamespaces: nil
+                idNamespaces: nil,
+                behaviorHints: nil
             ),
             manifestURL: testURL("https://example.com/manifest.json"),
             baseURL: testURL("https://example.com"),
@@ -122,6 +123,37 @@ struct AddonRegistryTests {
 
         #expect(registry.installed.first?.lastHealthStatus == .healthy)
         #expect(registry.installed.first?.lastCheckedAt != nil)
+    }
+
+    @Test func configurationChangesBumpRevisionAndNotify() throws {
+        let registry = AddonRegistry(persistence: InMemoryAddonPersistence())
+        var notifications = 0
+        registry.onConfigurationChange = { notifications += 1 }
+
+        _ = try registry.install(makePreview(id: "one"))
+        _ = try registry.install(makePreview(id: "two"))
+        try registry.setEnabled(id: "one", isEnabled: false)
+        try registry.move(id: "two", direction: .up)
+        try registry.move(fromOffsets: IndexSet(integer: 0), toOffset: 2)
+        try registry.remove(id: "one")
+
+        #expect(registry.revision == 6)
+        #expect(notifications == 6)
+    }
+
+    @Test func noOpChangesDoNotNotify() throws {
+        let registry = AddonRegistry(persistence: InMemoryAddonPersistence())
+        _ = try registry.install(makePreview(id: "one"))
+        var notifications = 0
+        registry.onConfigurationChange = { notifications += 1 }
+
+        try registry.updateHealth(id: "one", status: .healthy)
+        try registry.remove(id: "missing")
+        try registry.setEnabled(id: "missing", isEnabled: false)
+        try registry.move(id: "one", direction: .up)
+
+        #expect(registry.revision == 1)
+        #expect(notifications == 0)
     }
 
     @Test func swiftDataPersistenceRoundTrips() throws {

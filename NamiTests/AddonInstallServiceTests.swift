@@ -102,10 +102,14 @@ struct AddonInstallServiceTests {
         let service = AddonInstallService(
             http: MockHTTPClient { _ in AddonFixtures.manifestWithoutStreamsJSON }
         )
-        await expectAddonFailure(service, matching: { error in
-            if case .invalidManifest = error { return true }
-            return false
-        })
+        await expectAddonFailure(service, matching: { $0 == .noStreamResources })
+    }
+
+    @Test func rejectsConfigurableManifestWithEmptyResources() async {
+        let service = AddonInstallService(
+            http: MockHTTPClient { _ in AddonFixtures.emptyResourcesManifestJSON }
+        )
+        await expectAddonFailure(service, matching: { $0 == .noStreamResources })
     }
 
     @Test func rejectsUnsupportedProtocol() async {

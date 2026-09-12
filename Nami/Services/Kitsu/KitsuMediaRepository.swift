@@ -237,15 +237,18 @@ actor KitsuMediaRepository: MediaRepository {
         }
     }
 
+    /// Kitsu's `page[offset]` returns the first page again whenever a
+    /// `filter[...]` is present, which stalls paging. `page[number]` with
+    /// `page[size]` paginates correctly for both filtered and plain lists.
     private func pageQueryItems(page: Int, extra: [URLQueryItem]) -> [URLQueryItem] {
         [
             URLQueryItem(
-                name: "page[limit]",
+                name: "page[size]",
                 value: String(KitsuPagination.pageLimit)
             ),
             URLQueryItem(
-                name: "page[offset]",
-                value: String(max(page, 0) * KitsuPagination.pageLimit)
+                name: "page[number]",
+                value: String(max(page, 0) + 1)
             ),
         ] + extra
     }

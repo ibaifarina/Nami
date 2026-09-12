@@ -184,10 +184,26 @@ struct StremioAddonAdapter: StreamAddon {
         guard magnetURL != nil || directURL != nil else {
             return nil
         }
-        let rawTitle = stream.title ?? stream.name ?? stream.behaviorHints?.filename
+        // Comet and similar addons omit `title` and only put the real release
+        // name in `behaviorHints.filename`, while `name` is stylized UI text.
+        // Prefer the first field that can be parsed.
+        let rawTitle = Self.firstNonEmpty(
+            stream.title,
+            stream.behaviorHints?.filename,
+            stream.description,
+            stream.name
+        )
         var metadata: [String: String] = [:]
         if let filename = stream.behaviorHints?.filename { metadata["filename"] = filename }
         if let bingeGroup = stream.behaviorHints?.bingeGroup { metadata["bingeGroup"] = bingeGroup }
+        if let sources = stream.sources, !sources.isEmpty {
+            metadata["sourcesCount"] = String(sources.count)
+        }
+        var sourceFields: [StreamField: String] = [:]
+        if let title = stream.title { sourceFields[.title] = title }
+        if let name = stream.name { sourceFields[.name] = name }
+        if let description = stream.description { sourceFields[.description] = description }
+        if let filename = stream.behaviorHints?.filename { sourceFields[.filename] = filename }
         return RawStreamResult(
             addonID: descriptor.id,
             addonName: descriptor.name,
@@ -200,13 +216,42 @@ struct StremioAddonAdapter: StreamAddon {
             sizeBytes: stream.behaviorHints?.videoSize,
             seeders: nil,
             providerName: stream.name,
-            providerMetadata: metadata
+            providerMetadata: metadata,
+            sourceFields: sourceFields
         )
+    }
+
+    private static func firstNonEmpty(_ values: String?...) -> String? {
+        for value in values {
+            guard let value else { continue }
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
+        return nil
     }
 }
 
 struct StremioStreamResponse: Decodable {
     let streams: [StremioStream]
+}
+
+/// Stremio allows `sources` entries to be either tracker URL strings or
+/// objects containing a `url`. Only the URL is kept, and only as a count
+/// signal for calibration; the values are never shown or logged.
+struct StremioStreamSource: Decodable, Sendable {
+    let value: String
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let string = try? container.decode(String.self) {
+            value = string
+            return
+        }
+        struct ObjectValue: Decodable {
+            let url: String?
+        }
+        value = (try? container.decode(ObjectValue.self))?.url ?? ""
+    }
 }
 
 struct StremioStream: Decodable {
@@ -218,9 +263,11 @@ struct StremioStream: Decodable {
 
     let name: String?
     let title: String?
+    let description: String?
     let url: String?
     let externalUrl: String?
     let infoHash: String?
     let fileIdx: Int?
+    let sources: [StremioStreamSource]?
     let behaviorHints: BehaviorHints?
 }

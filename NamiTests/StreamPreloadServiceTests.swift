@@ -78,6 +78,22 @@ struct StreamPreloadServiceTests {
         )
     }
 
+    @Test func streamYieldsPartialUpdatesThenFinal() async throws {
+        let setup = try await makeSetup(latency: .milliseconds(50))
+        defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
+
+        var updates: [StreamPreloadUpdate] = []
+        for await update in setup.service.stream(anime: anime, episode: episode(7)) {
+            updates.append(update)
+        }
+
+        #expect(updates.count >= 2)
+        #expect(updates.first?.isFinal == false)
+        #expect(updates.last?.isFinal == true)
+        #expect(updates.last?.result.decision.shouldAutoPlay == true)
+        #expect(updates.last?.result.ranked.first?.candidate.debridStatus == .cached)
+    }
+
     @Test func prepareCachesDiscoveryForLaterPlayback() async throws {
         let setup = try await makeSetup()
         defer { setup.defaults.removePersistentDomain(forName: setup.suite) }
