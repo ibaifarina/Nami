@@ -5,6 +5,7 @@ struct PlayerView: View {
     @Environment(AppEnvironment.self) private var environment
 
     @State private var controlsVisible = true
+    @State private var skipButtonVisible = true
     @State private var controlsTracker = ControlsVisibilityTracker()
     @State private var displaySleepPreventer = DisplaySleepPreventer()
     @State private var nextSelectionRequest: PlaybackRequest?
@@ -51,6 +52,9 @@ struct PlayerView: View {
             isFocused = true
             displaySleepPreventer.setPlaying(playback.isPlaying)
             scheduleHide()
+            if skipIntro.activeInterval != nil {
+                scheduleSkipButtonHide()
+            }
         }
         .onDisappear {
             controlsTracker.cancel()
@@ -60,12 +64,23 @@ struct PlayerView: View {
         .onChange(of: playback.isPlaying) { _, isPlaying in
             displaySleepPreventer.setPlaying(isPlaying)
         }
+        .onChange(of: skipIntro.activeInterval) { _, interval in
+            if interval != nil {
+                revealSkipButton()
+            } else {
+                skipButtonVisible = true
+                controlsTracker.cancelSkipHide()
+            }
+        }
         .sheet(item: $nextSelectionRequest) { request in
             StreamSelectionView(request: request, environment: environment)
         }
         .onContinuousHover { phase in
             guard case .active(let point) = phase, controlsTracker.registerMovement(point) else { return }
             revealControls()
+            if skipIntro.activeInterval != nil {
+                revealSkipButton()
+            }
         }
         .onKeyPress(.space) {
             playback.togglePlayPause()
@@ -117,6 +132,9 @@ struct PlayerView: View {
                     Spacer()
                     if let interval = skipIntro.activeInterval {
                         skipButton(interval)
+                            .opacity(skipButtonVisible ? 1 : 0)
+                            .allowsHitTesting(skipButtonVisible)
+                            .accessibilityHidden(!skipButtonVisible)
                     }
                     if nextEpisode.overlay != .hidden, let episodeNumber = nextEpisode.nextEpisodeNumber {
                         nextEpisodeCard(episodeNumber)
@@ -126,6 +144,7 @@ struct PlayerView: View {
             .padding(Spacing.xl)
             .padding(.bottom, controlsVisible ? 64 : 0)
             .animation(.easeOut(duration: Motion.transition), value: skipIntro.activeInterval)
+            .animation(.easeOut(duration: Motion.transition), value: skipButtonVisible)
             .animation(.easeOut(duration: Motion.transition), value: nextEpisode.overlay)
         }
     }
@@ -455,6 +474,19 @@ struct PlayerView: View {
         scheduleHide()
     }
 
+    private func revealSkipButton() {
+        skipButtonVisible = true
+        scheduleSkipButtonHide()
+    }
+
+    /// Hides the skip button when the user lets it sit untouched so it does not
+    /// linger over the video; any pointer movement brings it back.
+    private func scheduleSkipButtonHide() {
+        controlsTracker.scheduleSkipHide {
+            skipButtonVisible = false
+        }
+    }
+
     private func scheduleHide() {
         controlsTracker.scheduleHide {
             if playback.isPlaying {
@@ -485,6 +517,7 @@ struct PlayerView: View {
 private final class ControlsVisibilityTracker {
     private var lastPoint: CGPoint = .zero
     private var hideTask: Task<Void, Never>?
+    private var skipHideTask: Task<Void, Never>?
 
     /// Returns true when the pointer moved far enough to count as activity.
     func registerMovement(_ point: CGPoint) -> Bool {
@@ -505,9 +538,25 @@ private final class ControlsVisibilityTracker {
         }
     }
 
+    /// (Re)schedules the skip-button auto-hide independently of the controls.
+    func scheduleSkipHide(after delay: Duration = .seconds(4), _ hide: @escaping @MainActor () -> Void) {
+        skipHideTask?.cancel()
+        skipHideTask = Task { @MainActor in
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled else { return }
+            hide()
+        }
+    }
+
+    func cancelSkipHide() {
+        skipHideTask?.cancel()
+        skipHideTask = nil
+    }
+
     func cancel() {
         hideTask?.cancel()
         hideTask = nil
+        cancelSkipHide()
     }
 }
 
