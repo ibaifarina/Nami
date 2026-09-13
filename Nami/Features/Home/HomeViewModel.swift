@@ -60,6 +60,7 @@ final class HomeViewModel {
     var hero: Anime?
     var heroState: LoadingState<Anime> = .idle
     var continueWatching: [ContinueWatchingEntry] = []
+    var isLoadingContinueWatching = false
     var rows: [Row] = RowID.allCases.map { Row(id: $0, state: .idle) }
 
     /// Bumped by every load and by removals so a slow in-flight pass can never
@@ -181,6 +182,16 @@ final class HomeViewModel {
                 .prefix(16)
         )
 
+        guard !candidates.isEmpty else {
+            continueWatching = []
+            isLoadingContinueWatching = false
+            return
+        }
+
+        // Cards already on screen stay put during a refresh; the skeleton only
+        // bridges the first load, once local progress proves there is a shelf.
+        isLoadingContinueWatching = continueWatching.isEmpty
+
         // Entries resolve concurrently: the shelf waits for the slowest show,
         // not for the sum of every show's details, episodes and seasons. Only
         // the fully resolved set is published, so cards never appear and then
@@ -197,6 +208,7 @@ final class HomeViewModel {
             guard entries.count < 8 else { break }
         }
         continueWatching = entries
+        isLoadingContinueWatching = false
     }
 
     private nonisolated func resolveEntries(_ items: [PlaybackProgress]) async -> [ResolvedEntry] {

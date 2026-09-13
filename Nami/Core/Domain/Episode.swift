@@ -69,6 +69,19 @@ struct Episode: Identifiable, Hashable, Codable, Sendable {
         return !synopsis.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    /// Synopsis cleaned for display: trailing "(Source: …)" attributions and
+    /// any resulting trailing blank lines are removed.
+    var displaySynopsis: String? {
+        guard let synopsis else { return nil }
+        let stripped = synopsis.replacingOccurrences(
+            of: #"\s*\(\s*Source:[^)]*\)"#,
+            with: "",
+            options: [.regularExpression, .caseInsensitive]
+        )
+        let trimmed = stripped.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     var durationText: String? {
         guard let durationMinutes, durationMinutes > 0 else { return nil }
         let hours = durationMinutes / 60

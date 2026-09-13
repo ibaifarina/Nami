@@ -64,6 +64,22 @@ struct EpisodeTests {
         #expect(episode(number: 1, synopsis: "A synopsis").hasSynopsis)
     }
 
+    @Test func displaySynopsisRemovesSourceAttribution() {
+        let value = episode(number: 1, synopsis: "A great episode.\n\n(Source: Wikipedia)\n\n")
+        #expect(value.displaySynopsis == "A great episode.")
+        #expect(value.displaySynopsis?.contains("Source") == false)
+    }
+
+    @Test func displaySynopsisKeepsPlainText() {
+        let value = episode(number: 1, synopsis: "Just the synopsis.")
+        #expect(value.displaySynopsis == "Just the synopsis.")
+    }
+
+    @Test func displaySynopsisIsNilWhenOnlySource() {
+        #expect(episode(number: 1, synopsis: "(Source: ANN)").displaySynopsis == nil)
+        #expect(episode(number: 1, synopsis: nil).displaySynopsis == nil)
+    }
+
     @Test func formatsEpisodeDuration() {
         #expect(episode(number: 1, durationMinutes: 24).durationText == "24m")
         #expect(episode(number: 1, durationMinutes: 60).durationText == "1h")

@@ -389,9 +389,54 @@ struct HomeViewModelTests {
         // placeholders would have dropped its episode title.
         #expect(model.continueWatching.count == 1)
         #expect(model.continueWatching.first?.episode?.title == "The Journey Begins")
+        #expect(!model.isLoadingContinueWatching)
 
         await refresh.value
         #expect(model.continueWatching.count == 2)
+    }
+
+    @Test func continueWatchingLoadsPlaceholderWhileResolving() async throws {
+        var media = StubMediaRepository()
+        media.requestDelay = .milliseconds(150)
+        let progressStore = InMemoryPlaybackProgressStore(items: [
+            PlaybackProgress(
+                animeID: "46474",
+                episodeNumber: 1,
+                positionSeconds: 100,
+                durationSeconds: 1400,
+                updatedAt: Date(),
+                animeTitle: "Frieren"
+            ),
+        ])
+        let model = HomeViewModel(
+            media: media,
+            progressStore: progressStore,
+            episodes: StubEpisodeRepository()
+        )
+
+        let load = Task { await model.load() }
+        try await Task.sleep(for: .milliseconds(50))
+        // Local progress is known, so the shelf shows its placeholder while
+        // details and episodes resolve.
+        #expect(model.continueWatching.isEmpty)
+        #expect(model.isLoadingContinueWatching)
+
+        await load.value
+        #expect(!model.isLoadingContinueWatching)
+        #expect(model.continueWatching.count == 1)
+    }
+
+    @Test func continueWatchingHasNoPlaceholderWithoutProgress() async {
+        let model = HomeViewModel(
+            media: StubMediaRepository(),
+            progressStore: InMemoryPlaybackProgressStore(),
+            episodes: StubEpisodeRepository()
+        )
+
+        await model.load()
+
+        #expect(!model.isLoadingContinueWatching)
+        #expect(model.continueWatching.isEmpty)
     }
 
     @Test func continueWatchingResolvesShowsConcurrently() async {

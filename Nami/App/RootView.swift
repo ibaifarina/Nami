@@ -20,6 +20,13 @@ struct RootView: View {
                     .transition(.opacity)
                     .zIndex(1)
             }
+
+            if let request = environment.lightbox.request {
+                ImageLightbox(request: request) {
+                    environment.lightbox.dismiss()
+                }
+                .zIndex(2)
+            }
         }
         .frame(minWidth: Layout.windowMinWidth, minHeight: Layout.windowMinHeight)
         .environment(\.animeTitleLanguage, environment.preferences.animeTitleLanguage)
@@ -53,6 +60,13 @@ struct RootView: View {
             guard router.refreshToken > 0 else { return }
             await environment.clearCaches()
             contentGeneration += 1
+        }
+        .onChange(of: environment.playback.isPresenting) {
+            guard environment.playback.isPresenting else { return }
+            environment.lightbox.dismiss()
+        }
+        .onChange(of: router.selection) {
+            environment.lightbox.dismiss()
         }
     }
 

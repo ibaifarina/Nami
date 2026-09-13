@@ -22,6 +22,7 @@ final class AppEnvironment {
     let sourceResolver: SourceResolver
     let playback: PlaybackCoordinator
     let playbackLaunch: PlaybackLaunchController
+    let lightbox = ImageLightboxPresenter()
     let nextEpisode: NextEpisodeController
     let skipIntro: SkipIntroController
     let externalPlayers: ExternalPlayerService

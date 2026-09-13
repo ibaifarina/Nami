@@ -52,6 +52,7 @@ enum Layout {
     static let detailHeroOverlap: CGFloat = 120
     static let posterCardMinWidth: CGFloat = 148
     static let posterCardMaxWidth: CGFloat = 186
+    static let continueWatchingCardWidth: CGFloat = 280
     static let topBarScrimHeight: CGFloat = 72
     /// Scroll distance over which the top bar scrim reaches full opacity.
     static let topBarScrimDistance: CGFloat = 32

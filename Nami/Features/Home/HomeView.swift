@@ -15,6 +15,8 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: Spacing.xxl) {
                     if !model.continueWatching.isEmpty {
                         continueWatchingSection
+                    } else if model.isLoadingContinueWatching {
+                        continueWatchingSkeleton
                     }
                     ForEach(model.rows) { row in
                         rowSection(row)
@@ -86,7 +88,7 @@ struct HomeView: View {
                                 Task { await model.removeFromContinueWatching(entry) }
                             }
                         )
-                        .frame(width: 280)
+                        .frame(width: Layout.continueWatchingCardWidth)
                     }
                 }
                 .animation(.easeOut(duration: Motion.transition), value: model.continueWatching.map(\.id))
@@ -94,6 +96,15 @@ struct HomeView: View {
             }
             .scrollClipDisabled()
         }
+    }
+
+    private var continueWatchingSkeleton: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            SectionHeader(title: "Continue Watching")
+            ContinueWatchingRowSkeleton()
+                .padding(.vertical, Spacing.xxs)
+        }
+        .accessibilityHidden(true)
     }
 
     @ViewBuilder
