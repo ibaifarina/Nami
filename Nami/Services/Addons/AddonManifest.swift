@@ -111,15 +111,25 @@ extension AddonManifest {
             let mapped = idNamespaces.compactMap { AddonIDNamespace(rawValue: $0.lowercased()) }
             if !mapped.isEmpty { return mapped }
         }
-        let prefixes = idPrefixes ?? []
-        if !prefixes.isEmpty {
-            return Self.namespaces(fromPrefixes: prefixes)
+        return Self.namespaces(fromPrefixes: streamIDPrefixes)
+    }
+
+    /// Prefixes explicitly accepted by the stream resource. A detailed stream
+    /// declaration is authoritative; otherwise Stremio's top-level prefixes
+    /// apply. An empty result means the addon declared no restriction, which
+    /// is different from declaring only provider-private prefixes.
+    var streamIDPrefixes: [String] {
+        for resource in resources ?? [] {
+            guard
+                resource.resourceName.lowercased() == "stream",
+                case .detailed(_, _, let prefixes) = resource,
+                let prefixes
+            else {
+                continue
+            }
+            return Self.uniquePrefixes(prefixes)
         }
-        let resourcePrefixes = (resources ?? []).flatMap(\.idPrefixes)
-        if !resourcePrefixes.isEmpty {
-            return Self.namespaces(fromPrefixes: resourcePrefixes)
-        }
-        return []
+        return Self.uniquePrefixes(idPrefixes ?? [])
     }
 
     var streamsEndpointPath: String? {
@@ -186,6 +196,16 @@ extension AddonManifest {
             }
         }
         return result
+    }
+
+    private static func uniquePrefixes(_ prefixes: [String]) -> [String] {
+        var seen: Set<String> = []
+        return prefixes.compactMap { prefix in
+            let trimmed = prefix.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return nil }
+            let key = trimmed.lowercased()
+            return seen.insert(key).inserted ? trimmed : nil
+        }
     }
 
     private static func capability(from raw: String) -> AddonCapability? {

@@ -308,7 +308,7 @@ private struct AddonRow: View {
     }
 }
 
-private struct AddAddonSheet: View {
+struct AddAddonSheet: View {
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.dismiss) private var dismiss
 

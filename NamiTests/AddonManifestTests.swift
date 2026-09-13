@@ -40,6 +40,17 @@ enum AddonFixtures {
     }
     """.utf8)
 
+    static let privateCatalogIDsManifestJSON = Data("""
+    {
+      "id": "org.stremio.thepiratebay-catalog",
+      "version": "1.3.0",
+      "name": "ThePirateBay Catalog",
+      "resources": ["catalog", "stream", "meta"],
+      "types": ["movie", "series"],
+      "idPrefixes": ["tpb_ctl"]
+    }
+    """.utf8)
+
     static let manifestWithoutNameJSON = Data("""
     {
       "id": "missing.name",
@@ -256,6 +267,36 @@ struct AddonManifestTests {
             AddonManifest.namespaces(fromPrefixes: ["tt", "tmdb:", "mal:", "tvdb:", "anilist:"])
                 == [.imdb, .tmdb, .mal, .anilist]
         )
+    }
+
+    @Test func preservesUnsupportedPrivateStreamPrefixes() throws {
+        let manifest = try JSONDecoder().decode(
+            AddonManifest.self,
+            from: AddonFixtures.privateCatalogIDsManifestJSON
+        )
+
+        #expect(manifest.streamIDPrefixes == ["tpb_ctl"])
+        #expect(manifest.resolvedNamespaces.isEmpty)
+    }
+
+    @Test func detailedStreamPrefixesOverrideTopLevelCatalogPrefixes() throws {
+        let manifest = try JSONDecoder().decode(
+            AddonManifest.self,
+            from: Data("""
+            {
+              "id": "org.example.mixed-prefixes",
+              "name": "Mixed Prefixes",
+              "resources": [
+                { "name": "stream", "types": ["series"], "idPrefixes": ["tt"] }
+              ],
+              "types": ["series"],
+              "idPrefixes": ["private_catalog_id"]
+            }
+            """.utf8)
+        )
+
+        #expect(manifest.streamIDPrefixes == ["tt"])
+        #expect(manifest.resolvedNamespaces == [.imdb])
     }
 
     @Test func streamTypesPreferDetailedStreamResource() throws {

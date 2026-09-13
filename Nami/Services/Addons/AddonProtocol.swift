@@ -180,6 +180,9 @@ enum AddonError: Error, Equatable, Sendable {
     /// what configurable addons such as AIOStreams return when their saved
     /// configuration has no providers enabled.
     case noStreamResources
+    /// The addon only accepts provider-private catalog IDs, so Nami cannot
+    /// address its stream endpoint using an anime identity.
+    case unsupportedIDPrefixes([String])
     case unsupportedProtocol
     case alreadyInstalled(String)
     case unsupportedCapability(String)
@@ -207,6 +210,8 @@ extension AddonError: LocalizedError {
             "This addon returned an invalid manifest. \(detail)"
         case .noStreamResources:
             "This addon's manifest doesn't declare any stream providers. If it's configurable, open its configuration, enable at least one stream provider, then add the addon again."
+        case .unsupportedIDPrefixes(let prefixes):
+            "This addon only serves its own catalog IDs (\(prefixes.joined(separator: ", "))), which Nami can't match to its anime library. Use a stream addon that supports IMDb, TMDB, Kitsu, MAL, or AniList IDs."
         case .unsupportedProtocol:
             "This addon uses a protocol the app does not support yet."
         case .alreadyInstalled(let name):

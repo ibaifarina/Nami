@@ -29,6 +29,12 @@ struct AddonCalibrationReport: Identifiable, Hashable, Sendable {
 /// Playback never calls this service. Normal playback only reads the saved
 /// profile through `ParsingProfileStore`.
 actor AddonCalibrationService {
+    private enum FallbackReason {
+        case analyzerUnavailable
+        case noSampleStreams
+        case analysisFailed
+    }
+
     enum Limits {
         static let episodeSamplesPerTitle = 5
         static let movieSamplesPerTitle = 5
@@ -36,7 +42,11 @@ actor AddonCalibrationService {
         static let episodeTargetDiversity = 6
         static let movieTargetSamples = 5
         static let movieTargetDiversity = 4
-        static let requestTimeout = Duration.seconds(6)
+        /// Calibration requests are allowed to outlive normal playback
+        /// discovery. Aggregating addons can need several seconds to run live
+        /// scrapers, and a timeout here used to make a slow response look like
+        /// an unsupported stream format.
+        static let requestTimeout = Duration.seconds(20)
         /// The on-device model can take a minute to load and answer on first
         /// use on older Apple silicon, so this is deliberately generous.
         static let analysisTimeout = Duration.seconds(150)
@@ -152,23 +162,22 @@ actor AddonCalibrationService {
         )
 
         guard !batch.isEmpty else {
-            let record = StoredAddonParsingProfile(
+            // An empty probe says nothing about the addon's response format.
+            // It can be caused by provider filters, temporary upstream
+            // availability, or simply no releases for the fixed setup titles.
+            return await saveUnavailable(
+                addon: addon,
                 fingerprint: fingerprint,
-                status: .failure
-            )
-            await profileStore.save(record)
-            return Self.report(
-                for: addon,
-                fingerprint: fingerprint,
-                status: .failure,
-                episodeCoverage: nil,
-                movieCoverage: nil,
-                coverage: nil
+                reason: .noSampleStreams
             )
         }
 
         guard let analyzer, analyzer.isAvailable else {
-            return await saveUnavailable(addon: addon, fingerprint: fingerprint)
+            return await saveUnavailable(
+                addon: addon,
+                fingerprint: fingerprint,
+                reason: .analyzerUnavailable
+            )
         }
 
         await progress(.analyzing)
@@ -181,7 +190,11 @@ actor AddonCalibrationService {
                 // Every bounded attempt still overflowed the model's context
                 // window. That is a model limitation, not an addon format
                 // problem, so fall back to built-in parsing.
-                return await saveUnavailable(addon: addon, fingerprint: fingerprint)
+                return await saveUnavailable(
+                    addon: addon,
+                    fingerprint: fingerprint,
+                    reason: .analysisFailed
+                )
             }
             learned = analyzed
         } catch is CancellationError {
@@ -194,10 +207,11 @@ actor AddonCalibrationService {
                 coverage: nil
             )
         } catch {
-            return await saveFailure(
+            return await saveUnavailable(
                 addon: addon,
                 fingerprint: fingerprint,
-                reason: error
+                reason: .analysisFailed,
+                underlyingError: error
             )
         }
 
@@ -325,12 +339,16 @@ actor AddonCalibrationService {
     // MARK: - Model input
 
     /// Runs the analyzer against progressively smaller sample subsets until the
-    /// prompt fits the model's context window. Returns `nil` when even the
-    /// smallest attempt is too large; other errors propagate.
+    /// prompt fits the model's context window. Empty and failed generations
+    /// also get a smaller retry because those are often model/context issues,
+    /// not evidence that the addon's format is unsupported. Returns `nil`
+    /// when every attempt exceeded the context window.
     private static func analyze(
         _ analyzer: any StreamFormatAnalyzing,
         batch: CalibrationSampleBatch
     ) async throws -> LearnedStreamFormat? {
+        var lastEmptyResult: LearnedStreamFormat?
+        var lastGenerationError: StreamFormatAnalyzerError?
         for limits in AnalysisLimits.attempts {
             let subset = analysisBatch(
                 from: batch,
@@ -339,11 +357,24 @@ actor AddonCalibrationService {
             )
             guard !subset.isEmpty else { continue }
             do {
-                return try await analyzer.analyze(subset)
+                let learned = try await analyzer.analyze(subset)
+                if learned.episodeRules.isEmpty, learned.movieRules.isEmpty {
+                    lastEmptyResult = learned
+                    continue
+                }
+                return learned
             } catch StreamFormatAnalyzerError.inputTooLarge {
                 continue
+            } catch let error as StreamFormatAnalyzerError {
+                if case .generationFailed = error {
+                    lastGenerationError = error
+                    continue
+                }
+                throw error
             }
         }
+        if let lastEmptyResult { return lastEmptyResult }
+        if let lastGenerationError { throw lastGenerationError }
         return nil
     }
 
@@ -388,40 +419,29 @@ actor AddonCalibrationService {
 
     private func saveUnavailable(
         addon: InstalledAddon,
-        fingerprint: AddonFingerprint
+        fingerprint: AddonFingerprint,
+        reason: FallbackReason,
+        underlyingError: Error? = nil
     ) async -> AddonCalibrationReport {
         let record = StoredAddonParsingProfile(fingerprint: fingerprint, status: .unavailable)
         await profileStore.save(record)
-        AppLogger.addons.notice(
-            "Format analysis was unavailable; built-in parsing will be used"
-        )
+        if let underlyingError {
+            AppLogger.addons.error(
+                "Format analysis could not finish; built-in parsing will be used: \(String(describing: type(of: underlyingError)))"
+            )
+        } else {
+            AppLogger.addons.notice(
+                "Format analysis was unavailable; built-in parsing will be used"
+            )
+        }
         return Self.report(
             for: addon,
             fingerprint: fingerprint,
             status: .unavailable,
             episodeCoverage: nil,
             movieCoverage: nil,
-            coverage: nil
-        )
-    }
-
-    private func saveFailure(
-        addon: InstalledAddon,
-        fingerprint: AddonFingerprint,
-        reason: Error
-    ) async -> AddonCalibrationReport {
-        let record = StoredAddonParsingProfile(fingerprint: fingerprint, status: .failure)
-        await profileStore.save(record)
-        AppLogger.addons.error(
-            "Format analysis failed during calibration: \(String(describing: type(of: reason)))"
-        )
-        return Self.report(
-            for: addon,
-            fingerprint: fingerprint,
-            status: .failure,
-            episodeCoverage: nil,
-            movieCoverage: nil,
-            coverage: nil
+            coverage: nil,
+            fallbackReason: reason
         )
     }
 
@@ -442,9 +462,10 @@ actor AddonCalibrationService {
         status: AddonCalibrationStatus,
         episodeCoverage: Double?,
         movieCoverage: Double?,
-        coverage: Double?
+        coverage: Double?,
+        fallbackReason: FallbackReason? = nil
     ) -> AddonCalibrationReport {
-        let copy = Self.copy(for: status)
+        let copy = Self.copy(for: status, fallbackReason: fallbackReason)
         return AddonCalibrationReport(
             id: fingerprint.storageKey,
             addonID: addon.id,
@@ -460,7 +481,8 @@ actor AddonCalibrationService {
     }
 
     private static func copy(
-        for status: AddonCalibrationStatus
+        for status: AddonCalibrationStatus,
+        fallbackReason: FallbackReason? = nil
     ) -> (title: String, message: String) {
         switch status {
         case .success:
@@ -479,10 +501,23 @@ actor AddonCalibrationService {
                 "Nami couldn't reliably interpret this addon's stream results. The addon may still work, but automatic source selection may be less accurate."
             )
         case .unavailable:
-            (
-                "Addon installed",
-                "Nami couldn't run on-device format analysis for this addon, so it will use its built-in parser instead. Playback works normally; automatic source selection may be slightly less accurate."
-            )
+            switch fallbackReason {
+            case .noSampleStreams:
+                (
+                    "Addon installed",
+                    "The addon didn't return streams for Nami's setup titles, so its format couldn't be analyzed. It will use the built-in parser; you can recalibrate later from Addons settings."
+                )
+            case .analysisFailed:
+                (
+                    "Addon installed",
+                    "On-device format analysis couldn't finish, so Nami will use its built-in parser instead. Playback still works; automatic source selection may be slightly less accurate."
+                )
+            case .analyzerUnavailable, nil:
+                (
+                    "Addon installed",
+                    "Nami couldn't run on-device format analysis for this addon, so it will use its built-in parser instead. Playback works normally; automatic source selection may be slightly less accurate."
+                )
+            }
         case .skipped:
             (
                 "Addon installed",

@@ -94,7 +94,7 @@ Built for:
 Nami works with Stremio-compatible addons.
 
 * **Torrentio** and **Comet** are supported out of the box. Nami already understands their result format and uses a built-in optimized parser, so no format analysis is needed.
-* **Any other Stremio-compatible addon** can be added as well. When it is installed, Nami analyzes the addon's stream format on-device with Apple's AI using Foundation Models and Apple Intelligence on macOS 26+.
+* **Other Stremio-compatible stream addons** can be added when they accept IMDb, TMDB, Kitsu, MAL, or AniList IDs. Catalog-only addons that use private item IDs cannot be matched to Nami's anime library. Compatible custom addons are analyzed on-device with Apple's AI using Foundation Models and Apple Intelligence on macOS 26+.
 * On Macs where Apple Intelligence isn't available, Nami automatically falls back to its built-in parser, although parsing may be less reliable.
 * Results are best when an addon includes as much release information as possible in its stream text, such as resolution, codec, dynamic range, audio and subtitle languages, release group, and file size.
 

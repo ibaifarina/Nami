@@ -63,6 +63,17 @@ struct AddonInstallServiceTests {
         #expect(preview.idNamespaces == [.imdb, .kitsu])
     }
 
+    @Test func rejectsAddonThatOnlyAcceptsPrivateCatalogIDs() async {
+        let service = AddonInstallService(
+            http: MockHTTPClient { _ in AddonFixtures.privateCatalogIDsManifestJSON }
+        )
+
+        await expectAddonFailure(service, matching: { error in
+            guard case .unsupportedIDPrefixes(let prefixes) = error else { return false }
+            return prefixes == ["tpb_ctl"]
+        })
+    }
+
     @Test func rejectsHTTPManifestByDefault() async {
         let service = AddonInstallService(http: MockHTTPClient())
         do {

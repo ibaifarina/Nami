@@ -53,13 +53,19 @@ actor AddonInstallService {
             throw AddonError.unsupportedProtocol
         }
 
+        if protocolType == .stremio,
+           !validated.streamIDPrefixes.isEmpty,
+           validated.resolvedNamespaces.isEmpty {
+            throw AddonError.unsupportedIDPrefixes(validated.streamIDPrefixes)
+        }
+
         let namespaces: [AddonIDNamespace]
         if protocolType == .animeStreamV1, validated.resolvedNamespaces.isEmpty {
             // Kitsu is the canonical identity; other IDs are optional.
             namespaces = [.kitsu, .mal, .anilist]
-        } else if protocolType == .stremio, validated.resolvedNamespaces.isEmpty {
+        } else if protocolType == .stremio, validated.streamIDPrefixes.isEmpty {
             // Addons that omit idPrefixes accept any ID; IMDb is the format
-            // essentially every Stremio stream addon understands.
+            // essentially every unrestricted Stremio stream addon understands.
             namespaces = [.imdb, .kitsu]
         } else {
             namespaces = validated.resolvedNamespaces

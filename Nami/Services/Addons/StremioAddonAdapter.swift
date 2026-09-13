@@ -12,7 +12,7 @@ struct StremioAddonAdapter: StreamAddon {
         descriptor: AddonDescriptor,
         supportedTypes: [String] = [],
         http: any HTTPClient = URLSessionHTTPClient(),
-        timeout: TimeInterval = 8,
+        timeout: TimeInterval = HTTPDefaults.timeout,
         maxResponseBytes: Int = 4_000_000
     ) {
         self.descriptor = descriptor

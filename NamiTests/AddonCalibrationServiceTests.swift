@@ -36,6 +36,26 @@ struct AddonCalibrationServiceTests {
         }
     }
 
+    /// Simulates a transient Foundation Models generation failure followed by
+    /// a successful response to a smaller retry batch.
+    private actor FlakyAnalyzer: StreamFormatAnalyzing {
+        nonisolated let isAvailable = true
+        private let result: LearnedStreamFormat
+        private(set) var receivedCounts: [Int] = []
+
+        init(result: LearnedStreamFormat) {
+            self.result = result
+        }
+
+        func analyze(_ batch: CalibrationSampleBatch) async throws -> LearnedStreamFormat {
+            receivedCounts.append(batch.totalCount)
+            if receivedCounts.count == 1 {
+                throw StreamFormatAnalyzerError.generationFailed("transient")
+            }
+            return result
+        }
+    }
+
     private static let streamsJSON = Data("""
     {
       "streams": [
@@ -257,7 +277,7 @@ struct AddonCalibrationServiceTests {
         #expect(Set(limited.episodes.map(\.titleName)) == ["Title A", "Title B"])
     }
 
-    @Test func reportsFailureWhenAnalyzerThrows() async {
+    @Test func fallsBackToBuiltInParsingWhenAnalyzerKeepsFailing() async {
         let http = MockHTTPClient { _ in Self.streamsJSON }
         let store = ParsingProfileStore(directory: nil)
         let service = AddonCalibrationService(
@@ -268,10 +288,12 @@ struct AddonCalibrationServiceTests {
 
         let report = await service.calibrate(addon: addon())
 
-        #expect(report.status == .failure)
+        #expect(report.status == .unavailable)
+        #expect(report.title == "Addon installed")
+        #expect(report.message.contains("built-in parser"))
     }
 
-    @Test func reportsFailureWhenAddonReturnsNoStreams() async {
+    @Test func fallsBackToBuiltInParsingWhenAddonReturnsNoStreams() async {
         let http = MockHTTPClient { _ in Data(#"{"streams":[]}"#.utf8) }
         let store = ParsingProfileStore(directory: nil)
         let analyzer = StubAnalyzer(result: Self.learnedFormat)
@@ -283,7 +305,27 @@ struct AddonCalibrationServiceTests {
 
         let report = await service.calibrate(addon: addon())
 
-        #expect(report.status == .failure)
+        #expect(report.status == .unavailable)
+        #expect(report.title == "Addon installed")
+        #expect(report.message.contains("didn't return streams"))
+    }
+
+    @Test func retriesSmallerBatchAfterTransientGenerationFailure() async {
+        let http = MockHTTPClient { _ in Self.streamsJSON }
+        let store = ParsingProfileStore(directory: nil)
+        let analyzer = FlakyAnalyzer(result: Self.learnedFormat)
+        let service = AddonCalibrationService(
+            addonManager: AddonManager(http: http),
+            profileStore: store,
+            analyzer: analyzer
+        )
+
+        let report = await service.calibrate(addon: addon())
+
+        #expect(report.status == .success)
+        let received = await analyzer.receivedCounts
+        #expect(received.count == 2)
+        #expect(received[1] < received[0])
     }
 
     @Test func optimizedAddonsSkipCalibrationEntirely() async {
