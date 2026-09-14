@@ -67,7 +67,7 @@ actor AddonManager {
         guard let adapter = Self.makeAdapter(for: addon, http: http) else {
             return AddonQueryResult(
                 addon: addon,
-                outcome: .failure("This addon's protocol is not supported yet.")
+                outcome: .failure(String(localized: "This addon's protocol is not supported yet."))
             )
         }
         // Resolve interoperability IDs only for addons that cannot use the
@@ -188,14 +188,14 @@ actor AddonManager {
 
     private static func failureMessage(for error: Error) -> String {
         if let addonError = error as? AddonError {
-            return addonError.errorDescription ?? "The addon request failed."
+            return addonError.errorDescription ?? String(localized: "The addon request failed.")
         }
         if let httpError = error as? HTTPError {
-            return "The addon request failed. \(httpError.localizedDescription)"
+            return String(localized: "The addon request failed. \(httpError.localizedDescription)")
         }
         if error is CancellationError {
-            return "The addon request was cancelled."
+            return String(localized: "The addon request was cancelled.")
         }
-        return "The addon request failed."
+        return String(localized: "The addon request failed.")
     }
 }

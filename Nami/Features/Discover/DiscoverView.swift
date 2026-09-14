@@ -70,42 +70,42 @@ struct DiscoverView: View {
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.xs) {
                 FilterMenu(
-                    label: "Genre",
-                    anyLabel: "All Genres",
+                    label: String(localized: "Genre"),
+                    anyLabel: String(localized: "All Genres"),
                     systemImage: "theatermasks",
                     selection: $model.filters.genre,
                     options: DiscoverFilters.genres.map { ($0.slug, $0.title) }
                 )
                 FilterMenu(
-                    label: "Season",
-                    anyLabel: "Any Season",
+                    label: String(localized: "Season"),
+                    anyLabel: String(localized: "Any Season"),
                     systemImage: "leaf",
                     selection: $model.filters.season,
                     options: AnimeSeason.allCases.map { ($0, $0.displayName) }
                 )
                 FilterMenu(
-                    label: "Year",
-                    anyLabel: "Any Year",
+                    label: String(localized: "Year"),
+                    anyLabel: String(localized: "Any Year"),
                     systemImage: "calendar",
                     selection: $model.filters.year,
                     options: DiscoverFilters.years.map { ($0, String($0)) }
                 )
                 FilterMenu(
-                    label: "Format",
-                    anyLabel: "Any Format",
+                    label: String(localized: "Format"),
+                    anyLabel: String(localized: "Any Format"),
                     systemImage: "rectangle.stack",
                     selection: $model.filters.subtype,
                     options: AnimeSubtype.allCases.map { ($0, $0.displayName) }
                 )
                 FilterMenu(
-                    label: "Status",
-                    anyLabel: "Any Status",
+                    label: String(localized: "Status"),
+                    anyLabel: String(localized: "Any Status"),
                     systemImage: "dot.radiowaves.left.and.right",
                     selection: $model.filters.status,
                     options: AnimeStatus.allCases.map { ($0, $0.displayName) }
                 )
                 FilterDropdown(
-                    title: "Sort: \(model.filters.sort.displayName)",
+                    title: String(localized: "Sort: \(model.filters.sort.displayName)"),
                     systemImage: "arrow.up.arrow.down",
                     isActive: model.filters.sort != .popularity,
                     rows: DiscoverSort.allCases.map { sort in
@@ -172,9 +172,9 @@ struct DiscoverView: View {
         case .loaded(let items) where items.isEmpty:
             EmptyStateView(
                 systemImage: "magnifyingglass",
-                title: "No results",
-                message: "Try a different search or clear some filters.",
-                actionTitle: "Clear Filters",
+                title: String(localized: "No results"),
+                message: String(localized: "Try a different search or clear some filters."),
+                actionTitle: String(localized: "Clear Filters"),
                 action: { model.clearFilters() }
             )
         case .loaded(let items):
@@ -199,7 +199,7 @@ struct DiscoverView: View {
             }
         case .failed(let error):
             ErrorStateView(
-                title: error.errorDescription ?? "Something went wrong",
+                title: error.errorDescription ?? String(localized: "Something went wrong"),
                 message: error.recoverySuggestion,
                 technicalDetail: error.technicalDetail,
                 onRetry: { Task { await model.retry() } }

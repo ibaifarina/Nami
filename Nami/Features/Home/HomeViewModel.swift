@@ -15,11 +15,11 @@ final class HomeViewModel {
 
         var title: String {
             switch self {
-            case .popular: "Popular Now"
-            case .topRated: "Top Rated"
-            case .airing: "Currently Airing"
-            case .newReleases: "New Releases"
-            case .upcoming: "Upcoming"
+            case .popular: String(localized: "Popular Now")
+            case .topRated: String(localized: "Top Rated")
+            case .airing: String(localized: "Currently Airing")
+            case .newReleases: String(localized: "New Releases")
+            case .upcoming: String(localized: "Upcoming")
             }
         }
     }

@@ -83,14 +83,14 @@ final class AVPlayerEngine: PlayerEngine {
                 onStateChange?(.ready)
                 return
             case .failed:
-                let detail = item.error?.localizedDescription ?? "Unknown playback error"
+                let detail = item.error?.localizedDescription ?? String(localized: "Unknown playback error")
                 onStateChange?(.failed(detail))
                 throw PlayerError.failedToLoad(detail)
             default:
                 try? await Task.sleep(for: .milliseconds(100))
             }
         }
-        onStateChange?(.failed("Timed out"))
+        onStateChange?(.failed(String(localized: "Timed out")))
         throw PlayerError.timedOut
     }
 

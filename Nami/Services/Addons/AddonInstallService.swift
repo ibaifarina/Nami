@@ -33,7 +33,7 @@ actor AddonInstallService {
                 try await http.data(for: request, maxBytes: maxManifestBytes)
             }
         } catch TimeoutError.timedOut {
-            throw AddonError.requestFailed("The addon did not respond in time.")
+            throw AddonError.requestFailed(String(localized: "The addon did not respond in time."))
         } catch let error as HTTPError {
             if case .responseTooLarge = error {
                 throw AddonError.manifestTooLarge
@@ -45,7 +45,7 @@ actor AddonInstallService {
         do {
             manifest = try JSONDecoder().decode(AddonManifest.self, from: data)
         } catch {
-            throw AddonError.invalidManifest("The manifest could not be read.")
+            throw AddonError.invalidManifest(String(localized: "The manifest could not be read."))
         }
 
         let validated = try manifest.validated()

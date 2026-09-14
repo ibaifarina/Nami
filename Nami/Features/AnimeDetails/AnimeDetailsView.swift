@@ -27,7 +27,7 @@ struct AnimeDetailsView: View {
                 content(details)
             case .failed(let error):
                 ErrorStateView(
-                    title: error.errorDescription ?? "Something went wrong",
+                    title: error.errorDescription ?? String(localized: "Something went wrong"),
                     message: error.recoverySuggestion,
                     technicalDetail: error.technicalDetail,
                     onRetry: { Task { await model.retry() } }
@@ -91,7 +91,7 @@ struct AnimeDetailsView: View {
                 VStack(alignment: .leading, spacing: Spacing.xxl) {
                     skeletonSynopsis
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        SectionHeader(title: "Episodes")
+                        SectionHeader(title: String(localized: "Episodes"))
                         episodeSkeleton
                     }
                 }
@@ -155,7 +155,7 @@ struct AnimeDetailsView: View {
 
     private var skeletonSynopsis: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            SectionHeader(title: "Synopsis")
+            SectionHeader(title: String(localized: "Synopsis"))
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 ForEach(0..<4, id: \.self) { index in
                     LoadingSkeleton(cornerRadius: 4)
@@ -169,7 +169,7 @@ struct AnimeDetailsView: View {
 
     private var skeletonSeason: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            SectionHeader(title: "Season")
+            SectionHeader(title: String(localized: "Season"))
             HStack(spacing: Spacing.xs) {
                 ForEach(0..<4, id: \.self) { index in
                     LoadingSkeleton(cornerRadius: 15)
@@ -183,7 +183,7 @@ struct AnimeDetailsView: View {
 
     private var skeletonRelated: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            SectionHeader(title: "Related")
+            SectionHeader(title: String(localized: "Related"))
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(alignment: .top, spacing: Spacing.md) {
                     ForEach(0..<6, id: \.self) { _ in
@@ -339,7 +339,7 @@ struct AnimeDetailsView: View {
                 aspectRatio: Layout.posterAspectRatio,
                 sourceFrame: posterFrame,
                 cornerRadius: Radius.card,
-                accessibilityLabel: "Cover art for \(anime.displayTitle(for: titleLanguage))"
+                accessibilityLabel: String(localized: "Cover art for \(anime.displayTitle(for: titleLanguage))")
             )
         )
     }
@@ -389,7 +389,7 @@ struct AnimeDetailsView: View {
             isLibraryMenuExpanded.toggle()
         } label: {
             Label(
-                model.libraryEntry?.status.displayName ?? "Add to Library",
+                model.libraryEntry?.status.displayName ?? String(localized: "Add to Library"),
                 systemImage: model.libraryEntry?.status.systemImage ?? "bookmark"
             )
             .labelStyle(.iconOnly)
@@ -404,7 +404,7 @@ struct AnimeDetailsView: View {
         .buttonStyle(GlassButtonStyle())
         .fixedSize()
         .hoverFeedback(scale: 1.03)
-        .accessibilityLabel(model.libraryEntry?.status.displayName ?? "Add to Library")
+        .accessibilityLabel(model.libraryEntry?.status.displayName ?? String(localized: "Add to Library"))
         .disabled(model.isUpdatingLibrary || model.selectedAnime == nil)
         .help("Manage your local library")
         .popover(isPresented: $isLibraryMenuExpanded, arrowEdge: .top) {
@@ -431,7 +431,7 @@ struct AnimeDetailsView: View {
     private var removeFromLibraryAction: SettingsDropdownAction? {
         guard model.libraryEntry != nil else { return nil }
         return SettingsDropdownAction(
-            label: "Remove from Library",
+            label: String(localized: "Remove from Library"),
             systemImage: "trash",
             isDestructive: true
         ) {
@@ -444,7 +444,7 @@ struct AnimeDetailsView: View {
     private func synopsis(_ anime: Anime) -> some View {
         if let synopsis = anime.synopsis {
             VStack(alignment: .leading, spacing: Spacing.xs) {
-                SectionHeader(title: "Synopsis")
+                SectionHeader(title: String(localized: "Synopsis"))
                 Text(synopsis)
                     .font(AppFont.body)
                     .foregroundStyle(.secondary)
@@ -495,7 +495,7 @@ struct AnimeDetailsView: View {
 
     private var seasonSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            SectionHeader(title: "Season")
+            SectionHeader(title: String(localized: "Season"))
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Spacing.xs) {
                     ForEach(model.availableInstallments) { installment in
@@ -531,9 +531,9 @@ struct AnimeDetailsView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack(alignment: .firstTextBaseline) {
                 SectionHeader(
-                    title: "Episodes",
+                    title: String(localized: "Episodes"),
                     subtitle: model.selectedAnime?.status == .current
-                        ? "New episodes air as they release"
+                        ? String(localized: "New episodes air as they release")
                         : nil
                 )
                 episodeViewToggle
@@ -723,7 +723,7 @@ struct AnimeDetailsView: View {
     private var relatedSection: some View {
         if !model.related.isEmpty {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                SectionHeader(title: "Related")
+                SectionHeader(title: String(localized: "Related"))
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(alignment: .top, spacing: Spacing.md) {
                         ForEach(model.related) { relation in
@@ -841,8 +841,8 @@ private enum EpisodeViewMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .list: "List"
-        case .cards: "Cards"
+        case .list: String(localized: "List")
+        case .cards: String(localized: "Cards")
         }
     }
 }
@@ -990,7 +990,7 @@ private struct EpisodeListRow: View {
 
     private var titleText: String {
         episode.hasTitle
-            ? "\(episode.displayNumber). \(episode.displayTitle)"
+            ? String(localized: "\(episode.displayNumber). \(episode.displayTitle)")
             : "\(episode.displayNumber)"
     }
 
@@ -1070,8 +1070,8 @@ private struct EpisodeCard: View {
             .buttonStyle(.plain)
             .opacity(isWatched ? 0.6 : 1)
             .accessibilityLabel(
-                progress.map { "Resume \(episode.displayTitle), \($0.timecode)" }
-                    ?? "Play \(episode.displayTitle)"
+                progress.map { String(localized: "Resume \(episode.displayTitle), \($0.timecode)") }
+                    ?? String(localized: "Play \(episode.displayTitle)")
             )
 
             watchedToggle
@@ -1192,7 +1192,7 @@ private struct CompactEpisodeError: View {
             Image(systemName: "exclamationmark.triangle")
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 2) {
-                Text(error.errorDescription ?? "Episode metadata is unavailable")
+                Text(error.errorDescription ?? String(localized: "Episode metadata is unavailable"))
                     .font(AppFont.cardTitle)
                 if let suggestion = error.recoverySuggestion {
                     Text(suggestion)

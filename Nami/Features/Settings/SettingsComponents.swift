@@ -13,23 +13,23 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .general: "General"
-        case .streaming: "Streaming"
-        case .realDebrid: "Real-Debrid"
-        case .addons: "Addons"
-        case .playback: "Playback"
-        case .advanced: "Advanced"
+        case .general: String(localized: "General")
+        case .streaming: String(localized: "Streaming")
+        case .realDebrid: String(localized: "Real-Debrid")
+        case .addons: String(localized: "Addons")
+        case .playback: String(localized: "Playback")
+        case .advanced: String(localized: "Advanced")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .general: "Appearance, version, and local storage."
-        case .streaming: "How sources are chosen, ranked, and filtered."
-        case .realDebrid: "Resolve torrent and hoster sources through your account."
-        case .addons: "Providers that discover playable sources."
-        case .playback: "Player engines and what happens between episodes."
-        case .advanced: "Fine-tune scoring, release groups, and caches."
+        case .general: String(localized: "Appearance, version, and local storage.")
+        case .streaming: String(localized: "How sources are chosen, ranked, and filtered.")
+        case .realDebrid: String(localized: "Resolve torrent and hoster sources through your account.")
+        case .addons: String(localized: "Providers that discover playable sources.")
+        case .playback: String(localized: "Player engines and what happens between episodes.")
+        case .advanced: String(localized: "Fine-tune scoring, release groups, and caches.")
         }
     }
 

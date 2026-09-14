@@ -13,7 +13,7 @@ enum CatalogError: Error, Equatable, Sendable {
     var technicalDetail: String? {
         switch self {
         case .server(let detail): detail
-        case .unavailable: "Kitsu returned 403 (service unavailable)"
+        case .unavailable: String(localized: "Kitsu returned 403 (service unavailable)")
         default: nil
         }
     }
@@ -23,32 +23,32 @@ extension CatalogError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unavailable:
-            "Kitsu is temporarily unavailable."
+            String(localized: "Kitsu is temporarily unavailable.")
         case .offline:
-            "You appear to be offline. Check your internet connection and try again."
+            String(localized: "You appear to be offline. Check your internet connection and try again.")
         case .timeout:
-            "The request took too long. Please try again."
+            String(localized: "The request took too long. Please try again.")
         case .unauthorized:
-            "That request was not authorized."
+            String(localized: "That request was not authorized.")
         case .notFound:
-            "That anime could not be found."
+            String(localized: "That anime could not be found.")
         case .server:
-            "Kitsu returned an unexpected response. Please try again."
+            String(localized: "Kitsu returned an unexpected response. Please try again.")
         case .decoding:
-            "Kitsu sent data we could not read."
+            String(localized: "Kitsu sent data we could not read.")
         case .unknown:
-            "Something went wrong while loading this content."
+            String(localized: "Something went wrong while loading this content.")
         }
     }
 
     var recoverySuggestion: String? {
         switch self {
         case .unavailable:
-            "Kitsu is temporarily unavailable. Cached content is shown where available."
+            String(localized: "Kitsu is temporarily unavailable. Cached content is shown where available.")
         case .offline:
-            "Reconnect and try again."
+            String(localized: "Reconnect and try again.")
         default:
-            "Please try again in a moment."
+            String(localized: "Please try again in a moment.")
         }
     }
 }
@@ -78,13 +78,13 @@ extension CatalogError {
                 switch code {
                 case 403: return .unavailable
                 case 404: return .notFound
-                case 429: return .server("Kitsu rate limit reached. Try again shortly.")
+                case 429: return .server(String(localized: "Kitsu rate limit reached. Try again shortly."))
                 default:
                     let detail = body.map { ": \(String($0.prefix(200)))" } ?? ""
                     return .server("HTTP \(code)\(detail)")
                 }
             case .responseTooLarge:
-                return .server("Response exceeded the size limit")
+                return .server(String(localized: "Response exceeded the size limit"))
             case .decoding:
                 return .decoding
             }

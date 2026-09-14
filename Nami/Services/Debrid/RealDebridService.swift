@@ -211,7 +211,7 @@ actor RealDebridService: DebridService {
                 let links = ready.links,
                 links.indices.contains(linkIndex)
             else {
-                throw DebridError.fileSelectionFailed("Real-Debrid did not generate a download link.")
+                throw DebridError.fileSelectionFailed(String(localized: "Real-Debrid did not generate a download link."))
             }
 
             let unrestricted = try await unrestrict(link: links[linkIndex])
@@ -308,7 +308,7 @@ actor RealDebridService: DebridService {
                 return info
             case "error", "magnet_error", "virus", "dead":
                 throw DebridError.requestFailed(
-                    "Real-Debrid could not process this torrent (\(info.status ?? "unknown"))."
+                    String(localized: "Real-Debrid could not process this torrent (\(info.status ?? "unknown")).")
                 )
             default:
                 continue
@@ -359,7 +359,7 @@ actor RealDebridService: DebridService {
         fileID: Int?
     ) throws -> TorrentFileSelection {
         if let fileID, let file = files.first(where: { $0.id == fileID }) {
-            return TorrentFileSelection(file: file, reason: "User-selected file")
+            return TorrentFileSelection(file: file, reason: String(localized: "User-selected file"))
         }
         return try TorrentFileSelector.selectFile(from: files, targetEpisode: targetEpisode)
     }

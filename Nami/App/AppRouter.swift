@@ -13,9 +13,9 @@ final class AppRouter {
 
         var title: String {
             switch self {
-            case .home: "Home"
-            case .discover: "Discover"
-            case .library: "Library"
+            case .home: String(localized: "Home")
+            case .discover: String(localized: "Discover")
+            case .library: String(localized: "Library")
             }
         }
 

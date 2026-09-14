@@ -17,16 +17,16 @@ enum StreamAttribute: String, Codable, CaseIterable, Hashable, Sendable, Identif
 
     var displayName: String {
         switch self {
-        case .resolution: "Resolution"
-        case .codec: "Codec"
-        case .dynamicRange: "Dynamic range"
-        case .audioLanguage: "Audio language"
-        case .subtitleLanguage: "Subtitle language"
-        case .releaseGroup: "Release group"
-        case .fileSize: "File size"
-        case .seeders: "Seeders"
-        case .cached: "Cached"
-        case .source: "Source"
+        case .resolution: String(localized: "Resolution")
+        case .codec: String(localized: "Codec")
+        case .dynamicRange: String(localized: "Dynamic range")
+        case .audioLanguage: String(localized: "Audio language")
+        case .subtitleLanguage: String(localized: "Subtitle language")
+        case .releaseGroup: String(localized: "Release group")
+        case .fileSize: String(localized: "File size")
+        case .seeders: String(localized: "Seeders")
+        case .cached: String(localized: "Cached")
+        case .source: String(localized: "Source")
         }
     }
 
@@ -148,8 +148,8 @@ enum StreamContentKind: String, Codable, CaseIterable, Hashable, Sendable {
 
     var displayName: String {
         switch self {
-        case .episode: "Episodes"
-        case .movie: "Movies"
+        case .episode: String(localized: "Episodes")
+        case .movie: String(localized: "Movies")
         }
     }
 }

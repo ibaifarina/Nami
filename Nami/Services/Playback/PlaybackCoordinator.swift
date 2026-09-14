@@ -195,7 +195,7 @@ final class PlaybackCoordinator {
     private func startBuiltIn(stream: ResolvedStream, anime: Anime, episode: Episode, startAt: Double?) {
         session = Session(anime: anime, episode: episode, stream: stream)
         title = anime.displayTitle(for: preferences.animeTitleLanguage)
-        episodeLabel = "Episode \(episode.displayNumber)"
+        episodeLabel = String(localized: "Episode \(episode.displayNumber)")
         isPresenting = true
         state = .loading
         currentTime = 0
@@ -223,7 +223,7 @@ final class PlaybackCoordinator {
         }
         session = nil
         title = anime.displayTitle(for: preferences.animeTitleLanguage)
-        episodeLabel = "Episode \(episode.displayNumber)"
+        episodeLabel = String(localized: "Episode \(episode.displayNumber)")
         isPresenting = true
         state = .loading
         currentTime = 0

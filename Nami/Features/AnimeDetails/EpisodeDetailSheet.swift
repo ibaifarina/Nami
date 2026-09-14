@@ -114,7 +114,7 @@ struct EpisodeDetailSheet: View {
     }
 
     private var synopsis: some View {
-        Text(episode.hasSynopsis ? (episode.synopsis ?? "") : "No synopsis is available for this episode yet.")
+        Text(episode.hasSynopsis ? (episode.synopsis ?? "") : String(localized: "No synopsis is available for this episode yet."))
             .font(AppFont.body)
             .foregroundStyle(.white.opacity(0.82))
             .lineSpacing(3)

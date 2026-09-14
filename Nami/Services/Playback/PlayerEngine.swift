@@ -19,11 +19,11 @@ enum PlayerError: Error, Equatable, Sendable {
     var userMessage: String {
         switch self {
         case .notReady:
-            "The video is not ready yet."
+            String(localized: "The video is not ready yet.")
         case .timedOut:
-            "The video took too long to load."
+            String(localized: "The video took too long to load.")
         case .failedToLoad(let detail):
-            "This source could not be played. \(detail)"
+            String(localized: "This source could not be played. \(detail)")
         }
     }
 }

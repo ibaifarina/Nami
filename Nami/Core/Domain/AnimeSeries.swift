@@ -8,9 +8,9 @@ enum InstallmentRelationship: String, Codable, Sendable {
 
     var displayName: String {
         switch self {
-        case .original: "Original"
-        case .sequel: "Sequel"
-        case .prequel: "Prequel"
+        case .original: String(localized: "Original")
+        case .sequel: String(localized: "Sequel")
+        case .prequel: String(localized: "Prequel")
         }
     }
 }
@@ -49,7 +49,7 @@ struct AnimeSeries: Hashable, Codable, Sendable {
                     anime: anime,
                     relationship: .original,
                     displayOrder: 0,
-                    displayName: "Season 1",
+                    displayName: String(localized: "Season 1"),
                     absoluteEpisodeOffset: 0
                 ),
             ],

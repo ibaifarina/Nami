@@ -127,7 +127,7 @@ struct URLSessionStreamProbe: StreamProbing {
         do {
             let (bytes, response) = try await session.bytes(for: request, delegate: delegate)
             guard let http = response as? HTTPURLResponse else {
-                throw StreamProbeError.transport("Unexpected response type")
+                throw StreamProbeError.transport(String(localized: "Unexpected response type"))
             }
             var prefix = Data()
             prefix.reserveCapacity(maxPrefixBytes)
@@ -222,10 +222,10 @@ struct StreamValidationService: StreamValidating, Sendable {
                 let scheme = url.scheme?.lowercased(),
                 scheme == "http" || scheme == "https"
             else {
-                return .candidateInvalid(StreamValidationIssue(kind: .nonMedia, detail: "Unsupported URL"))
+                return .candidateInvalid(StreamValidationIssue(kind: .nonMedia, detail: String(localized: "Unsupported URL")))
             }
             guard visited.insert(url.absoluteString).inserted else {
-                return .candidateInvalid(StreamValidationIssue(kind: .errorPage, detail: "Redirect loop"))
+                return .candidateInvalid(StreamValidationIssue(kind: .errorPage, detail: String(localized: "Redirect loop")))
             }
 
             let response: StreamProbeResponse
@@ -244,7 +244,7 @@ struct StreamValidationService: StreamValidating, Sendable {
                 redirectCount += 1
                 guard redirectCount <= maximumRedirects else {
                     return .candidateInvalid(
-                        StreamValidationIssue(kind: .errorPage, detail: "Too many redirects")
+                        StreamValidationIssue(kind: .errorPage, detail: String(localized: "Too many redirects"))
                     )
                 }
                 guard
@@ -252,7 +252,7 @@ struct StreamValidationService: StreamValidating, Sendable {
                     let next = URL(string: location, relativeTo: url)?.absoluteURL
                 else {
                     return .candidateInvalid(
-                        StreamValidationIssue(kind: .errorPage, detail: "Redirect without target")
+                        StreamValidationIssue(kind: .errorPage, detail: String(localized: "Redirect without target"))
                     )
                 }
                 if let issue = Self.issue(forErrorURL: next) {
@@ -325,12 +325,12 @@ struct StreamValidationService: StreamValidating, Sendable {
                 return Self.verdict(for: issue)
             }
             return .candidateInvalid(
-                StreamValidationIssue(kind: .errorPage, detail: "HTML page")
+                StreamValidationIssue(kind: .errorPage, detail: String(localized: "HTML page"))
             )
         }
         if contentType.contains("application/json") {
             return .candidateInvalid(
-                StreamValidationIssue(kind: .nonMedia, detail: "JSON response")
+                StreamValidationIssue(kind: .nonMedia, detail: String(localized: "JSON response"))
             )
         }
         if !Self.isMediaContentType(contentType), !Self.looksLikeMedia(body) {
@@ -350,7 +350,7 @@ struct StreamValidationService: StreamValidating, Sendable {
            duration < Self.slateMaximumSeconds,
            duration < Double(expectedMinutes * 60) * 0.35 {
             return .candidateInvalid(
-                StreamValidationIssue(kind: .slateVideo, detail: "\(Int(duration.rounded()))s video")
+                StreamValidationIssue(kind: .slateVideo, detail: String(localized: "\(Int(duration.rounded()))s video"))
             )
         }
 
@@ -547,7 +547,7 @@ struct StreamValidationService: StreamValidating, Sendable {
         case 14:
             return StreamValidationIssue(kind: .accountIssue, detail: detail)
         case 15:
-            return StreamValidationIssue(kind: .accountIssue, detail: detail ?? "Account not activated")
+            return StreamValidationIssue(kind: .accountIssue, detail: detail ?? String(localized: "Account not activated"))
         case 16:
             return StreamValidationIssue(kind: .unsupportedHoster, detail: detail)
         case 17, 19:
@@ -557,7 +557,7 @@ struct StreamValidationService: StreamValidating, Sendable {
         case 21, 34:
             return StreamValidationIssue(kind: .rateLimited, detail: detail)
         case 22:
-            return StreamValidationIssue(kind: .accountIssue, detail: detail ?? "IP address not allowed")
+            return StreamValidationIssue(kind: .accountIssue, detail: detail ?? String(localized: "IP address not allowed"))
         case 24:
             return StreamValidationIssue(kind: .unavailableFile, detail: detail)
         case 25:

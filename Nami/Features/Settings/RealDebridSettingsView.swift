@@ -15,10 +15,10 @@ struct RealDebridSettingsView: View {
             if let message = environment.debridAuth.failureMessage {
                 SettingsBanner(kind: .warning, message: message)
             }
-            SettingsCard(title: "Usage") {
+            SettingsCard(title: String(localized: "Usage")) {
                 SettingsRow(
-                    "Source Resolution",
-                    description: "Connected sources are resolved through Real-Debrid. Cached torrents start immediately; uncached ones are prepared by Real-Debrid first."
+                    String(localized: "Source Resolution"),
+                    description: String(localized: "Connected sources are resolved through Real-Debrid. Cached torrents start immediately; uncached ones are prepared by Real-Debrid first.")
                 ) {
                     Image(systemName: "bolt.fill")
                         .font(.system(size: 15, weight: .medium))
@@ -29,7 +29,7 @@ struct RealDebridSettingsView: View {
     }
 
     private func connectedCard(_ account: DebridAccount) -> some View {
-        SettingsCard(title: "Account") {
+        SettingsCard(title: String(localized: "Account")) {
             HStack(spacing: Spacing.md) {
                 ZStack {
                     Circle()
@@ -52,20 +52,20 @@ struct RealDebridSettingsView: View {
             }
             .padding(Spacing.md)
 
-            SettingsValueRow(title: "Username", value: account.username)
-            SettingsRow("Plan") {
+            SettingsValueRow(title: String(localized: "Username"), value: account.username)
+            SettingsRow(String(localized: "Plan")) {
                 Pill(
-                    text: account.isPremium ? "Premium" : "Free",
+                    text: account.isPremium ? String(localized: "Premium") : String(localized: "Free"),
                     systemImage: account.isPremium ? "star.fill" : nil,
                     tint: account.isPremium ? .green : .secondary
                 )
             }
             if let expiration = account.expirationDescription {
-                SettingsValueRow(title: "Premium Until", value: expiration)
+                SettingsValueRow(title: String(localized: "Premium Until"), value: expiration)
             }
             SettingsRow(
-                "Connection",
-                description: "Verifying re-checks your token with Real-Debrid. Disconnecting removes it from your Keychain."
+                String(localized: "Connection"),
+                description: String(localized: "Verifying re-checks your token with Real-Debrid. Disconnecting removes it from your Keychain.")
             ) {
                 HStack(spacing: Spacing.xs) {
                     Button("Verify") {
@@ -85,7 +85,7 @@ struct RealDebridSettingsView: View {
     }
 
     private var connectCard: some View {
-        SettingsCard(title: "Connect") {
+        SettingsCard(title: String(localized: "Connect")) {
             HStack(spacing: Spacing.md) {
                 ZStack {
                     Circle()
@@ -109,8 +109,8 @@ struct RealDebridSettingsView: View {
             .padding(Spacing.md)
 
             SettingsStackedRow(
-                "API Token",
-                description: "Generate a private token at real-debrid.com/apitoken. It is stored in your macOS Keychain and never logged or sent to addons."
+                String(localized: "API Token"),
+                description: String(localized: "Generate a private token at real-debrid.com/apitoken. It is stored in your macOS Keychain and never logged or sent to addons.")
             ) {
                 HStack(spacing: Spacing.sm) {
                     SettingsFieldChrome {

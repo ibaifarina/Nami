@@ -289,10 +289,10 @@ final class StreamSelectionViewModel {
         case .ready(let stream):
             start(stream, episode: episode)
         case .unavailable:
-            phase = .failed("This source is no longer available. Pick another one.")
+            phase = .failed(String(localized: "This source is no longer available. Pick another one."))
         case .blocked(let error):
             phase = .failed(
-                error?.errorDescription ?? "Real-Debrid is unavailable right now."
+                error?.errorDescription ?? String(localized: "Real-Debrid is unavailable right now.")
             )
         }
     }

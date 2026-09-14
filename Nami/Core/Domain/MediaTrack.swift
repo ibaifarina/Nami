@@ -31,7 +31,7 @@ struct MediaTrack: Identifiable, Hashable, Sendable {
 
     var displayName: String {
         if let language, !language.isEmpty, !title.localizedCaseInsensitiveContains(language) {
-            return "\(title) (\(language))"
+            return String(localized: "\(title) (\(language))")
         }
         return title
     }

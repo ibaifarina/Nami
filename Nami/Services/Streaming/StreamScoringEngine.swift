@@ -268,13 +268,13 @@ struct StreamScoringEngine: Sendable {
             < EpisodeMatchResult.safeForAutoSelectionThreshold
         {
             reasons.append(
-                "Episode match is too uncertain"
+                String(localized: "Episode match is too uncertain")
             )
         }
 
         if !hasPlayableSource(candidate) {
             reasons.append(
-                "No playable source"
+                String(localized: "No playable source")
             )
         }
 
@@ -282,7 +282,7 @@ struct StreamScoringEngine: Sendable {
            candidate.directURL == nil
         {
             reasons.append(
-                "Real-Debrid isn't connected"
+                String(localized: "Real-Debrid isn't connected")
             )
         }
 
@@ -292,7 +292,7 @@ struct StreamScoringEngine: Sendable {
            size > maximum
         {
             reasons.append(
-                "File is larger than your size limit"
+                String(localized: "File is larger than your size limit")
             )
         }
 
@@ -302,7 +302,7 @@ struct StreamScoringEngine: Sendable {
            seeders < options.minimumSeedersForUncached
         {
             reasons.append(
-                "Not enough seeders for an uncached stream"
+                String(localized: "Not enough seeders for an uncached stream")
             )
         }
 
@@ -310,13 +310,13 @@ struct StreamScoringEngine: Sendable {
            candidate.targetEpisode == nil
         {
             reasons.append(
-                "Batch could not be matched to this episode"
+                String(localized: "Batch could not be matched to this episode")
             )
         }
 
         if isBlockedGroup(candidate) {
             reasons.append(
-                "Release group is blocked"
+                String(localized: "Release group is blocked")
             )
         }
 
@@ -936,7 +936,7 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: "Exact episode match",
+                    text: String(localized: "Exact episode match"),
                     kind: .positive
                 )
             )
@@ -945,14 +945,14 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: "Episode match confidence \(percent)%",
+                    text: String(localized: "Episode match confidence \(percent)%"),
                     kind: .positive
                 )
             )
         } else {
             reasons.append(
                 ScoreReason(
-                    text: "Uncertain episode match (\(percent)%)",
+                    text: String(localized: "Uncertain episode match (\(percent)%)"),
                     kind: .caution
                 )
             )
@@ -961,7 +961,7 @@ struct StreamScoringEngine: Sendable {
         if candidate.debridStatus == .cached {
             reasons.append(
                 ScoreReason(
-                    text: "Cached on Real-Debrid",
+                    text: String(localized: "Cached on Real-Debrid"),
                     kind: .positive
                 )
             )
@@ -972,7 +972,7 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: "\(resolution.label) quality",
+                    text: String(localized: "\(resolution.label) quality"),
                     kind:
                         breakdown.resolution >= 15
                         ? .positive
@@ -992,7 +992,7 @@ struct StreamScoringEngine: Sendable {
 
             reasons.append(
                 ScoreReason(
-                    text: "\(source.label) source",
+                    text: String(localized: "\(source.label) source"),
                     kind: kind
                 )
             )
@@ -1003,7 +1003,7 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: "\(codec.label) codec",
+                    text: String(localized: "\(codec.label) codec"),
                     kind: .positive
                 )
             )
@@ -1013,7 +1013,7 @@ struct StreamScoringEngine: Sendable {
             candidate.sizeBytes
         {
             let text =
-                "File size \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))"
+                String(localized: "File size \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))")
 
             let kind: ScoreReason.Kind
 
@@ -1038,7 +1038,7 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: "\(seeders) seeders",
+                    text: String(localized: "\(seeders) seeders"),
                     kind:
                         seeders
                             >= options.minimumSeedersForUncached
@@ -1051,7 +1051,7 @@ struct StreamScoringEngine: Sendable {
         if breakdown.language > 0 {
             reasons.append(
                 ScoreReason(
-                    text: "Preferred language available",
+                    text: String(localized: "Preferred language available"),
                     kind: .positive
                 )
             )
@@ -1062,7 +1062,7 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: "Preferred group \(group)",
+                    text: String(localized: "Preferred group \(group)"),
                     kind: .positive
                 )
             )
@@ -1074,7 +1074,7 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: "Blocked group \(group)",
+                    text: String(localized: "Blocked group \(group)"),
                     kind: .negative
                 )
             )
@@ -1085,7 +1085,7 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: "Batch contains this episode",
+                    text: String(localized: "Batch contains this episode"),
                     kind: .caution
                 )
             )

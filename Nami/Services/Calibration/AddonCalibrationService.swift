@@ -487,41 +487,41 @@ actor AddonCalibrationService {
         switch status {
         case .success:
             (
-                "Addon ready",
-                "Nami successfully identified this addon's stream format."
+                String(localized: "Addon ready"),
+                String(localized: "Nami successfully identified this addon's stream format.")
             )
         case .partial:
             (
-                "Addon installed with limited compatibility",
-                "Nami could identify some stream information, but not all of it. Playback should still work, but automatic source selection may be less accurate."
+                String(localized: "Addon installed with limited compatibility"),
+                String(localized: "Nami could identify some stream information, but not all of it. Playback should still work, but automatic source selection may be less accurate.")
             )
         case .failure:
             (
-                "Addon format not recognized",
-                "Nami couldn't reliably interpret this addon's stream results. The addon may still work, but automatic source selection may be less accurate."
+                String(localized: "Addon format not recognized"),
+                String(localized: "Nami couldn't reliably interpret this addon's stream results. The addon may still work, but automatic source selection may be less accurate.")
             )
         case .unavailable:
             switch fallbackReason {
             case .noSampleStreams:
                 (
-                    "Addon installed",
-                    "The addon didn't return streams for Nami's setup titles, so its format couldn't be analyzed. It will use the built-in parser; you can recalibrate later from Addons settings."
+                    String(localized: "Addon installed"),
+                    String(localized: "The addon didn't return streams for Nami's setup titles, so its format couldn't be analyzed. It will use the built-in parser; you can recalibrate later from Addons settings.")
                 )
             case .analysisFailed:
                 (
-                    "Addon installed",
-                    "On-device format analysis couldn't finish, so Nami will use its built-in parser instead. Playback still works; automatic source selection may be slightly less accurate."
+                    String(localized: "Addon installed"),
+                    String(localized: "On-device format analysis couldn't finish, so Nami will use its built-in parser instead. Playback still works; automatic source selection may be slightly less accurate.")
                 )
             case .analyzerUnavailable, nil:
                 (
-                    "Addon installed",
-                    "Nami couldn't run on-device format analysis for this addon, so it will use its built-in parser instead. Playback works normally; automatic source selection may be slightly less accurate."
+                    String(localized: "Addon installed"),
+                    String(localized: "Nami couldn't run on-device format analysis for this addon, so it will use its built-in parser instead. Playback works normally; automatic source selection may be slightly less accurate.")
                 )
             }
         case .skipped:
             (
-                "Addon installed",
-                "Nami already understands this addon's format and will use its optimized parser."
+                String(localized: "Addon installed"),
+                String(localized: "Nami already understands this addon's format and will use its optimized parser.")
             )
         }
     }

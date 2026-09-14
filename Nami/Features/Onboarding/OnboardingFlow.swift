@@ -12,21 +12,21 @@ struct OnboardingFlow: Equatable {
 
         var title: String {
             switch self {
-            case .welcome: "Welcome to Nami"
-            case .realDebrid: "Connect Real-Debrid"
-            case .addons: "Add Your Addons"
-            case .preferences: "Set Your Preferences"
-            case .ready: "You're All Set"
+            case .welcome: String(localized: "Welcome to Nami")
+            case .realDebrid: String(localized: "Connect Real-Debrid")
+            case .addons: String(localized: "Add Your Addons")
+            case .preferences: String(localized: "Set Your Preferences")
+            case .ready: String(localized: "You're All Set")
             }
         }
 
         var subtitle: String {
             switch self {
-            case .welcome: "Your anime, one clean Play button."
-            case .realDebrid: "Unlock instant, cached, high-quality streams."
-            case .addons: "Addons are where your sources come from."
-            case .preferences: "Tell Nami how you like to watch. Change it anytime."
-            case .ready: "Review your setup and start watching."
+            case .welcome: String(localized: "Your anime, one clean Play button.")
+            case .realDebrid: String(localized: "Unlock instant, cached, high-quality streams.")
+            case .addons: String(localized: "Addons are where your sources come from.")
+            case .preferences: String(localized: "Tell Nami how you like to watch. Change it anytime.")
+            case .ready: String(localized: "Review your setup and start watching.")
             }
         }
 
@@ -43,11 +43,11 @@ struct OnboardingFlow: Equatable {
         /// Short label used in the setup progress rail.
         var shortTitle: String {
             switch self {
-            case .welcome: "Welcome"
-            case .realDebrid: "Real-Debrid"
-            case .addons: "Addons"
-            case .preferences: "Preferences"
-            case .ready: "Ready"
+            case .welcome: String(localized: "Welcome")
+            case .realDebrid: String(localized: "Real-Debrid")
+            case .addons: String(localized: "Addons")
+            case .preferences: String(localized: "Preferences")
+            case .ready: String(localized: "Ready")
             }
         }
 

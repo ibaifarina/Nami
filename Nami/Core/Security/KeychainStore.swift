@@ -9,7 +9,7 @@ extension KeychainError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unexpectedStatus(let status):
-            "Keychain error (\(status))"
+            String(localized: "Keychain error (\(Int(status)))")
         }
     }
 }

@@ -76,10 +76,10 @@ enum DebridAvailability: String, Codable, Sendable {
 
     var label: String {
         switch self {
-        case .unknown: "Cache unknown"
-        case .cached: "Cached"
-        case .notCached: "Not cached"
-        case .unavailable: "Unavailable"
+        case .unknown: String(localized: "Cache unknown")
+        case .cached: String(localized: "Cached")
+        case .notCached: String(localized: "Not cached")
+        case .unavailable: String(localized: "Unavailable")
         }
     }
 }

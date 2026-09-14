@@ -49,14 +49,14 @@ final class RealDebridAuthService {
     func connect(token: String) async {
         let trimmed = token.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            state = .failed("Enter your Real-Debrid API token.")
+            state = .failed(String(localized: "Enter your Real-Debrid API token."))
             return
         }
         state = .connecting
         do {
             let account = try await service.validateAccount(token: trimmed)
             guard account.isPremium else {
-                state = .failed("This Real-Debrid account has no active premium time.")
+                state = .failed(String(localized: "This Real-Debrid account has no active premium time."))
                 return
             }
             try await tokenStore.save(trimmed)
@@ -88,7 +88,7 @@ final class RealDebridAuthService {
 
     private static func message(for error: Error) -> String {
         if let debridError = error as? DebridError {
-            return debridError.errorDescription ?? "The Real-Debrid request failed."
+            return debridError.errorDescription ?? String(localized: "The Real-Debrid request failed.")
         }
         return error.localizedDescription
     }

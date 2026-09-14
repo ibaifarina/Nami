@@ -63,7 +63,7 @@ struct HomeView: View {
 
     private var continueWatchingSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            SectionHeader(title: "Continue Watching")
+            SectionHeader(title: String(localized: "Continue Watching"))
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(alignment: .top, spacing: Spacing.md) {
                     ForEach(model.continueWatching) { entry in
@@ -100,7 +100,7 @@ struct HomeView: View {
 
     private var continueWatchingSkeleton: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            SectionHeader(title: "Continue Watching")
+            SectionHeader(title: String(localized: "Continue Watching"))
             ContinueWatchingRowSkeleton()
                 .padding(.vertical, Spacing.xxs)
         }
@@ -158,7 +158,7 @@ private struct CompactErrorRow: View {
             Image(systemName: "exclamationmark.triangle")
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 2) {
-                Text(error.errorDescription ?? "Something went wrong")
+                Text(error.errorDescription ?? String(localized: "Something went wrong"))
                     .font(AppFont.cardTitle)
                 if let suggestion = error.recoverySuggestion {
                     Text(suggestion)

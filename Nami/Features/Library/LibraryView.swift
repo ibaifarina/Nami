@@ -17,7 +17,7 @@ struct LibraryView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .failed(let error):
                 ErrorStateView(
-                    title: error.errorDescription ?? "Couldn't load your library",
+                    title: error.errorDescription ?? String(localized: "Couldn't load your library"),
                     message: error.recoverySuggestion,
                     technicalDetail: error.technicalDetail,
                     onRetry: { Task { await model.load() } }
@@ -40,7 +40,7 @@ struct LibraryView: View {
         ) { _ in
             Button("OK") {}
         } message: { error in
-            Text(error.errorDescription ?? "Please try again.")
+            Text(error.errorDescription ?? String(localized: "Please try again."))
         }
     }
 
@@ -66,12 +66,12 @@ struct LibraryView: View {
             EmptyStateView(
                 systemImage: "bookmark.fill",
                 title: model.hasAnyEntries
-                    ? "Nothing in \(model.filter.title)"
-                    : "Your library is empty",
+                    ? String(localized: "Nothing in \(model.filter.title)")
+                    : String(localized: "Your library is empty"),
                 message: model.hasAnyEntries
-                    ? "Try another status tab."
-                    : "Add anime from their details page to build your local library. Everything is stored on this Mac.",
-                actionTitle: "Browse",
+                    ? String(localized: "Try another status tab.")
+                    : String(localized: "Add anime from their details page to build your local library. Everything is stored on this Mac."),
+                actionTitle: String(localized: "Browse"),
                 action: { environment.router.select(.discover) }
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -114,9 +114,9 @@ struct LibraryView: View {
     private func progressLabel(_ entry: LibraryEntry) -> String? {
         guard entry.anime.subtype?.isMovie != true else { return nil }
         if let total = entry.anime.episodesAvailable, total > 0 {
-            return "Ep \(entry.progress) / \(total)"
+            return String(localized: "Ep \(entry.progress) / \(total)")
         }
-        return entry.progress > 0 ? "Ep \(entry.progress)" : nil
+        return entry.progress > 0 ? String(localized: "Ep \(entry.progress)") : nil
     }
 }
 

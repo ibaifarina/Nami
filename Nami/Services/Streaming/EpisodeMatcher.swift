@@ -37,22 +37,22 @@ enum EpisodeMatchReason: String, Hashable, Sendable {
 
     var displayText: String {
         switch self {
-        case .providerEpisodeMetadata: "Provider confirmed this episode"
-        case .exactEpisodeNumber: "Exact episode match"
-        case .seasonEpisode: "Season and episode match"
-        case .absoluteNumbering: "Absolute episode numbering"
-        case .batchRange: "Episode falls inside this batch"
-        case .batchUnknown: "Batch contents could not be verified"
-        case .movieTitle: "Title match for a movie"
-        case .noEpisodeNumber: "No episode number in the release title"
-        case .episodeMismatch: "Release is a different episode"
-        case .conflictingSeason: "Season does not match"
-        case .specialMismatch: "Release is a special"
-        case .specialMatch: "Special episode match"
-        case .extraContent: "Extra content such as a preview or creditless sequence"
-        case .weakTitleMatch: "Title only partially matches"
-        case .titleMismatch: "Release title does not match this anime"
-        case .episodeCountMismatch: "Requested episode is beyond the known episode count"
+        case .providerEpisodeMetadata: String(localized: "Provider confirmed this episode")
+        case .exactEpisodeNumber: String(localized: "Exact episode match")
+        case .seasonEpisode: String(localized: "Season and episode match")
+        case .absoluteNumbering: String(localized: "Absolute episode numbering")
+        case .batchRange: String(localized: "Episode falls inside this batch")
+        case .batchUnknown: String(localized: "Batch contents could not be verified")
+        case .movieTitle: String(localized: "Title match for a movie")
+        case .noEpisodeNumber: String(localized: "No episode number in the release title")
+        case .episodeMismatch: String(localized: "Release is a different episode")
+        case .conflictingSeason: String(localized: "Season does not match")
+        case .specialMismatch: String(localized: "Release is a special")
+        case .specialMatch: String(localized: "Special episode match")
+        case .extraContent: String(localized: "Extra content such as a preview or creditless sequence")
+        case .weakTitleMatch: String(localized: "Title only partially matches")
+        case .titleMismatch: String(localized: "Release title does not match this anime")
+        case .episodeCountMismatch: String(localized: "Requested episode is beyond the known episode count")
         }
     }
 }

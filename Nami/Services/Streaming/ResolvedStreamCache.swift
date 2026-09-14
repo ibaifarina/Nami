@@ -94,7 +94,7 @@ actor ResolvedStreamCache {
 
     static var maximumAgeDescription: String {
         let hours = Int(defaultMaximumAge / 3600)
-        return hours == 1 ? "1 hour" : "\(hours) hours"
+        return String(localized: "\(hours) hours")
     }
 
     // MARK: - Helpers

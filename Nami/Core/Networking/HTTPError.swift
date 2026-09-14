@@ -14,19 +14,19 @@ extension HTTPError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            "The address could not be understood."
+            String(localized: "The address could not be understood.")
         case .offline:
-            "You appear to be offline. Check your internet connection."
+            String(localized: "You appear to be offline. Check your internet connection.")
         case .transport:
-            "The server could not be reached."
+            String(localized: "The server could not be reached.")
         case .timedOut:
-            "The server took too long to respond."
+            String(localized: "The server took too long to respond.")
         case .httpStatus(let code, _):
-            "The server rejected the request (HTTP \(code))."
+            String(localized: "The server rejected the request (HTTP \(code)).")
         case .responseTooLarge:
-            "The server returned more data than allowed."
+            String(localized: "The server returned more data than allowed.")
         case .decoding:
-            "The server returned an unsupported response."
+            String(localized: "The server returned an unsupported response.")
         }
     }
 }

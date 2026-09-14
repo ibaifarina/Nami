@@ -94,15 +94,15 @@ final class AnimeDetailsViewModel {
 
     var primaryActionTitle: String {
         if isMovie {
-            return continuesFromProgress ? "Resume" : "Play"
+            return continuesFromProgress ? String(localized: "Resume") : String(localized: "Play")
         }
         if continuesFromProgress, let progress {
-            return "Continue Episode \(progress.episodeNumber)"
+            return String(localized: "Continue Episode \(progress.episodeNumber)")
         }
         if let currentEpisode {
-            return "Play Episode \(currentEpisode.displayNumber)"
+            return String(localized: "Play Episode \(currentEpisode.displayNumber)")
         }
-        return "Play Episode 1"
+        return String(localized: "Play Episode 1")
     }
 
     /// The episode to watch next: the in-progress episode when there is one,

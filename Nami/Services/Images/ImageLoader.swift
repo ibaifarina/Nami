@@ -9,11 +9,11 @@ enum ImageLoadError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            "The image request returned an unexpected response."
+            String(localized: "The image request returned an unexpected response.")
         case .httpStatus(let code):
-            "The image request failed with status \(code)."
+            String(localized: "The image request failed with status \(code).")
         case .invalidData:
-            "The image data could not be decoded."
+            String(localized: "The image data could not be decoded.")
         }
     }
 }

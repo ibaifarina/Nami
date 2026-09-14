@@ -157,10 +157,10 @@ struct SeriesGroupingService: Sendable {
     static func displayName(for anime: Anime, order: Int, chain: [Anime]) -> String {
         let title = anime.canonicalTitle ?? anime.englishTitle ?? anime.title
         if title.localizedCaseInsensitiveContains("final season") {
-            return "Final Season"
+            return String(localized: "Final Season")
         }
         let base = chain.first.flatMap { seasonNumber(inTitle: $0.canonicalTitle ?? $0.title) } ?? 1
-        return "Season \(base + order)"
+        return String(localized: "Season \(base + order)")
     }
 
     /// Extracts an explicit season number from a title, e.g.

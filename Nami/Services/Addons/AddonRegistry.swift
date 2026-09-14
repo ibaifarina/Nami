@@ -108,7 +108,7 @@ final class AddonRegistry {
             lastError = nil
         } catch {
             AppLogger.persistence.error("Failed to persist addons")
-            lastError = "Addon changes could not be saved."
+            lastError = String(localized: "Addon changes could not be saved.")
             throw error
         }
     }

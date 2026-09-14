@@ -599,7 +599,7 @@ final class MPVPlayerEngine: PlayerEngine {
 
     func load(_ stream: ResolvedStream) async throws {
         guard let core = ensureCore() else {
-            let error = PlayerError.failedToLoad("The MPV playback engine could not be initialized.")
+            let error = PlayerError.failedToLoad(String(localized: "The MPV playback engine could not be initialized."))
             emit(.failed(error.userMessage))
             throw error
         }
@@ -904,7 +904,9 @@ final class MPVPlayerEngine: PlayerEngine {
 
     private static func mediaTrack(from info: MPVTrackInfo) -> MediaTrack {
         let kind: MediaTrack.Kind = info.type == "audio" ? .audio : .subtitle
-        let fallback = kind == .audio ? "Audio \(info.id)" : "Subtitle \(info.id)"
+        let fallback = kind == .audio
+            ? String(localized: "Audio \(Int(info.id))")
+            : String(localized: "Subtitle \(Int(info.id))")
         let title = info.title ?? languageName(info.language) ?? fallback
         return MediaTrack(
             id: "\(kind.rawValue)-\(info.id)",
@@ -941,7 +943,7 @@ final class MPVPlayerEngine: PlayerEngine {
 
     private static func message(forMPVError code: Int32) -> String {
         guard code < 0, let description = mpv_error_string(code) else {
-            return "The video could not be loaded."
+            return String(localized: "The video could not be loaded.")
         }
         return String(cString: description)
     }

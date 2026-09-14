@@ -43,7 +43,7 @@ struct GenericHTTPAddonAdapter: StreamAddon {
         do {
             body = try JSONEncoder().encode(payload)
         } catch {
-            throw AddonError.requestFailed("The request could not be encoded.")
+            throw AddonError.requestFailed(String(localized: "The request could not be encoded."))
         }
         let request = RequestBuilder(
             url: endpoint,
@@ -72,7 +72,7 @@ struct GenericHTTPAddonAdapter: StreamAddon {
         do {
             response = try JSONDecoder().decode(GenericStreamResponse.self, from: data)
         } catch {
-            throw AddonError.requestFailed("The addon returned an unsupported response.")
+            throw AddonError.requestFailed(String(localized: "The addon returned an unsupported response."))
         }
         return response.streams.compactMap { stream in
             Self.normalize(stream, descriptor: descriptor)
@@ -114,7 +114,7 @@ struct GenericHTTPAddonAdapter: StreamAddon {
         return RawStreamResult(
             addonID: descriptor.id,
             addonName: descriptor.name,
-            displayTitle: rawTitle ?? "Untitled release",
+            displayTitle: rawTitle ?? String(localized: "Untitled release"),
             rawTitle: rawTitle,
             infoHash: infoHash,
             magnetURI: magnetURL,

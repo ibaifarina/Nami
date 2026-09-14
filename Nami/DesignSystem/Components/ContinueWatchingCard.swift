@@ -77,9 +77,9 @@ struct ContinueWatchingCard: View {
     }
 
     private var episodeLine: String {
-        var line = "E\(progress.episodeNumber)"
+        var line = String(localized: "E\(progress.episodeNumber)")
         if let seasonNumber {
-            line = "S\(seasonNumber) \u{00B7} " + line
+            line = String(localized: "S\(seasonNumber) \u{00B7} ") + line
         }
         if let episodeTitle = episode?.title, !episodeTitle.isEmpty {
             line += " \u{2014} \(episodeTitle)"
@@ -90,9 +90,9 @@ struct ContinueWatchingCard: View {
     private var accessibilityEpisodeLine: String {
         var parts: [String] = []
         if let seasonNumber {
-            parts.append("season \(seasonNumber)")
+            parts.append(String(localized: "season \(seasonNumber)"))
         }
-        parts.append("episode \(progress.episodeNumber)")
+        parts.append(String(localized: "episode \(progress.episodeNumber)"))
         if let episodeTitle = episode?.title, !episodeTitle.isEmpty {
             parts.append(episodeTitle)
         }

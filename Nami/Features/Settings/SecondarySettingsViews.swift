@@ -7,32 +7,32 @@ struct PlaybackSettingsView: View {
     var body: some View {
         @Bindable var preferences = environment.preferences
         SettingsPaneLayout(pane: .playback) {
-            SettingsCard(title: "Episodes") {
+            SettingsCard(title: String(localized: "Episodes")) {
                 SettingsToggleRow(
-                    title: "Autoplay Next Episode",
-                    description: "When an episode nears its end, the next one is prepared and can start automatically.",
+                    title: String(localized: "Autoplay Next Episode"),
+                    description: String(localized: "When an episode nears its end, the next one is prepared and can start automatically."),
                     isOn: $preferences.autoplayNextEpisode
                 )
                 SettingsToggleRow(
-                    title: "Skip Intro Button",
-                    description: "Shows a button while an episode's opening, ending, or recap is playing, using community-sourced skip times. Timings aren't available for every episode.",
+                    title: String(localized: "Skip Intro Button"),
+                    description: String(localized: "Shows a button while an episode's opening, ending, or recap is playing, using community-sourced skip times. Timings aren't available for every episode."),
                     isOn: $preferences.skipIntroEnabled
                 )
             }
-            SettingsCard(title: "Player") {
+            SettingsCard(title: String(localized: "Player")) {
                 SettingsSegmentedRow(
-                    title: "Playback Engine",
-                    description: "MPV plays MKV releases with styled ASS/SSA subtitles and embedded audio tracks. AVPlayer is the legacy system player and cannot play MKV.",
+                    title: String(localized: "Playback Engine"),
+                    description: String(localized: "MPV plays MKV releases with styled ASS/SSA subtitles and embedded audio tracks. AVPlayer is the legacy system player and cannot play MKV."),
                     options: PlaybackEngineKind.allCases,
                     titleForOption: \.displayName,
                     selection: engineBinding
                 )
             }
-            SettingsCard(title: "External Player") {
-                SettingsRow("Open Streams In", description: externalPlayerDescription) {
+            SettingsCard(title: String(localized: "External Player")) {
+                SettingsRow(String(localized: "Open Streams In"), description: externalPlayerDescription) {
                     HStack(spacing: Spacing.xs) {
                         SettingsDropdown(
-                            title: "Open Streams In",
+                            title: String(localized: "Open Streams In"),
                             options: externalPlayerOptions,
                             selection: externalPlayerBinding,
                             systemImage: "play.rectangle",
@@ -63,7 +63,7 @@ struct PlaybackSettingsView: View {
         var options = [
             SettingsDropdownOption(
                 value: String?.none,
-                label: "Built-in Player",
+                label: String(localized: "Built-in Player"),
                 systemImage: "play.rectangle"
             )
         ]
@@ -81,8 +81,8 @@ struct PlaybackSettingsView: View {
 
     private var externalPlayerDescription: String {
         detectedPlayers.isEmpty
-            ? "No supported external players were found. Install VLC, IINA, or mpv to enable external playback."
-            : "Streams open in the selected app instead of the built-in player. Watch progress isn't tracked for external playback."
+            ? String(localized: "No supported external players were found. Install VLC, IINA, or mpv to enable external playback.")
+            : String(localized: "Streams open in the selected app instead of the built-in player. Watch progress isn't tracked for external playback.")
     }
 
     private var externalPlayerBinding: Binding<String?> {

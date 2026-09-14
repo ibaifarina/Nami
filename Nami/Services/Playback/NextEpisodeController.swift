@@ -296,13 +296,13 @@ final class NextEpisodeController {
                 case .blocked(let error):
                     self.advanceInFlight = false
                     self.prepareError = error?.errorDescription
-                        ?? "Real-Debrid is unavailable right now."
+                        ?? String(localized: "Real-Debrid is unavailable right now.")
                     self.setOverlay(.readyToChoose)
                     return
                 }
             }
             self.advanceInFlight = false
-            self.prepareError = "No playable source was found for the next episode."
+            self.prepareError = String(localized: "No playable source was found for the next episode.")
             self.setOverlay(.readyToChoose)
         }
     }

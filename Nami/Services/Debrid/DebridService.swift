@@ -95,48 +95,48 @@ extension DebridError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notConfigured:
-            "Real-Debrid isn't connected yet."
+            String(localized: "Real-Debrid isn't connected yet.")
         case .unauthorized:
-            "Real-Debrid rejected the request. Check your API token in Settings."
+            String(localized: "Real-Debrid rejected the request. Check your API token in Settings.")
         case .accountLocked:
-            "Your Real-Debrid account is locked."
+            String(localized: "Your Real-Debrid account is locked.")
         case .accountRestricted(let reason):
             reason
         case .notPremium:
-            "Resolving torrents requires an active Real-Debrid premium account."
+            String(localized: "Resolving torrents requires an active Real-Debrid premium account.")
         case .rateLimited:
-            "Real-Debrid is rate limiting requests. Please wait a moment and try again."
+            String(localized: "Real-Debrid is rate limiting requests. Please wait a moment and try again.")
         case .trafficExceeded:
-            "Your Real-Debrid traffic is exhausted. Wait for it to reset or add more traffic."
+            String(localized: "Your Real-Debrid traffic is exhausted. Wait for it to reset or add more traffic.")
         case .fairUseLimit:
-            "Your Real-Debrid fair-use limit was reached. Try again later."
+            String(localized: "Your Real-Debrid fair-use limit was reached. Try again later.")
         case .infringingContent:
-            "Real-Debrid cannot download this torrent because of a copyright filter."
+            String(localized: "Real-Debrid cannot download this torrent because of a copyright filter.")
         case .torrentTooBig:
-            "This torrent is too large for Real-Debrid to process."
+            String(localized: "This torrent is too large for Real-Debrid to process.")
         case .itemNotReady:
-            "Real-Debrid is still preparing this source. Try again in a few minutes."
+            String(localized: "Real-Debrid is still preparing this source. Try again in a few minutes.")
         case .fileSelectionFailed:
-            "The correct file could not be selected inside this torrent."
+            String(localized: "The correct file could not be selected inside this torrent.")
         case .unresolvableCandidate:
-            "This source cannot be resolved for playback."
+            String(localized: "This source cannot be resolved for playback.")
         case .invalidResponse:
-            "Real-Debrid returned an unsupported response."
+            String(localized: "Real-Debrid returned an unsupported response.")
         case .requestFailed:
-            "The Real-Debrid request failed. Please try again."
+            String(localized: "The Real-Debrid request failed. Please try again.")
         }
     }
 
     var recoverySuggestion: String? {
         switch self {
         case .notConfigured:
-            "Add your Real-Debrid API token in Settings \u{203A} Real-Debrid."
+            String(localized: "Add your Real-Debrid API token in Settings \u{203A} Real-Debrid.")
         case .unauthorized:
-            "Generate a token at real-debrid.com/apitoken and paste it in Settings."
+            String(localized: "Generate a token at real-debrid.com/apitoken and paste it in Settings.")
         case .rateLimited:
-            "Wait about a minute before trying again."
+            String(localized: "Wait about a minute before trying again.")
         case .itemNotReady:
-            "Real-Debrid downloads uncached torrents before playback. It can take a few minutes for popular releases."
+            String(localized: "Real-Debrid downloads uncached torrents before playback. It can take a few minutes for popular releases.")
         default:
             nil
         }
@@ -158,9 +158,9 @@ extension DebridError: LocalizedError {
         if let httpError = error as? HTTPError {
             switch httpError {
             case .offline:
-                return .requestFailed("You appear to be offline.")
+                return .requestFailed(String(localized: "You appear to be offline."))
             case .timedOut:
-                return .requestFailed("The request timed out.")
+                return .requestFailed(String(localized: "The request timed out."))
             case .httpStatus(let code, let body):
                 let apiError = RealDebridAPIError(
                     httpStatus: code,
@@ -179,7 +179,7 @@ extension DebridError: LocalizedError {
             }
         }
         if let secureError = error as? SecureTokenError {
-            return .requestFailed("The token could not be read from the Keychain (\(secureError)).")
+            return .requestFailed(String(localized: "The token could not be read from the Keychain (\(String(describing: secureError)))."))
         }
         return .requestFailed(error.localizedDescription)
     }
@@ -196,11 +196,11 @@ extension DebridError: LocalizedError {
             return .accountLocked
         case 15:
             return .accountRestricted(
-                apiError.error ?? "Your Real-Debrid account is not activated."
+                apiError.error ?? String(localized: "Your Real-Debrid account is not activated.")
             )
         case 22:
             return .accountRestricted(
-                apiError.error ?? "Real-Debrid blocked this IP address."
+                apiError.error ?? String(localized: "Real-Debrid blocked this IP address.")
             )
         case 9, 20:
             return .notPremium
@@ -213,7 +213,7 @@ extension DebridError: LocalizedError {
         case 29, 30:
             return .torrentTooBig
         case 24, 25, 26, 27, 28:
-            return .requestFailed(apiError.error ?? "Real-Debrid returned error \(apiError.code ?? -1).")
+            return .requestFailed(apiError.error ?? String(localized: "Real-Debrid returned error \(apiError.code ?? -1)."))
         default:
             break
         }

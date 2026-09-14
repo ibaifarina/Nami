@@ -90,7 +90,7 @@ struct StreamSelectionView: View {
                 title: message,
                 message: nil,
                 onRetry: { Task { await model.retry() } },
-                secondaryTitle: "Open Settings",
+                secondaryTitle: String(localized: "Open Settings"),
                 onSecondary: { openSettings() }
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -102,7 +102,7 @@ struct StreamSelectionView: View {
             LoadingSpinner(size: 32, lineWidth: 3)
             Text("Searching for the best source\u{2026}")
                 .font(AppFont.body)
-            Text("Checking \(model.enabledAddonCount) enabled addon\(model.enabledAddonCount == 1 ? "" : "s")")
+            Text("Checking \(model.enabledAddonCount) enabled addons")
                 .font(AppFont.cardMeta)
                 .foregroundStyle(.secondary)
         }
@@ -127,7 +127,7 @@ struct StreamSelectionView: View {
 
                     if let best = model.bestMatch {
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            SectionHeader(title: "Best Match")
+                            SectionHeader(title: String(localized: "Best Match"))
                             SourceRow(
                                 scored: best,
                                 isBest: true,
@@ -148,8 +148,8 @@ struct StreamSelectionView: View {
                     if !model.otherStreams.isEmpty {
                         LazyVStack(alignment: .leading, spacing: Spacing.sm) {
                             SectionHeader(
-                                title: "Other Sources",
-                                subtitle: "\(model.otherSourceCount) more option\(model.otherSourceCount == 1 ? "" : "s")"
+                                title: String(localized: "Other Sources"),
+                                subtitle: String(localized: "\(model.otherSourceCount) more options")
                             )
                             ForEach(model.otherStreams) { scored in
                                 SourceRow(
@@ -165,8 +165,8 @@ struct StreamSelectionView: View {
                     if !model.visibleRejectedStreams.isEmpty {
                         LazyVStack(alignment: .leading, spacing: Spacing.sm) {
                             SectionHeader(
-                                title: "Low Confidence",
-                                subtitle: "These aren't auto-selected. Choose manually only if you're sure."
+                                title: String(localized: "Low Confidence"),
+                                subtitle: String(localized: "These aren't auto-selected. Choose manually only if you're sure.")
                             )
                             ForEach(model.visibleRejectedStreams) { scored in
                                 SourceRow(
@@ -213,8 +213,8 @@ struct StreamSelectionView: View {
     private var filePickerView: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             SectionHeader(
-                title: "Choose a file",
-                subtitle: "This source contains \(model.pendingFiles.count) video files. Pick the one to play."
+                title: String(localized: "Choose a file"),
+                subtitle: String(localized: "This source contains \(model.pendingFiles.count) video files. Pick the one to play.")
             )
 
             ScrollView {
@@ -254,9 +254,9 @@ struct StreamSelectionView: View {
             VStack(spacing: Spacing.md) {
                 EmptyStateView(
                     systemImage: "puzzlepiece.extension",
-                    title: "No streaming addons are configured",
-                    message: "Add a compatible streaming addon in Settings to discover sources for this episode.",
-                    actionTitle: "Open Addon Settings",
+                    title: String(localized: "No streaming addons are configured"),
+                    message: String(localized: "Add a compatible streaming addon in Settings to discover sources for this episode."),
+                    actionTitle: String(localized: "Open Addon Settings"),
                     action: { openSettings() }
                 )
                 Button("Close") { dismiss() }
@@ -267,11 +267,11 @@ struct StreamSelectionView: View {
             VStack(spacing: Spacing.md) {
                 EmptyStateView(
                     systemImage: "magnifyingglass",
-                    title: "No playable sources were found for this episode",
+                    title: String(localized: "No playable sources were found for this episode"),
                     message: model.addonFailureMessages.isEmpty
-                        ? "Try again, or add more addons in Settings."
-                        : "Some addons failed to respond. Try again in a moment.",
-                    actionTitle: "Try Again",
+                        ? String(localized: "Try again, or add more addons in Settings.")
+                        : String(localized: "Some addons failed to respond. Try again in a moment."),
+                    actionTitle: String(localized: "Try Again"),
                     action: { Task { await model.retry() } }
                 )
             }
@@ -388,7 +388,7 @@ private struct SourceRow: View {
                     .foregroundStyle(.secondary)
             }
             if isBest {
-                Pill(text: "BEST", systemImage: "star.fill", tint: AppColor.brand)
+                Pill(text: String(localized: "BEST"), systemImage: "star.fill", tint: AppColor.brand)
             }
         }
     }
@@ -398,7 +398,7 @@ private struct SourceRow: View {
         if let source = scored.candidate.source { parts.append(source.label) }
         if let codec = scored.candidate.codec { parts.append(codec.label) }
         if let dynamicRange = scored.candidate.dynamicRange { parts.append(dynamicRange.label) }
-        if parts.isEmpty, scored.candidate.resolution == nil { parts.append("Unknown quality") }
+        if parts.isEmpty, scored.candidate.resolution == nil { parts.append(String(localized: "Unknown quality")) }
         return parts.joined(separator: " \u{00B7} ")
     }
 
@@ -451,30 +451,30 @@ private struct SourceRow: View {
 
     private var debugLine: String {
         let breakdown = scored.breakdown
-        return "score \(Int(breakdown.total)) "
-            + "ep \(Int(breakdown.episodeMatch)) "
-            + "cache \(Int(breakdown.cached)) "
-            + "res \(Int(breakdown.resolution)) "
-            + "src \(Int(breakdown.source)) "
-            + "size \(Int(breakdown.size)) "
-            + "seed \(Int(breakdown.seeders)) "
-            + "lang \(Int(breakdown.language)) "
-            + "pen \(Int(breakdown.penalties))"
+        return String(localized: "score \(Int(breakdown.total)) ")
+            + String(localized: "ep \(Int(breakdown.episodeMatch)) ")
+            + String(localized: "cache \(Int(breakdown.cached)) ")
+            + String(localized: "res \(Int(breakdown.resolution)) ")
+            + String(localized: "src \(Int(breakdown.source)) ")
+            + String(localized: "size \(Int(breakdown.size)) ")
+            + String(localized: "seed \(Int(breakdown.seeders)) ")
+            + String(localized: "lang \(Int(breakdown.language)) ")
+            + String(localized: "pen \(Int(breakdown.penalties))")
     }
 
     private var advancedDetails: String? {
         var parts: [String] = []
         if let hash = scored.candidate.infoHash {
-            parts.append("hash \(hash)")
+            parts.append(String(localized: "hash \(hash)"))
         }
         if let magnet = scored.candidate.magnetURI?.absoluteString {
-            parts.append("magnet \(magnet)")
+            parts.append(String(localized: "magnet \(magnet)"))
         }
         if let url = scored.candidate.directURL?.absoluteString {
-            parts.append("url \(url)")
+            parts.append(String(localized: "url \(url)"))
         }
         if let fileIndex = scored.candidate.fileIndex {
-            parts.append("file #\(fileIndex)")
+            parts.append(String(localized: "file #\(fileIndex)"))
         }
         return parts.isEmpty ? nil : parts.joined(separator: "\n")
     }
@@ -484,7 +484,7 @@ private struct SourceRow: View {
             scored.candidate.resolution?.label,
             headlineRest,
             sizeText,
-            scored.candidate.seeders.map { "\($0) seeders" },
+            scored.candidate.seeders.map { String(localized: "\($0) seeders") },
             footer,
             CacheIndicator.label(for: scored.candidate.debridStatus, hasTorrentSource: hasTorrentSource),
         ]
@@ -529,7 +529,7 @@ private struct MovieFileRow: View {
                 }
                 Spacer(minLength: Spacing.xs)
                 if isLargest {
-                    Pill(text: "LARGEST")
+                    Pill(text: String(localized: "LARGEST"))
                 }
                 if isResolving {
                     LoadingSpinner(size: 16, lineWidth: 2)
@@ -567,11 +567,11 @@ private struct MovieFileRow: View {
     }
 
     private var subtitle: String {
-        file.path == file.filename ? "Video file" : file.path
+        file.path == file.filename ? String(localized: "Video file") : file.path
     }
 
     private var accessibilityText: String {
-        [file.filename, sizeText, isLargest ? "largest file" : nil]
+        [file.filename, sizeText, isLargest ? String(localized: "largest file") : nil]
             .compactMap { $0 }
             .joined(separator: ", ")
     }
@@ -595,15 +595,15 @@ private struct CacheIndicator: View {
     static func label(for status: DebridAvailability, hasTorrentSource: Bool) -> String {
         switch status {
         case .cached:
-            "Cached on Real-Debrid"
+            String(localized: "Cached on Real-Debrid")
         case .notCached:
-            "Not cached, Real-Debrid will download it first"
+            String(localized: "Not cached, Real-Debrid will download it first")
         case .unavailable:
-            "Unavailable on Real-Debrid"
+            String(localized: "Unavailable on Real-Debrid")
         case .unknown:
             hasTorrentSource
-                ? "Cache status unknown"
-                : "Direct stream, cache status doesn't apply"
+                ? String(localized: "Cache status unknown")
+                : String(localized: "Direct stream, cache status doesn't apply")
         }
     }
 
@@ -633,7 +633,7 @@ private struct CacheIndicator: View {
 
     private var description: String {
         if status == .unknown, isCachedHint {
-            return "The addon lists this source as cached; not yet verified"
+            return String(localized: "The addon lists this source as cached; not yet verified")
         }
         return Self.label(for: status, hasTorrentSource: hasTorrentSource)
     }

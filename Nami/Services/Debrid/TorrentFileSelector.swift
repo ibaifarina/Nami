@@ -16,7 +16,7 @@ enum TorrentFileSelector {
     ) throws -> TorrentFileSelection {
         let videoFiles = files.filter { isVideo($0.filename) }
         guard !videoFiles.isEmpty else {
-            throw DebridError.fileSelectionFailed("No video files were found in this torrent.")
+            throw DebridError.fileSelectionFailed(String(localized: "No video files were found in this torrent."))
         }
 
         let candidates = playableFiles(from: files)
@@ -29,24 +29,24 @@ enum TorrentFileSelector {
             if let best = matches.max(by: { $0.file.bytes < $1.file.bytes }) {
                 return TorrentFileSelection(
                     file: best.file,
-                    reason: "Matched episode \(targetEpisode)"
+                    reason: String(localized: "Matched episode \(targetEpisode)")
                 )
             }
             if videoFiles.count == 1, !isExtra(videoFiles[0].filename) {
                 return TorrentFileSelection(
                     file: videoFiles[0],
-                    reason: "Only one video file in this torrent"
+                    reason: String(localized: "Only one video file in this torrent")
                 )
             }
             throw DebridError.fileSelectionFailed(
-                "Episode \(targetEpisode) was not found inside this torrent."
+                String(localized: "Episode \(targetEpisode) was not found inside this torrent.")
             )
         }
 
         guard let largest = candidates.max(by: { $0.bytes < $1.bytes }) else {
-            throw DebridError.fileSelectionFailed("No playable files were found in this torrent.")
+            throw DebridError.fileSelectionFailed(String(localized: "No playable files were found in this torrent."))
         }
-        return TorrentFileSelection(file: largest, reason: "Largest playable file")
+        return TorrentFileSelection(file: largest, reason: String(localized: "Largest playable file"))
     }
 
     /// The video files a user can meaningfully pick between: extras such as

@@ -53,7 +53,7 @@ struct Episode: Identifiable, Hashable, Codable, Sendable {
 
     /// Fallback-aware title.
     var displayTitle: String {
-        guard let title, !title.isEmpty else { return "Episode \(displayNumber)" }
+        guard let title, !title.isEmpty else { return String(localized: "Episode \(displayNumber)") }
         return title
     }
 
@@ -86,9 +86,9 @@ struct Episode: Identifiable, Hashable, Codable, Sendable {
         guard let durationMinutes, durationMinutes > 0 else { return nil }
         let hours = durationMinutes / 60
         let minutes = durationMinutes % 60
-        if hours == 0 { return "\(minutes)m" }
-        if minutes == 0 { return "\(hours)h" }
-        return "\(hours)h \(minutes)m"
+        if hours == 0 { return String(localized: "\(minutes)m") }
+        if minutes == 0 { return String(localized: "\(hours)h") }
+        return String(localized: "\(hours)h \(minutes)m")
     }
 
     var airDateText: String? {

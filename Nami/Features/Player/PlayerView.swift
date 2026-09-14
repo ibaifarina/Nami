@@ -335,7 +335,7 @@ struct PlayerView: View {
     private var speedMenu: some View {
         Menu {
             ForEach([0.5, 0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { value in
-                Button(value == 1 ? "Normal" : String(format: "%g\u{00D7}", value)) {
+                Button(value == 1 ? String(localized: "Normal") : String(format: "%g\u{00D7}", value)) {
                     playback.setRate(value)
                 }
             }
@@ -347,7 +347,7 @@ struct PlayerView: View {
         .menuStyle(.borderlessButton)
         .fixedSize()
         .pointerStyle(.link)
-        .accessibilityLabel(playback.rate == 1 ? "Playback speed" : String(format: "Playback speed %g\u{00D7}", playback.rate))
+        .accessibilityLabel(playback.rate == 1 ? String(localized: "Playback speed") : String(localized: "Playback speed \(playback.rate)\u{00D7}"))
     }
 
     private var audioMenu: some View {

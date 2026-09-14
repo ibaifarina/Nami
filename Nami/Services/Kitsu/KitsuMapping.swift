@@ -13,7 +13,7 @@ enum KitsuMapping {
             english,
             romaji,
             japanese
-        ) ?? "Untitled"
+        ) ?? String(localized: "Untitled")
 
         return Anime(
             identity: MediaIdentity(kitsuID: resource.id),

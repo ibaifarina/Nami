@@ -18,12 +18,12 @@ enum LibraryStatus: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .watching: "Watching"
-        case .planToWatch: "To watch"
-        case .completed: "Completed"
-        case .onHold: "On Hold"
-        case .dropped: "Dropped"
-        case .favorites: "Favorites"
+        case .watching: String(localized: "Watching")
+        case .planToWatch: String(localized: "To watch")
+        case .completed: String(localized: "Completed")
+        case .onHold: String(localized: "On Hold")
+        case .dropped: String(localized: "Dropped")
+        case .favorites: String(localized: "Favorites")
         }
     }
 

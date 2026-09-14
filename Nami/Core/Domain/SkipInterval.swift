@@ -22,9 +22,9 @@ struct SkipInterval: Identifiable, Hashable, Codable, Sendable {
     /// Label for the skip button shown while this interval is playing.
     var buttonTitle: String {
         switch kind {
-        case .opening, .mixedOpening: "Skip Intro"
-        case .ending, .mixedEnding: "Skip Outro"
-        case .recap: "Skip Recap"
+        case .opening, .mixedOpening: String(localized: "Skip Intro")
+        case .ending, .mixedEnding: String(localized: "Skip Outro")
+        case .recap: String(localized: "Skip Recap")
         }
     }
 

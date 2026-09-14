@@ -12,11 +12,11 @@ enum AnimeStatus: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .current: "Airing"
-        case .finished: "Finished"
-        case .tba: "TBA"
-        case .unreleased: "Unreleased"
-        case .upcoming: "Upcoming"
+        case .current: String(localized: "Airing")
+        case .finished: String(localized: "Finished")
+        case .tba: String(localized: "TBA")
+        case .unreleased: String(localized: "Unreleased")
+        case .upcoming: String(localized: "Upcoming")
         }
     }
 
@@ -45,13 +45,13 @@ enum AnimeSubtype: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .tv: "TV"
-        case .tvSpecial: "TV Special"
-        case .movie: "Movie"
-        case .ova: "OVA"
-        case .ona: "ONA"
-        case .special: "Special"
-        case .music: "Music"
+        case .tv: String(localized: "TV")
+        case .tvSpecial: String(localized: "TV Special")
+        case .movie: String(localized: "Movie")
+        case .ova: String(localized: "OVA")
+        case .ona: String(localized: "ONA")
+        case .special: String(localized: "Special")
+        case .music: String(localized: "Music")
         }
     }
 
@@ -95,10 +95,10 @@ enum AnimeSeason: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .winter: "Winter"
-        case .spring: "Spring"
-        case .summer: "Summer"
-        case .fall: "Fall"
+        case .winter: String(localized: "Winter")
+        case .spring: String(localized: "Spring")
+        case .summer: String(localized: "Summer")
+        case .fall: String(localized: "Fall")
         }
     }
 }
@@ -120,18 +120,18 @@ enum MediaRelationRole: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .adaptation: "Adaptation"
-        case .alternativeSetting: "Alternative Setting"
-        case .alternativeVersion: "Alternative Version"
-        case .character: "Character"
-        case .fullStory: "Full Story"
-        case .other: "Related"
-        case .parentStory: "Parent Story"
-        case .prequel: "Prequel"
-        case .sequel: "Sequel"
-        case .sideStory: "Side Story"
-        case .spinOff: "Spin-off"
-        case .summary: "Summary"
+        case .adaptation: String(localized: "Adaptation")
+        case .alternativeSetting: String(localized: "Alternative Setting")
+        case .alternativeVersion: String(localized: "Alternative Version")
+        case .character: String(localized: "Character")
+        case .fullStory: String(localized: "Full Story")
+        case .other: String(localized: "Related")
+        case .parentStory: String(localized: "Parent Story")
+        case .prequel: String(localized: "Prequel")
+        case .sequel: String(localized: "Sequel")
+        case .sideStory: String(localized: "Side Story")
+        case .spinOff: String(localized: "Spin-off")
+        case .summary: String(localized: "Summary")
         }
     }
 

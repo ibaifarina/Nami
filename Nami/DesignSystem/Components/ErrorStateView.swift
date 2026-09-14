@@ -4,7 +4,7 @@ struct ErrorStateView: View {
     let title: String
     var message: String?
     var technicalDetail: String?
-    var retryTitle = "Try Again"
+    var retryTitle = String(localized: "Try Again")
     var onRetry: (() -> Void)?
     var secondaryTitle: String?
     var onSecondary: (() -> Void)?

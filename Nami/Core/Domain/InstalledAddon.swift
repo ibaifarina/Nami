@@ -9,9 +9,9 @@ enum AddonProtocolType: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .animeStreamV1: "Anime Stream v1"
-        case .stremio: "Stremio"
-        case .generic: "Generic HTTP"
+        case .animeStreamV1: String(localized: "Anime Stream v1")
+        case .stremio: String(localized: "Stremio")
+        case .generic: String(localized: "Generic HTTP")
         }
     }
 }
@@ -24,10 +24,10 @@ enum AddonHealthStatus: String, Codable, Sendable {
 
     var displayName: String {
         switch self {
-        case .unknown: "Not checked"
-        case .healthy: "Healthy"
-        case .degraded: "Slow"
-        case .failing: "Unreachable"
+        case .unknown: String(localized: "Not checked")
+        case .healthy: String(localized: "Healthy")
+        case .degraded: String(localized: "Slow")
+        case .failing: String(localized: "Unreachable")
         }
     }
 }

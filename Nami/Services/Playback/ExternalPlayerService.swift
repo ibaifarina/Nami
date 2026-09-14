@@ -25,7 +25,7 @@ enum ExternalPlayerError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .notInstalled(let name):
-            "\(name) is no longer installed."
+            String(localized: "\(name) is no longer installed.")
         }
     }
 }

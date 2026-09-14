@@ -10,10 +10,10 @@ enum AddonCapability: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .streams: "Streams"
-        case .catalog: "Catalog"
-        case .meta: "Metadata"
-        case .subtitles: "Subtitles"
+        case .streams: String(localized: "Streams")
+        case .catalog: String(localized: "Catalog")
+        case .meta: String(localized: "Metadata")
+        case .subtitles: String(localized: "Subtitles")
         }
     }
 }
@@ -142,7 +142,7 @@ struct AddonQueryResult: Identifiable, Sendable {
         switch outcome {
         case .success: nil
         case .failure(let message): message
-        case .timedOut: "The addon took too long to respond."
+        case .timedOut: String(localized: "The addon took too long to respond.")
         }
     }
 }
@@ -195,35 +195,35 @@ extension AddonError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            "That addon address is not valid."
+            String(localized: "That addon address is not valid.")
         case .insecureURL:
-            "Addons must use HTTPS. Enable the advanced HTTP override for local development if you trust the address."
+            String(localized: "Addons must use HTTPS. Enable the advanced HTTP override for local development if you trust the address.")
         case .unsupportedScheme:
-            "That address uses an unsupported scheme. Only HTTPS is allowed."
+            String(localized: "That address uses an unsupported scheme. Only HTTPS is allowed.")
         case .credentialsInURL:
-            "Addon addresses must not contain embedded credentials."
+            String(localized: "Addon addresses must not contain embedded credentials.")
         case .manifestTooLarge:
-            "This addon's manifest is larger than allowed."
+            String(localized: "This addon's manifest is larger than allowed.")
         case .responseTooLarge:
-            "The addon returned more data than allowed."
+            String(localized: "The addon returned more data than allowed.")
         case .invalidManifest(let detail):
-            "This addon returned an invalid manifest. \(detail)"
+            String(localized: "This addon returned an invalid manifest. \(detail)")
         case .noStreamResources:
-            "This addon's manifest doesn't declare any stream providers. If it's configurable, open its configuration, enable at least one stream provider, then add the addon again."
+            String(localized: "This addon's manifest doesn't declare any stream providers. If it's configurable, open its configuration, enable at least one stream provider, then add the addon again.")
         case .unsupportedIDPrefixes(let prefixes):
-            "This addon only serves its own catalog IDs (\(prefixes.joined(separator: ", "))), which Nami can't match to its anime library. Use a stream addon that supports IMDb, TMDB, Kitsu, MAL, or AniList IDs."
+            String(localized: "This addon only serves its own catalog IDs (\(prefixes.joined(separator: ", "))), which Nami can't match to its anime library. Use a stream addon that supports IMDb, TMDB, Kitsu, MAL, or AniList IDs.")
         case .unsupportedProtocol:
-            "This addon uses a protocol the app does not support yet."
+            String(localized: "This addon uses a protocol the app does not support yet.")
         case .alreadyInstalled(let name):
-            "\(name) is already installed."
+            String(localized: "\(name) is already installed.")
         case .unsupportedCapability(let capability):
-            "This addon does not support \(capability)."
+            String(localized: "This addon does not support \(capability).")
         case .unresolvableMediaID(let namespaces):
-            "This addon needs an ID we could not resolve (\(namespaces.map(\.displayName).joined(separator: ", ")))."
+            String(localized: "This addon needs an ID we could not resolve (\(namespaces.map(\.displayName).joined(separator: ", "))).")
         case .requestFailed(let detail):
-            "The addon request failed. \(detail)"
+            String(localized: "The addon request failed. \(detail)")
         case .noStreams:
-            "No playable sources were found for this episode."
+            String(localized: "No playable sources were found for this episode.")
         }
     }
 }

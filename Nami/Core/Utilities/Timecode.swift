@@ -14,6 +14,6 @@ enum Timecode {
     }
 
     static func remaining(_ seconds: Double) -> String {
-        "\(format(seconds)) left"
+        String(localized: "\(format(seconds)) left")
     }
 }

@@ -102,6 +102,19 @@ Nami uses this metadata to match episodes correctly and rank sources accurately.
 
 ---
 
+## Localization
+
+Nami ships with English and Spanish and can display several languages. Change the app language in **Settings → General → Language**; applying it restarts the app.
+
+All strings live in `Nami/Resources/Localizable.xcstrings`. To add a language:
+
+1. Add a case with its language code in `Nami/Core/Domain/AppLanguage.swift`.
+2. Open `Localizable.xcstrings` in Xcode, add the language, and translate the entries.
+
+In code, SwiftUI text (`Text`, `Button`, `Label`, `.help`, `.accessibilityLabel`, and friends) is localized automatically. Plain `String` values such as enum display names, error messages, and strings passed to custom components use `String(localized:)`. Plurals are declared in the string catalog.
+
+---
+
 ## Quick Start
 
 ### Run with Xcode

@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct NamiApp: App {
     @State private var environment = AppEnvironment()
+    @State private var localization = AppLocalization()
 
     init() {
         URLCache.shared = URLCache(
@@ -18,6 +19,7 @@ struct NamiApp: App {
         WindowGroup {
             RootView()
                 .environment(environment)
+                .environment(localization)
                 .tint(AppColor.brand)
         }
         .defaultSize(width: 1280, height: 820)
@@ -29,6 +31,7 @@ struct NamiApp: App {
         Settings {
             SettingsScene()
                 .environment(environment)
+                .environment(localization)
                 .tint(AppColor.brand)
         }
         .windowToolbarStyle(.unified)

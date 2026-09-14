@@ -49,13 +49,13 @@ enum StreamFormatAnalyzerError: Error, Equatable, Sendable {
     var localizedDescription: String {
         switch self {
         case .unavailable:
-            "On-device format analysis is not available on this Mac."
+            String(localized: "On-device format analysis is not available on this Mac.")
         case .noSamples:
-            "The addon did not return streams to analyze."
+            String(localized: "The addon did not return streams to analyze.")
         case .inputTooLarge:
-            "The addon's sample text was too large for the on-device model."
+            String(localized: "The addon's sample text was too large for the on-device model.")
         case .generationFailed(let detail):
-            "The format analysis failed. \(detail)"
+            String(localized: "The format analysis failed. \(detail)")
         }
     }
 }
@@ -219,7 +219,7 @@ struct FoundationModelStreamFormatAnalyzer: StreamFormatAnalyzing {
         } catch LanguageModelSession.GenerationError.exceededContextWindowSize {
             throw StreamFormatAnalyzerError.inputTooLarge
         } catch let error as LanguageModelSession.GenerationError {
-            throw StreamFormatAnalyzerError.generationFailed(error.errorDescription ?? "Generation failed")
+            throw StreamFormatAnalyzerError.generationFailed(error.errorDescription ?? String(localized: "Generation failed"))
         } catch {
             throw StreamFormatAnalyzerError.generationFailed(error.localizedDescription)
         }

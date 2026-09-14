@@ -12,9 +12,9 @@ struct AddonsSettingsView: View {
             if environment.addons.installed.isEmpty {
                 EmptyStateView(
                     systemImage: "puzzlepiece.extension",
-                    title: "No addons installed",
-                    message: "Add a compatible streaming addon to discover sources for your anime.",
-                    actionTitle: "Add Addon",
+                    title: String(localized: "No addons installed"),
+                    message: String(localized: "Add a compatible streaming addon to discover sources for your anime."),
+                    actionTitle: String(localized: "Add Addon"),
                     action: { isAddingAddon = true }
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -35,8 +35,8 @@ struct AddonsSettingsView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 SectionHeader(
-                    title: "Installed",
-                    subtitle: "\(count) addon\(count == 1 ? "" : "s") \u{00B7} Drag to reorder"
+                    title: String(localized: "Installed"),
+                    subtitle: String(localized: "\(count) addons \u{00B7} Drag to reorder")
                 )
 
                 Button {
@@ -162,7 +162,7 @@ private struct AddonRow: View {
                     Circle()
                         .fill(healthColor)
                         .frame(width: 7, height: 7)
-                        .help(addon.lastHealthStatus?.displayName ?? "Not checked")
+                        .help(addon.lastHealthStatus?.displayName ?? String(localized: "Not checked"))
                 }
                 if let description = addon.description {
                     Text(description)
@@ -274,7 +274,7 @@ private struct AddonRow: View {
             parts.append(addon.capabilities.map(\.displayName).sorted().joined(separator: ", "))
         }
         if let lastChecked = addon.lastCheckedAt {
-            parts.append("Checked \(lastChecked.formatted(.relative(presentation: .named)))")
+            parts.append(String(localized: "Checked \(lastChecked.formatted(.relative(presentation: .named)))"))
         }
         return parts.joined(separator: " \u{00B7} ")
     }
@@ -282,19 +282,19 @@ private struct AddonRow: View {
     private var calibrationStatus: (label: String, tint: Color)? {
         guard let calibration else { return nil }
         if calibration.isStale {
-            return ("Format may have changed", .orange)
+            return (String(localized: "Format may have changed"), .orange)
         }
         switch calibration.status {
         case .success:
-            return ("Format calibrated", .green)
+            return (String(localized: "Format calibrated"), .green)
         case .partial:
-            return ("Limited format support", .orange)
+            return (String(localized: "Limited format support"), .orange)
         case .failure:
-            return ("Format not recognized", .secondary)
+            return (String(localized: "Format not recognized"), .secondary)
         case .unavailable:
-            return ("Built-in parsing", .secondary)
+            return (String(localized: "Built-in parsing"), .secondary)
         case .skipped:
-            return ("Optimized parsing", .secondary)
+            return (String(localized: "Optimized parsing"), .secondary)
         }
     }
 
@@ -473,7 +473,7 @@ struct AddAddonSheet: View {
     private func fetchPreview() async {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let url = URL(string: trimmed), url.scheme != nil else {
-            phase = .failed("Enter a valid manifest URL.")
+            phase = .failed(String(localized: "Enter a valid manifest URL."))
             return
         }
         phase = .loading
@@ -510,7 +510,7 @@ struct AddAddonSheet: View {
 
     private func message(for error: Error) -> String {
         if let addonError = error as? AddonError {
-            return addonError.errorDescription ?? "The addon could not be installed."
+            return addonError.errorDescription ?? String(localized: "The addon could not be installed.")
         }
         return error.localizedDescription
     }
@@ -551,13 +551,13 @@ private struct CalibrationProgressView: View {
     private var detail: String {
         switch phase {
         case .preparing:
-            "Analyzing stream format"
+            String(localized: "Analyzing stream format")
         case .collecting(let title, let index, let total):
-            "Analyzing stream format \u{00B7} \(title) (\(index)/\(total))"
+            String(localized: "Analyzing stream format \u{00B7} \(title) (\(index)/\(total))")
         case .analyzing:
-            "Analyzing stream format \u{00B7} this can take up to a minute"
+            String(localized: "Analyzing stream format \u{00B7} this can take up to a minute")
         case .validating:
-            "Verifying parsing profile"
+            String(localized: "Verifying parsing profile")
         }
     }
 }
@@ -648,7 +648,7 @@ private struct AddonPreviewView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(preview.name)
                         .font(AppFont.cardTitle)
-                    Text(preview.version.map { "Version \($0)" } ?? "Unknown version")
+                    Text(preview.version.map { String(localized: "Version \($0)") } ?? String(localized: "Unknown version"))
                         .font(AppFont.cardMeta)
                         .foregroundStyle(.secondary)
                 }

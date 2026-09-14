@@ -66,7 +66,7 @@ struct OnboardingView: View {
 
                 if let index = flow.setupIndex {
                     Pill(
-                        text: "Setup \(index + 1) of \(OnboardingFlow.setupSteps.count)",
+                        text: String(localized: "Setup \(index + 1) of \(OnboardingFlow.setupSteps.count)"),
                         systemImage: "checklist",
                         tint: .secondary
                     )
@@ -154,18 +154,18 @@ struct OnboardingView: View {
             SettingsCard {
                 featureRow(
                     systemImage: "wand.and.stars",
-                    title: "Automatic source selection",
-                    detail: "Nami ranks every source and plays the best one for you."
+                    title: String(localized: "Automatic source selection"),
+                    detail: String(localized: "Nami ranks every source and plays the best one for you.")
                 )
                 featureRow(
                     systemImage: "bolt.fill",
-                    title: "Real-Debrid ready",
-                    detail: "Instant cached streams in up to 4K, with a manual picker one click away."
+                    title: String(localized: "Real-Debrid ready"),
+                    detail: String(localized: "Instant cached streams in up to 4K, with a manual picker one click away.")
                 )
                 featureRow(
                     systemImage: "display",
-                    title: "Built for macOS",
-                    detail: "MKV, ASS subtitles, multiple audio tracks, and hardware decoding."
+                    title: String(localized: "Built for macOS"),
+                    detail: String(localized: "MKV, ASS subtitles, multiple audio tracks, and hardware decoding.")
                 )
             }
         }
@@ -204,7 +204,7 @@ struct OnboardingView: View {
     @ViewBuilder
     private var realDebridStep: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
-            SettingsCard(title: "Account") {
+            SettingsCard(title: String(localized: "Account")) {
                 Group {
                     if let account = environment.debridAuth.account {
                         connectedDebridContent(account)
@@ -295,7 +295,7 @@ struct OnboardingView: View {
                 Spacer(minLength: Spacing.sm)
 
                 Pill(
-                    text: account.isPremium ? "Premium" : "Free",
+                    text: account.isPremium ? String(localized: "Premium") : String(localized: "Free"),
                     systemImage: account.isPremium ? "star.fill" : nil,
                     tint: account.isPremium ? .green : .secondary
                 )
@@ -389,8 +389,8 @@ struct OnboardingView: View {
 
     private var installedAddonsCard: some View {
         SettingsCard(
-            title: "Installed",
-            subtitle: "\(environment.addons.installed.count) addon\(environment.addons.installed.count == 1 ? "" : "s")"
+            title: String(localized: "Installed"),
+            subtitle: String(localized: "\(environment.addons.installed.count) addons")
         ) {
             ForEach(environment.addons.installed) { addon in
                 HStack(spacing: Spacing.sm) {
@@ -450,25 +450,25 @@ struct OnboardingView: View {
     private var preferencesStep: some View {
         @Bindable var preferences = environment.preferences
         return VStack(alignment: .leading, spacing: Spacing.md) {
-            SettingsCard(title: "Video") {
+            SettingsCard(title: String(localized: "Video")) {
                 SettingsSegmentedRow(
-                    title: "Preferred Quality",
-                    description: "Nami picks this resolution when it is available.",
+                    title: String(localized: "Preferred Quality"),
+                    description: String(localized: "Nami picks this resolution when it is available."),
                     options: QualityPreference.allCases,
                     titleForOption: \.displayName,
                     selection: $preferences.preferredQuality
                 )
                 SettingsSegmentedRow(
-                    title: "Quality Balance",
+                    title: String(localized: "Quality Balance"),
                     options: QualityBalance.allCases,
                     titleForOption: \.displayName,
                     selection: $preferences.qualityBalance
                 )
             }
 
-            SettingsCard(title: "Language") {
+            SettingsCard(title: String(localized: "Language")) {
                 SettingsDropdownRow(
-                    title: "Preferred Audio",
+                    title: String(localized: "Preferred Audio"),
                     systemImage: "speaker.wave.2",
                     options: AudioPreference.allCases.map {
                         SettingsDropdownOption(value: $0, label: $0.displayName)
@@ -476,7 +476,7 @@ struct OnboardingView: View {
                     selection: $preferences.preferredAudio
                 )
                 SettingsDropdownRow(
-                    title: "Preferred Subtitles",
+                    title: String(localized: "Preferred Subtitles"),
                     systemImage: "captions.bubble",
                     options: SubtitlePreference.allCases.map {
                         SettingsDropdownOption(value: $0, label: $0.displayName)
@@ -485,14 +485,14 @@ struct OnboardingView: View {
                 )
             }
 
-            SettingsCard(title: "Playback") {
+            SettingsCard(title: String(localized: "Playback")) {
                 SettingsToggleRow(
-                    title: "Autoplay Next Episode",
+                    title: String(localized: "Autoplay Next Episode"),
                     isOn: $preferences.autoplayNextEpisode
                 )
                 SettingsToggleRow(
-                    title: "Skip Intro and Outro",
-                    description: "Uses AniSkip timings when they are available.",
+                    title: String(localized: "Skip Intro and Outro"),
+                    description: String(localized: "Uses AniSkip timings when they are available."),
                     isOn: $preferences.skipIntroEnabled
                 )
             }
@@ -511,19 +511,19 @@ struct OnboardingView: View {
             SettingsCard {
                 summaryRow(
                     systemImage: "bolt.fill",
-                    title: "Real-Debrid",
-                    value: environment.debridAuth.account?.username ?? "Not connected",
+                    title: String(localized: "Real-Debrid"),
+                    value: environment.debridAuth.account?.username ?? String(localized: "Not connected"),
                     isComplete: environment.debridAuth.isConnected
                 )
                 summaryRow(
                     systemImage: "puzzlepiece.extension.fill",
-                    title: "Addons",
+                    title: String(localized: "Addons"),
                     value: addonSummary,
                     isComplete: !environment.addons.enabledAddons.isEmpty
                 )
                 summaryRow(
                     systemImage: "slider.horizontal.3",
-                    title: "Preferences",
+                    title: String(localized: "Preferences"),
                     value: preferenceSummary,
                     isComplete: true
                 )
@@ -538,15 +538,14 @@ struct OnboardingView: View {
     private var addonSummary: String {
         let count = environment.addons.enabledAddons.count
         switch count {
-        case 0: return "None added"
-        case 1: return "1 enabled"
-        default: return "\(count) enabled"
+        case 0: return String(localized: "None added")
+        default: return String(localized: "\(count) enabled")
         }
     }
 
     private var preferenceSummary: String {
         let preferences = environment.preferences
-        return "\(preferences.preferredQuality.displayName) \u{00B7} \(preferences.preferredAudio.displayName) audio"
+        return String(localized: "\(preferences.preferredQuality.displayName) \u{00B7} \(preferences.preferredAudio.displayName) audio")
     }
 
     private func summaryRow(
@@ -637,9 +636,9 @@ struct OnboardingView: View {
 
     private var primaryTitle: String {
         switch flow.step {
-        case .welcome: "Get Started"
-        case .ready: "Start Watching"
-        default: "Continue"
+        case .welcome: String(localized: "Get Started")
+        case .ready: String(localized: "Start Watching")
+        default: String(localized: "Continue")
         }
     }
 

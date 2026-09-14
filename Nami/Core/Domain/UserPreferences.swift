@@ -76,7 +76,7 @@ enum QualityPreference: String, Codable, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .auto: "Auto"
+        case .auto: String(localized: "Auto")
         case .p2160: "2160p"
         case .p1080: "1080p"
         case .p720: "720p"
@@ -93,9 +93,9 @@ enum QualityBalance: String, Codable, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .dataSaver: "Data Saver"
-        case .balanced: "Balanced"
-        case .best: "Best Quality"
+        case .dataSaver: String(localized: "Data Saver")
+        case .balanced: String(localized: "Balanced")
+        case .best: String(localized: "Best Quality")
         }
     }
 }
@@ -116,7 +116,7 @@ enum AudioPreference: String, Codable, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
 
     var displayName: String {
-        self == .any ? "Any" : LanguageName.displayName(for: rawValue)
+        self == .any ? String(localized: "Any") : LanguageName.displayName(for: rawValue)
     }
 }
 
@@ -136,23 +136,23 @@ enum SubtitlePreference: String, Codable, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
 
     var displayName: String {
-        self == .any ? "Any" : LanguageName.displayName(for: rawValue)
+        self == .any ? String(localized: "Any") : LanguageName.displayName(for: rawValue)
     }
 }
 
 enum LanguageName {
     static func displayName(for token: String) -> String {
         switch token {
-        case "japanese": "Japanese"
-        case "english": "English"
-        case "spanish": "Spanish"
-        case "french": "French"
-        case "german": "German"
-        case "italian": "Italian"
-        case "portuguese": "Portuguese"
-        case "russian": "Russian"
-        case "korean": "Korean"
-        case "chinese": "Chinese"
+        case "japanese": String(localized: "Japanese")
+        case "english": String(localized: "English")
+        case "spanish": String(localized: "Spanish")
+        case "french": String(localized: "French")
+        case "german": String(localized: "German")
+        case "italian": String(localized: "Italian")
+        case "portuguese": String(localized: "Portuguese")
+        case "russian": String(localized: "Russian")
+        case "korean": String(localized: "Korean")
+        case "chinese": String(localized: "Chinese")
         default: token.capitalized
         }
     }
@@ -168,10 +168,10 @@ enum HeroBackgroundBlur: String, Codable, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .off: "Off"
-        case .subtle: "Subtle"
-        case .medium: "Medium"
-        case .strong: "Strong"
+        case .off: String(localized: "Off")
+        case .subtle: String(localized: "Subtle")
+        case .medium: String(localized: "Medium")
+        case .strong: String(localized: "Strong")
         }
     }
 
@@ -194,9 +194,9 @@ enum AnimeTitleLanguage: String, Codable, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .standard: "Default"
-        case .english: "English"
-        case .japanese: "Original (Japanese)"
+        case .standard: String(localized: "Default")
+        case .english: String(localized: "English")
+        case .japanese: String(localized: "Original (Japanese)")
         }
     }
 }
@@ -209,8 +209,8 @@ enum PlaybackEngineKind: String, Codable, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .mpv: "MPV (Recommended)"
-        case .avPlayer: "AVPlayer"
+        case .mpv: String(localized: "MPV (Recommended)")
+        case .avPlayer: String(localized: "AVPlayer")
         }
     }
 }

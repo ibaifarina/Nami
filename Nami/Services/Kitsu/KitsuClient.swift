@@ -39,7 +39,7 @@ struct KitsuClient: Sendable {
         as type: JSONAPIDocument<Data, Included>.Type
     ) async throws -> JSONAPIDocument<Data, Included> {
         guard Self.isKitsuURL(url) else {
-            throw CatalogError.server("Kitsu returned an unexpected pagination link.")
+            throw CatalogError.server(String(localized: "Kitsu returned an unexpected pagination link."))
         }
         let request = RequestBuilder(
             url: url,
@@ -61,13 +61,13 @@ struct KitsuClient: Sendable {
                 resolvingAgainstBaseURL: false
             )
         else {
-            throw CatalogError.server("Could not build a Kitsu request URL.")
+            throw CatalogError.server(String(localized: "Could not build a Kitsu request URL."))
         }
         if !queryItems.isEmpty {
             components.queryItems = queryItems
         }
         guard let url = components.url else {
-            throw CatalogError.server("Could not build a Kitsu request URL.")
+            throw CatalogError.server(String(localized: "Could not build a Kitsu request URL."))
         }
         return url
     }

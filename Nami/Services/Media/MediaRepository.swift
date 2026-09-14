@@ -42,23 +42,23 @@ struct DiscoverFilters: Hashable, Sendable {
     var sort: DiscoverSort = .popularity
 
     static let genres: [GenreOption] = [
-        GenreOption(slug: "action", title: "Action"),
-        GenreOption(slug: "adventure", title: "Adventure"),
-        GenreOption(slug: "comedy", title: "Comedy"),
-        GenreOption(slug: "drama", title: "Drama"),
-        GenreOption(slug: "ecchi", title: "Ecchi"),
-        GenreOption(slug: "fantasy", title: "Fantasy"),
-        GenreOption(slug: "horror", title: "Horror"),
-        GenreOption(slug: "mecha", title: "Mecha"),
-        GenreOption(slug: "music", title: "Music"),
-        GenreOption(slug: "mystery", title: "Mystery"),
-        GenreOption(slug: "psychological", title: "Psychological"),
-        GenreOption(slug: "romance", title: "Romance"),
-        GenreOption(slug: "science-fiction", title: "Sci-Fi"),
-        GenreOption(slug: "slice-of-life", title: "Slice of Life"),
-        GenreOption(slug: "sports", title: "Sports"),
-        GenreOption(slug: "supernatural", title: "Supernatural"),
-        GenreOption(slug: "thriller", title: "Thriller"),
+        GenreOption(slug: "action", title: String(localized: "Action")),
+        GenreOption(slug: "adventure", title: String(localized: "Adventure")),
+        GenreOption(slug: "comedy", title: String(localized: "Comedy")),
+        GenreOption(slug: "drama", title: String(localized: "Drama")),
+        GenreOption(slug: "ecchi", title: String(localized: "Ecchi")),
+        GenreOption(slug: "fantasy", title: String(localized: "Fantasy")),
+        GenreOption(slug: "horror", title: String(localized: "Horror")),
+        GenreOption(slug: "mecha", title: String(localized: "Mecha")),
+        GenreOption(slug: "music", title: String(localized: "Music")),
+        GenreOption(slug: "mystery", title: String(localized: "Mystery")),
+        GenreOption(slug: "psychological", title: String(localized: "Psychological")),
+        GenreOption(slug: "romance", title: String(localized: "Romance")),
+        GenreOption(slug: "science-fiction", title: String(localized: "Sci-Fi")),
+        GenreOption(slug: "slice-of-life", title: String(localized: "Slice of Life")),
+        GenreOption(slug: "sports", title: String(localized: "Sports")),
+        GenreOption(slug: "supernatural", title: String(localized: "Supernatural")),
+        GenreOption(slug: "thriller", title: String(localized: "Thriller")),
     ]
 
     static let years: [Int] = {
@@ -89,9 +89,9 @@ enum DiscoverSort: String, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .popularity: "Popularity"
-        case .rating: "Rating"
-        case .newest: "Newest"
+        case .popularity: String(localized: "Popularity")
+        case .rating: String(localized: "Rating")
+        case .newest: String(localized: "Newest")
         }
     }
 

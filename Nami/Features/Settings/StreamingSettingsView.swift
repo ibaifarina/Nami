@@ -6,41 +6,41 @@ struct StreamingSettingsView: View {
     var body: some View {
         @Bindable var preferences = environment.preferences
         SettingsPaneLayout(pane: .streaming) {
-            SettingsCard(title: "Stream Selection") {
+            SettingsCard(title: String(localized: "Stream Selection")) {
                 SettingsToggleRow(
-                    title: "Auto Select Best Stream",
-                    description: "Automatically choose the best available source so playback can start immediately.",
+                    title: String(localized: "Auto Select Best Stream"),
+                    description: String(localized: "Automatically choose the best available source so playback can start immediately."),
                     isOn: $preferences.autoSelectBestStream
                 )
                 SettingsToggleRow(
-                    title: "Cache Played Sources",
-                    description: "Keeps the resolved source for each episode so returning to one starts instantly. Cached sources are kept for \(ResolvedStreamCache.maximumAgeDescription).",
+                    title: String(localized: "Cache Played Sources"),
+                    description: String(localized: "Keeps the resolved source for each episode so returning to one starts instantly. Cached sources are kept for \(ResolvedStreamCache.maximumAgeDescription)."),
                     isOn: $preferences.cacheResolvedSources
                 )
             }
-            SettingsCard(title: "Quality") {
+            SettingsCard(title: String(localized: "Quality")) {
                 SettingsSegmentedRow(
-                    title: "Preferred Quality",
+                    title: String(localized: "Preferred Quality"),
                     options: QualityPreference.allCases,
                     titleForOption: \.displayName,
                     selection: $preferences.preferredQuality
                 )
                 SettingsSegmentedRow(
-                    title: "Quality Preference",
+                    title: String(localized: "Quality Preference"),
                     options: QualityBalance.allCases,
                     titleForOption: \.displayName,
                     selection: $preferences.qualityBalance
                 )
                 SettingsToggleRow(
-                    title: "Prefer Cached Streams",
-                    description: "Cached sources start instantly. Uncached torrents are prepared by Real-Debrid first.",
+                    title: String(localized: "Prefer Cached Streams"),
+                    description: String(localized: "Cached sources start instantly. Uncached torrents are prepared by Real-Debrid first."),
                     isOn: $preferences.preferCachedStreams
                 )
             }
-            SettingsCard(title: "Language") {
+            SettingsCard(title: String(localized: "Language")) {
                 SettingsDropdownRow(
-                    title: "Preferred Audio",
-                    description: "Ranks sources by their audio language and picks the default audio track.",
+                    title: String(localized: "Preferred Audio"),
+                    description: String(localized: "Ranks sources by their audio language and picks the default audio track."),
                     systemImage: "speaker.wave.2",
                     options: AudioPreference.allCases.map {
                         SettingsDropdownOption(value: $0, label: $0.displayName)
@@ -48,8 +48,8 @@ struct StreamingSettingsView: View {
                     selection: $preferences.preferredAudio
                 )
                 SettingsDropdownRow(
-                    title: "Preferred Subtitles",
-                    description: "Ranks sources by their subtitle language and picks the default subtitle track.",
+                    title: String(localized: "Preferred Subtitles"),
+                    description: String(localized: "Ranks sources by their subtitle language and picks the default subtitle track."),
                     systemImage: "captions.bubble",
                     options: SubtitlePreference.allCases.map {
                         SettingsDropdownOption(value: $0, label: $0.displayName)
@@ -68,65 +68,65 @@ struct AdvancedSettingsView: View {
     var body: some View {
         @Bindable var preferences = environment.preferences
         SettingsPaneLayout(pane: .advanced) {
-            SettingsCard(title: "Auto Select") {
+            SettingsCard(title: String(localized: "Auto Select")) {
                 SettingsSliderRow(
-                    title: "Confidence Threshold",
-                    description: "How certain stream scoring must be before a source is picked automatically.",
+                    title: String(localized: "Confidence Threshold"),
+                    description: String(localized: "How certain stream scoring must be before a source is picked automatically."),
                     value: $preferences.autoSelectConfidenceThreshold,
                     range: 0.70...0.98,
                     step: 0.02,
-                    valueText: { "\(Int(($0 * 100).rounded()))%" }
+                    valueText: { String(localized: "\(Int(($0 * 100).rounded()))%") }
                 )
                 SettingsStepperRow(
-                    title: "Minimum Seeders for Uncached",
-                    description: "Uncached torrents below this seeder count are skipped.",
+                    title: String(localized: "Minimum Seeders for Uncached"),
+                    description: String(localized: "Uncached torrents below this seeder count are skipped."),
                     value: $preferences.minimumSeedersForUncached,
                     range: 0...50
                 )
                 SettingsDropdownRow(
-                    title: "Episode Size Limit",
-                    description: "Sources larger than this are skipped for episodes. Defaults to 5 GB.",
+                    title: String(localized: "Episode Size Limit"),
+                    description: String(localized: "Sources larger than this are skipped for episodes. Defaults to 5 GB."),
                     systemImage: "tv",
                     options: Self.fileSizeOptions,
                     selection: $preferences.maximumEpisodeFileSizeBytes
                 )
                 SettingsDropdownRow(
-                    title: "Movie Size Limit",
-                    description: "Sources larger than this are skipped for movies. Defaults to 20 GB.",
+                    title: String(localized: "Movie Size Limit"),
+                    description: String(localized: "Sources larger than this are skipped for movies. Defaults to 20 GB."),
                     systemImage: "film",
                     options: Self.fileSizeOptions,
                     selection: $preferences.maximumMovieFileSizeBytes
                 )
                 SettingsToggleRow(
-                    title: "Show Stream Scoring Debug Info",
-                    description: "Reveals the scoring breakdown for each source in the source picker.",
+                    title: String(localized: "Show Stream Scoring Debug Info"),
+                    description: String(localized: "Reveals the scoring breakdown for each source in the source picker."),
                     isOn: $preferences.showStreamScoringDebugInfo
                 )
             }
-            SettingsCard(title: "Release Groups") {
+            SettingsCard(title: String(localized: "Release Groups")) {
                 SettingsTextFieldRow(
-                    title: "Preferred Groups",
-                    description: "Preferred groups are boosted when ranking sources.",
-                    prompt: "Comma separated",
+                    title: String(localized: "Preferred Groups"),
+                    description: String(localized: "Preferred groups are boosted when ranking sources."),
+                    prompt: String(localized: "Comma separated"),
                     text: preferredGroupsBinding
                 )
                 SettingsTextFieldRow(
-                    title: "Blocked Groups",
-                    description: "Blocked groups are never selected automatically.",
-                    prompt: "Comma separated",
+                    title: String(localized: "Blocked Groups"),
+                    description: String(localized: "Blocked groups are never selected automatically."),
+                    prompt: String(localized: "Comma separated"),
                     text: blockedGroupsBinding
                 )
             }
-            SettingsCard(title: "Caches") {
+            SettingsCard(title: String(localized: "Caches")) {
                 SettingsRow(
-                    "Cached Metadata",
-                    description: "Cached Kitsu metadata is refreshed periodically. Clearing it forces a fresh fetch."
+                    String(localized: "Cached Metadata"),
+                    description: String(localized: "Cached Kitsu metadata is refreshed periodically. Clearing it forces a fresh fetch.")
                 ) {
                     Button("Clear Cache") {
                         Task {
                             await environment.clearCaches()
                             withAnimation(.easeOut(duration: Motion.transition)) {
-                                cacheMessage = "Metadata cache cleared."
+                                cacheMessage = String(localized: "Metadata cache cleared.")
                             }
                         }
                     }
@@ -144,12 +144,12 @@ struct AdvancedSettingsView: View {
     }
 
     private static let fileSizeOptions: [SettingsDropdownOption<Int64>] = [
-        SettingsDropdownOption(value: 0, label: "Unlimited"),
-        SettingsDropdownOption(value: 2_000_000_000, label: "2 GB"),
-        SettingsDropdownOption(value: 5_000_000_000, label: "5 GB"),
-        SettingsDropdownOption(value: 10_000_000_000, label: "10 GB"),
-        SettingsDropdownOption(value: 20_000_000_000, label: "20 GB"),
-        SettingsDropdownOption(value: 50_000_000_000, label: "50 GB"),
+        SettingsDropdownOption(value: 0, label: String(localized: "Unlimited")),
+        SettingsDropdownOption(value: 2_000_000_000, label: String(localized: "2 GB")),
+        SettingsDropdownOption(value: 5_000_000_000, label: String(localized: "5 GB")),
+        SettingsDropdownOption(value: 10_000_000_000, label: String(localized: "10 GB")),
+        SettingsDropdownOption(value: 20_000_000_000, label: String(localized: "20 GB")),
+        SettingsDropdownOption(value: 50_000_000_000, label: String(localized: "50 GB")),
     ]
 
     private var preferredGroupsBinding: Binding<String> {

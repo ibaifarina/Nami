@@ -1,0 +1,6551 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Original": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original"
+          }
+        }
+      }
+    },
+    "Sequel": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Secuela"
+          }
+        }
+      }
+    },
+    "Prequel": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precuela"
+          }
+        }
+      }
+    },
+    "Season 1": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporada 1"
+          }
+        }
+      }
+    },
+    "Setup %lld of %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuración %1$lld de %2$lld"
+          }
+        }
+      }
+    },
+    "Nami": {
+      "shouldTranslate": false
+    },
+    "Anime streaming for Mac": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emisión de anime para Mac"
+          }
+        }
+      }
+    },
+    "Welcome to Nami": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Te damos la bienvenida a Nami"
+          }
+        }
+      }
+    },
+    "Your anime, one clean Play button.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu anime, un solo botón de reproducir."
+          }
+        }
+      }
+    },
+    "Automatic source selection": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selección automática de fuentes"
+          }
+        }
+      }
+    },
+    "Nami ranks every source and plays the best one for you.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nami clasifica cada fuente y reproduce la mejor para ti."
+          }
+        }
+      }
+    },
+    "Real-Debrid ready": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid listo"
+          }
+        }
+      }
+    },
+    "Instant cached streams in up to 4K, with a manual picker one click away.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuentes en caché al instante en hasta 4K, con el selector manual a un clic."
+          }
+        }
+      }
+    },
+    "Built for macOS": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diseñado para macOS"
+          }
+        }
+      }
+    },
+    "MKV, ASS subtitles, multiple audio tracks, and hardware decoding.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MKV, subtítulos ASS, varias pistas de audio y decodificación por hardware."
+          }
+        }
+      }
+    },
+    "Account": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuenta"
+          }
+        }
+      }
+    },
+    "Real-Debrid is optional. Without it, Nami still plays direct sources, and you can connect later in Settings.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid es opcional. Sin él, Nami sigue reproduciendo fuentes directas y puedes conectarlo más tarde en Ajustes."
+          }
+        }
+      }
+    },
+    "Paste a private API token from real-debrid.com/apitoken. It is stored in your macOS Keychain and never shared with addons.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pega un token de API privado de real-debrid.com/apitoken. Se guarda en el Llavero de macOS y nunca se comparte con los complementos."
+          }
+        }
+      }
+    },
+    "Paste": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pegar"
+          }
+        }
+      }
+    },
+    "Paste your API token": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pega tu token de API"
+          }
+        }
+      }
+    },
+    "": {
+      "shouldTranslate": false
+    },
+    "Get a Token": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obtener un token"
+          }
+        }
+      }
+    },
+    "Connect Real-Debrid": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar Real-Debrid"
+          }
+        }
+      }
+    },
+    "Disconnect": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desconectar"
+          }
+        }
+      }
+    },
+    "Premium": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premium"
+          }
+        }
+      }
+    },
+    "Free": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratis"
+          }
+        }
+      }
+    },
+    "Premium account": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuenta premium"
+          }
+        }
+      }
+    },
+    "Free account": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuenta gratuita"
+          }
+        }
+      }
+    },
+    "Installed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalados"
+          }
+        }
+      }
+    },
+    "%lld addons": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld addon"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld addons"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld addon"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld addons"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "You can add more addons later in Settings.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puedes añadir más complementos más tarde en Ajustes."
+          }
+        }
+      }
+    },
+    "Add Addon": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir complemento"
+          }
+        }
+      }
+    },
+    "No addons yet": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay complementos"
+          }
+        }
+      }
+    },
+    "Add at least one addon to discover sources.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade al menos un complemento para descubrir fuentes."
+          }
+        }
+      }
+    },
+    "Enabled": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activado"
+          }
+        }
+      }
+    },
+    "Enable %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar %@"
+          }
+        }
+      }
+    },
+    "Video": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vídeo"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma"
+          }
+        }
+      }
+    },
+    "Playback": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducción"
+          }
+        }
+      }
+    },
+    "Fine-tune everything later in Settings.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajusta todo más tarde en Ajustes."
+          }
+        }
+      }
+    },
+    "Preferred Quality": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calidad preferida"
+          }
+        }
+      }
+    },
+    "Nami picks this resolution when it is available.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nami elige esta resolución cuando está disponible."
+          }
+        }
+      }
+    },
+    "Quality Balance": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Equilibrio de calidad"
+          }
+        }
+      }
+    },
+    "Preferred Audio": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio preferido"
+          }
+        }
+      }
+    },
+    "Preferred Subtitles": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtítulos preferidos"
+          }
+        }
+      }
+    },
+    "Autoplay Next Episode": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir automáticamente el siguiente episodio"
+          }
+        }
+      }
+    },
+    "Skip Intro and Outro": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omitir intro y outro"
+          }
+        }
+      }
+    },
+    "Uses AniSkip timings when they are available.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa los tiempos de AniSkip cuando están disponibles."
+          }
+        }
+      }
+    },
+    "You can revisit any of these at any time from Settings.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puedes revisar cualquiera de estos en cualquier momento desde Ajustes."
+          }
+        }
+      }
+    },
+    "Real-Debrid": {
+      "shouldTranslate": false
+    },
+    "Addons": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complementos"
+          }
+        }
+      }
+    },
+    "Preferences": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferencias"
+          }
+        }
+      }
+    },
+    "Not connected": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin conectar"
+          }
+        }
+      }
+    },
+    "None added": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguno añadido"
+          }
+        }
+      }
+    },
+    "%lld enabled": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "1 enabled"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld enabled"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "1 activado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld activados"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%@ · %@ audio": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@ (audio)"
+          }
+        }
+      }
+    },
+    "Skip Setup": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omitir configuración"
+          }
+        }
+      }
+    },
+    "Skip": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omitir"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atrás"
+          }
+        }
+      }
+    },
+    "Get Started": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empezar"
+          }
+        }
+      }
+    },
+    "Start Watching": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empezar a ver"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
+          }
+        }
+      }
+    },
+    "Popular Now": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popular ahora"
+          }
+        }
+      }
+    },
+    "Top Rated": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor valorados"
+          }
+        }
+      }
+    },
+    "Currently Airing": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En emisión"
+          }
+        }
+      }
+    },
+    "New Releases": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novedades"
+          }
+        }
+      }
+    },
+    "Upcoming": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximamente"
+          }
+        }
+      }
+    },
+    "Home": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicio"
+          }
+        }
+      }
+    },
+    "Continue Watching": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguir viendo"
+          }
+        }
+      }
+    },
+    "Retry": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar"
+          }
+        }
+      }
+    },
+    "Something went wrong": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algo salió mal"
+          }
+        }
+      }
+    },
+    "Usage": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso"
+          }
+        }
+      }
+    },
+    "Connect": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar"
+          }
+        }
+      }
+    },
+    "Source Resolution": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolución de fuentes"
+          }
+        }
+      }
+    },
+    "Connected sources are resolved through Real-Debrid. Cached torrents start immediately; uncached ones are prepared by Real-Debrid first.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las fuentes conectadas se resuelven a través de Real-Debrid. Los torrents en caché se inician al instante; los que no están en caché los prepara Real-Debrid primero."
+          }
+        }
+      }
+    },
+    "Username": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre de usuario"
+          }
+        }
+      }
+    },
+    "Plan": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan"
+          }
+        }
+      }
+    },
+    "Premium Until": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premium hasta"
+          }
+        }
+      }
+    },
+    "Connection": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conexión"
+          }
+        }
+      }
+    },
+    "Verifying re-checks your token with Real-Debrid. Disconnecting removes it from your Keychain.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificar vuelve a comprobar tu token con Real-Debrid. Desconectar lo elimina del Llavero."
+          }
+        }
+      }
+    },
+    "Verify": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificar"
+          }
+        }
+      }
+    },
+    "API Token": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token de API"
+          }
+        }
+      }
+    },
+    "Generate a private token at real-debrid.com/apitoken. It is stored in your macOS Keychain and never logged or sent to addons.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genera un token privado en real-debrid.com/apitoken. Se guarda en el Llavero de macOS y nunca se registra ni se envía a los complementos."
+          }
+        }
+      }
+    },
+    "Open Token Page": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir página del token"
+          }
+        }
+      }
+    },
+    "The MPV playback engine could not be initialized.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo inicializar el motor de reproducción MPV."
+          }
+        }
+      }
+    },
+    "The video could not be loaded.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo cargar el vídeo."
+          }
+        }
+      }
+    },
+    "Audio %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio %lld"
+          }
+        }
+      }
+    },
+    "Subtitle %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtítulo %lld"
+          }
+        }
+      }
+    },
+    "Real-Debrid did not generate a download link.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid no generó un enlace de descarga."
+          }
+        }
+      }
+    },
+    "User-selected file": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivo seleccionado por el usuario"
+          }
+        }
+      }
+    },
+    "Real-Debrid could not process this torrent (%@).": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid no pudo procesar este torrent (%@)."
+          }
+        }
+      }
+    },
+    "Discover": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descubrir"
+          }
+        }
+      }
+    },
+    "Library": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biblioteca"
+          }
+        }
+      }
+    },
+    "The address could not be understood.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo entender la dirección."
+          }
+        }
+      }
+    },
+    "You appear to be offline. Check your internet connection.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parece que no tienes conexión. Comprueba tu conexión a internet."
+          }
+        }
+      }
+    },
+    "The server could not be reached.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo contactar con el servidor."
+          }
+        }
+      }
+    },
+    "The server took too long to respond.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor tardó demasiado en responder."
+          }
+        }
+      }
+    },
+    "The server rejected the request (HTTP %lld).": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor rechazó la solicitud (HTTP %lld)."
+          }
+        }
+      }
+    },
+    "The server returned more data than allowed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor devolvió más datos de los permitidos."
+          }
+        }
+      }
+    },
+    "The server returned an unsupported response.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor devolvió una respuesta no compatible."
+          }
+        }
+      }
+    },
+    "Auto": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto"
+          }
+        }
+      }
+    },
+    "Data Saver": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahorro de datos"
+          }
+        }
+      }
+    },
+    "Balanced": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Equilibrado"
+          }
+        }
+      }
+    },
+    "Best Quality": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor calidad"
+          }
+        }
+      }
+    },
+    "Any": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cualquiera"
+          }
+        }
+      }
+    },
+    "Japanese": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Japonés"
+          }
+        }
+      }
+    },
+    "English": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inglés"
+          }
+        }
+      }
+    },
+    "Spanish": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Español"
+          }
+        }
+      }
+    },
+    "French": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Francés"
+          }
+        }
+      }
+    },
+    "German": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alemán"
+          }
+        }
+      }
+    },
+    "Italian": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Italiano"
+          }
+        }
+      }
+    },
+    "Portuguese": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Portugués"
+          }
+        }
+      }
+    },
+    "Russian": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ruso"
+          }
+        }
+      }
+    },
+    "Korean": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coreano"
+          }
+        }
+      }
+    },
+    "Chinese": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chino"
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivado"
+          }
+        }
+      }
+    },
+    "Subtle": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sutil"
+          }
+        }
+      }
+    },
+    "Medium": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medio"
+          }
+        }
+      }
+    },
+    "Strong": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intenso"
+          }
+        }
+      }
+    },
+    "Default": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predeterminado"
+          }
+        }
+      }
+    },
+    "Original (Japanese)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original (japonés)"
+          }
+        }
+      }
+    },
+    "MPV (Recommended)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MPV (recomendado)"
+          }
+        }
+      }
+    },
+    "AVPlayer": {
+      "shouldTranslate": false
+    },
+    "The request could not be encoded.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo codificar la solicitud."
+          }
+        }
+      }
+    },
+    "The addon returned an unsupported response.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El complemento devolvió una respuesta no compatible."
+          }
+        }
+      }
+    },
+    "Untitled release": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lanzamiento sin título"
+          }
+        }
+      }
+    },
+    "Action": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acción"
+          }
+        }
+      }
+    },
+    "Adventure": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aventura"
+          }
+        }
+      }
+    },
+    "Comedy": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comedia"
+          }
+        }
+      }
+    },
+    "Drama": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drama"
+          }
+        }
+      }
+    },
+    "Ecchi": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ecchi"
+          }
+        }
+      }
+    },
+    "Fantasy": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fantasía"
+          }
+        }
+      }
+    },
+    "Horror": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terror"
+          }
+        }
+      }
+    },
+    "Mecha": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mecha"
+          }
+        }
+      }
+    },
+    "Music": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Música"
+          }
+        }
+      }
+    },
+    "Mystery": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misterio"
+          }
+        }
+      }
+    },
+    "Psychological": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Psicológico"
+          }
+        }
+      }
+    },
+    "Romance": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Romance"
+          }
+        }
+      }
+    },
+    "Sci-Fi": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciencia ficción"
+          }
+        }
+      }
+    },
+    "Slice of Life": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recuentos de la vida"
+          }
+        }
+      }
+    },
+    "Sports": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deportes"
+          }
+        }
+      }
+    },
+    "Supernatural": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobrenatural"
+          }
+        }
+      }
+    },
+    "Thriller": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suspense"
+          }
+        }
+      }
+    },
+    "Popularity": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popularidad"
+          }
+        }
+      }
+    },
+    "Rating": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valoración"
+          }
+        }
+      }
+    },
+    "Newest": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más recientes"
+          }
+        }
+      }
+    },
+    "Add Your Addons": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade tus complementos"
+          }
+        }
+      }
+    },
+    "Set Your Preferences": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configura tus preferencias"
+          }
+        }
+      }
+    },
+    "You're All Set": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo listo"
+          }
+        }
+      }
+    },
+    "Unlock instant, cached, high-quality streams.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloquea fuentes en caché al instante y en alta calidad."
+          }
+        }
+      }
+    },
+    "Addons are where your sources come from.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los complementos son el origen de tus fuentes."
+          }
+        }
+      }
+    },
+    "Tell Nami how you like to watch. Change it anytime.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dile a Nami cómo te gusta ver anime. Cámbialo cuando quieras."
+          }
+        }
+      }
+    },
+    "Review your setup and start watching.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisa tu configuración y empieza a ver."
+          }
+        }
+      }
+    },
+    "Welcome": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bienvenido"
+          }
+        }
+      }
+    },
+    "Ready": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo"
+          }
+        }
+      }
+    },
+    "Navigate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegar"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar"
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar"
+          }
+        }
+      }
+    },
+    "%@ (%@)": {
+      "shouldTranslate": false
+    },
+    "Episode %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episodio %lld"
+          }
+        }
+      }
+    },
+    "Keychain error (%lld)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error del Llavero (%lld)"
+          }
+        }
+      }
+    },
+    "Kitsu returned 403 (service unavailable)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kitsu devolvió 403 (servicio no disponible)"
+          }
+        }
+      }
+    },
+    "Kitsu is temporarily unavailable.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kitsu no está disponible temporalmente."
+          }
+        }
+      }
+    },
+    "You appear to be offline. Check your internet connection and try again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parece que no tienes conexión. Comprueba tu conexión a internet e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "The request took too long. Please try again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud tardó demasiado. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "That request was not authorized.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esa solicitud no estaba autorizada."
+          }
+        }
+      }
+    },
+    "That anime could not be found.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo encontrar ese anime."
+          }
+        }
+      }
+    },
+    "Kitsu returned an unexpected response. Please try again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kitsu devolvió una respuesta inesperada. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "Kitsu sent data we could not read.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kitsu envió datos que no pudimos leer."
+          }
+        }
+      }
+    },
+    "Something went wrong while loading this content.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algo salió mal al cargar este contenido."
+          }
+        }
+      }
+    },
+    "Kitsu is temporarily unavailable. Cached content is shown where available.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kitsu no está disponible temporalmente. Se muestra el contenido en caché cuando hay."
+          }
+        }
+      }
+    },
+    "Reconnect and try again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vuelve a conectarte e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "Please try again in a moment.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inténtalo de nuevo en un momento."
+          }
+        }
+      }
+    },
+    "Kitsu rate limit reached. Try again shortly.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se alcanzó el límite de peticiones de Kitsu. Inténtalo de nuevo en breve."
+          }
+        }
+      }
+    },
+    "Response exceeded the size limit": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La respuesta superó el límite de tamaño"
+          }
+        }
+      }
+    },
+    "This source is no longer available. Pick another one.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta fuente ya no está disponible. Elige otra."
+          }
+        }
+      }
+    },
+    "Real-Debrid is unavailable right now.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid no está disponible ahora mismo."
+          }
+        }
+      }
+    },
+    "Real-Debrid isn't connected yet.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid aún no está conectado."
+          }
+        }
+      }
+    },
+    "Real-Debrid rejected the request. Check your API token in Settings.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid rechazó la solicitud. Comprueba tu token de API en Ajustes."
+          }
+        }
+      }
+    },
+    "Your Real-Debrid account is locked.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu cuenta de Real-Debrid está bloqueada."
+          }
+        }
+      }
+    },
+    "Resolving torrents requires an active Real-Debrid premium account.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolver torrents requiere una cuenta premium de Real-Debrid activa."
+          }
+        }
+      }
+    },
+    "Real-Debrid is rate limiting requests. Please wait a moment and try again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid está limitando las solicitudes. Espera un momento e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "Your Real-Debrid traffic is exhausted. Wait for it to reset or add more traffic.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu tráfico de Real-Debrid se ha agotado. Espera a que se restablezca o añade más tráfico."
+          }
+        }
+      }
+    },
+    "Your Real-Debrid fair-use limit was reached. Try again later.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se alcanzó tu límite de uso razonable de Real-Debrid. Inténtalo más tarde."
+          }
+        }
+      }
+    },
+    "Real-Debrid cannot download this torrent because of a copyright filter.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid no puede descargar este torrent por un filtro de derechos de autor."
+          }
+        }
+      }
+    },
+    "This torrent is too large for Real-Debrid to process.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este torrent es demasiado grande para que Real-Debrid lo procese."
+          }
+        }
+      }
+    },
+    "Real-Debrid is still preparing this source. Try again in a few minutes.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid todavía está preparando esta fuente. Inténtalo de nuevo en unos minutos."
+          }
+        }
+      }
+    },
+    "The correct file could not be selected inside this torrent.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo seleccionar el archivo correcto dentro de este torrent."
+          }
+        }
+      }
+    },
+    "This source cannot be resolved for playback.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta fuente no se puede resolver para su reproducción."
+          }
+        }
+      }
+    },
+    "Real-Debrid returned an unsupported response.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid devolvió una respuesta no compatible."
+          }
+        }
+      }
+    },
+    "The Real-Debrid request failed. Please try again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud a Real-Debrid falló. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "Add your Real-Debrid API token in Settings › Real-Debrid.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade tu token de API de Real-Debrid en Ajustes › Real-Debrid."
+          }
+        }
+      }
+    },
+    "Generate a token at real-debrid.com/apitoken and paste it in Settings.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genera un token en real-debrid.com/apitoken y pégalo en Ajustes."
+          }
+        }
+      }
+    },
+    "Wait about a minute before trying again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espera alrededor de un minuto antes de volver a intentarlo."
+          }
+        }
+      }
+    },
+    "Real-Debrid downloads uncached torrents before playback. It can take a few minutes for popular releases.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid descarga los torrents que no están en caché antes de la reproducción. Puede tardar unos minutos en lanzamientos populares."
+          }
+        }
+      }
+    },
+    "You appear to be offline.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parece que no tienes conexión."
+          }
+        }
+      }
+    },
+    "The request timed out.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud agotó el tiempo de espera."
+          }
+        }
+      }
+    },
+    "The token could not be read from the Keychain (%@).": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo leer el token del Llavero (%@)."
+          }
+        }
+      }
+    },
+    "Your Real-Debrid account is not activated.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu cuenta de Real-Debrid no está activada."
+          }
+        }
+      }
+    },
+    "Real-Debrid blocked this IP address.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid bloqueó esta dirección IP."
+          }
+        }
+      }
+    },
+    "Real-Debrid returned error %lld.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid devolvió el error %lld."
+          }
+        }
+      }
+    },
+    "Restart Required": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reinicio necesario"
+          }
+        }
+      }
+    },
+    "Titles": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Títulos"
+          }
+        }
+      }
+    },
+    "App Language": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma de la app"
+          }
+        }
+      }
+    },
+    "Choose the language used across the app. Changing it restarts Nami.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el idioma que se usa en toda la app. Cambiarlo reinicia Nami."
+          }
+        }
+      }
+    },
+    "Hero Background Blur": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desenfoque del fondo del destacado"
+          }
+        }
+      }
+    },
+    "Softens the artwork behind the featured hero on Home and anime details.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suaviza la ilustración detrás del destacado en Inicio y en los detalles del anime."
+          }
+        }
+      }
+    },
+    "Anime Names": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombres de anime"
+          }
+        }
+      }
+    },
+    "How anime titles are shown across the app. Original (Japanese) uses the Japanese title when available.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo se muestran los títulos de anime en la app. Original (japonés) usa el título japonés cuando está disponible."
+          }
+        }
+      }
+    },
+    "Stored on This Mac": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado en este Mac"
+          }
+        }
+      }
+    },
+    "No account required": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No requiere cuenta"
+          }
+        }
+      }
+    },
+    "Your library and watch progress are saved locally. Nothing is uploaded.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu biblioteca y tu progreso se guardan localmente. No se sube nada."
+          }
+        }
+      }
+    },
+    "Restart Now": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reiniciar ahora"
+          }
+        }
+      }
+    },
+    "Later": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más tarde"
+          }
+        }
+      }
+    },
+    "Nami needs to restart to apply the new language.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nami debe reiniciarse para aplicar el nuevo idioma."
+          }
+        }
+      }
+    },
+    "Version %@ (%@)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versión %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "Discover, stream, and keep watching — natively on your Mac.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descubre, reproduce y sigue viendo — de forma nativa en tu Mac."
+          }
+        }
+      }
+    },
+    "Episodes": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episodios"
+          }
+        }
+      }
+    },
+    "Synopsis": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinopsis"
+          }
+        }
+      }
+    },
+    "Season": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporada"
+          }
+        }
+      }
+    },
+    "Related": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relacionados"
+          }
+        }
+      }
+    },
+    "View larger cover art": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver portada más grande"
+          }
+        }
+      }
+    },
+    "View cover art for %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver la portada de %@"
+          }
+        }
+      }
+    },
+    "Opens a larger preview": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre una vista previa más grande"
+          }
+        }
+      }
+    },
+    "Cover art for %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Portada de %@"
+          }
+        }
+      }
+    },
+    "Source": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuente"
+          }
+        }
+      }
+    },
+    "Manage your local library": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestiona tu biblioteca local"
+          }
+        }
+      }
+    },
+    "Add to Library": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir a la biblioteca"
+          }
+        }
+      }
+    },
+    "Remove from Library": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar de la biblioteca"
+          }
+        }
+      }
+    },
+    "Show Less": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar menos"
+          }
+        }
+      }
+    },
+    "Show More": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar más"
+          }
+        }
+      }
+    },
+    "Episode metadata is not available yet for this title.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los metadatos de los episodios aún no están disponibles para este título."
+          }
+        }
+      }
+    },
+    "New episodes air as they release": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los nuevos episodios aparecen a medida que se estrenan"
+          }
+        }
+      }
+    },
+    "%@ view": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista de %@"
+          }
+        }
+      }
+    },
+    "%@ episode view": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista de episodios: %@"
+          }
+        }
+      }
+    },
+    "List": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lista"
+          }
+        }
+      }
+    },
+    "Cards": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarjetas"
+          }
+        }
+      }
+    },
+    "Mark Episode %lld as Unwatched": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcar el episodio %lld como no visto"
+          }
+        }
+      }
+    },
+    "Mark Episode %lld as Watched": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcar el episodio %lld como visto"
+          }
+        }
+      }
+    },
+    "Play %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir %@"
+          }
+        }
+      }
+    },
+    "Show less": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar menos"
+          }
+        }
+      }
+    },
+    "Read more": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leer más"
+          }
+        }
+      }
+    },
+    "%lld. %@": {
+      "shouldTranslate": false
+    },
+    "Mark as Unwatched": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcar como no visto"
+          }
+        }
+      }
+    },
+    "Mark as Watched": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcar como visto"
+          }
+        }
+      }
+    },
+    "Mark %@ as unwatched": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcar %@ como no visto"
+          }
+        }
+      }
+    },
+    "Mark %@ as watched": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcar %@ como visto"
+          }
+        }
+      }
+    },
+    "Resume %@, %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanudar %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "Episode metadata is unavailable": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los metadatos del episodio no están disponibles"
+          }
+        }
+      }
+    },
+    "Anime Stream v1": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anime Stream v1"
+          }
+        }
+      }
+    },
+    "Stremio": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stremio"
+          }
+        }
+      }
+    },
+    "Generic HTTP": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP genérico"
+          }
+        }
+      }
+    },
+    "Not checked": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin comprobar"
+          }
+        }
+      }
+    },
+    "Healthy": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correcto"
+          }
+        }
+      }
+    },
+    "Slow": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lento"
+          }
+        }
+      }
+    },
+    "Unreachable": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inaccesible"
+          }
+        }
+      }
+    },
+    "Episode match is too uncertain": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La coincidencia del episodio es demasiado incierta"
+          }
+        }
+      }
+    },
+    "No playable source": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay fuente reproducible"
+          }
+        }
+      }
+    },
+    "Real-Debrid isn't connected": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-Debrid no está conectado"
+          }
+        }
+      }
+    },
+    "File is larger than your size limit": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El archivo supera tu límite de tamaño"
+          }
+        }
+      }
+    },
+    "Not enough seeders for an uncached stream": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay suficientes semillas para una fuente sin caché"
+          }
+        }
+      }
+    },
+    "Batch could not be matched to this episode": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo asociar el lote a este episodio"
+          }
+        }
+      }
+    },
+    "Release group is blocked": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El grupo de lanzamiento está bloqueado"
+          }
+        }
+      }
+    },
+    "Exact episode match": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coincidencia exacta de episodio"
+          }
+        }
+      }
+    },
+    "Episode match confidence %lld%%": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confianza de coincidencia del episodio: %lld%%"
+          }
+        }
+      }
+    },
+    "Uncertain episode match (%lld%%)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coincidencia de episodio incierta (%lld%%)"
+          }
+        }
+      }
+    },
+    "Cached on Real-Debrid": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En caché de Real-Debrid"
+          }
+        }
+      }
+    },
+    "%@ quality": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calidad %@"
+          }
+        }
+      }
+    },
+    "%@ source": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuente %@"
+          }
+        }
+      }
+    },
+    "%@ codec": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Códec %@"
+          }
+        }
+      }
+    },
+    "File size %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamaño del archivo %@"
+          }
+        }
+      }
+    },
+    "%lld seeders": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld seeder"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld seeders"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld semilla"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld semillas"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Preferred language available": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma preferido disponible"
+          }
+        }
+      }
+    },
+    "Preferred group %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grupo preferido %@"
+          }
+        }
+      }
+    },
+    "Blocked group %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grupo bloqueado %@"
+          }
+        }
+      }
+    },
+    "Batch contains this episode": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El lote contiene este episodio"
+          }
+        }
+      }
+    },
+    "Matched episode %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episodio %lld coincidente"
+          }
+        }
+      }
+    },
+    "Only one video file in this torrent": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo hay un archivo de vídeo en este torrent"
+          }
+        }
+      }
+    },
+    "Episode %lld was not found inside this torrent.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontró el episodio %lld dentro de este torrent."
+          }
+        }
+      }
+    },
+    "Largest playable file": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivo reproducible más grande"
+          }
+        }
+      }
+    },
+    "No playable files were found in this torrent.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron archivos reproducibles en este torrent."
+          }
+        }
+      }
+    },
+    "No video files were found in this torrent.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron archivos de vídeo en este torrent."
+          }
+        }
+      }
+    },
+    "Cache unknown": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché desconocida"
+          }
+        }
+      }
+    },
+    "Cached": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En caché"
+          }
+        }
+      }
+    },
+    "Not cached": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin caché"
+          }
+        }
+      }
+    },
+    "Unavailable": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No disponible"
+          }
+        }
+      }
+    },
+    "No addons installed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay complementos instalados"
+          }
+        }
+      }
+    },
+    "Add a compatible streaming addon to discover sources for your anime.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade un complemento de emisión compatible para descubrir fuentes para tu anime."
+          }
+        }
+      }
+    },
+    "%lld addons · Drag to reorder": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld addon · Drag to reorder"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld addons · Drag to reorder"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld addon · Arrastra para reordenar"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld addons · Arrastra para reordenar"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Check All": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobar todos"
+          }
+        }
+      }
+    },
+    "Check Health": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobar estado"
+          }
+        }
+      }
+    },
+    "Recalibrate Format": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recalibrar formato"
+          }
+        }
+      }
+    },
+    "Move Up": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subir"
+          }
+        }
+      }
+    },
+    "Move Down": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajar"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar"
+          }
+        }
+      }
+    },
+    "Recalibrating stream format": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recalibrando el formato de las fuentes"
+          }
+        }
+      }
+    },
+    "This addon's format may have changed. Recalibrate to restore accurate source selection.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El formato de este complemento puede haber cambiado. Recalíbralo para restaurar una selección de fuentes precisa."
+          }
+        }
+      }
+    },
+    "Remove %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar %@"
+          }
+        }
+      }
+    },
+    "Checked %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobado %@"
+          }
+        }
+      }
+    },
+    "Format may have changed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El formato puede haber cambiado"
+          }
+        }
+      }
+    },
+    "Format calibrated": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formato calibrado"
+          }
+        }
+      }
+    },
+    "Limited format support": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compatibilidad de formato limitada"
+          }
+        }
+      }
+    },
+    "Format not recognized": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formato no reconocido"
+          }
+        }
+      }
+    },
+    "Built-in parsing": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Análisis integrado"
+          }
+        }
+      }
+    },
+    "Optimized parsing": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Análisis optimizado"
+          }
+        }
+      }
+    },
+    "Recalibrate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recalibrar"
+          }
+        }
+      }
+    },
+    "Enter the addon's manifest URL, usually ending in manifest.json.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce la URL del manifiesto del complemento, que suele terminar en manifest.json."
+          }
+        }
+      }
+    },
+    "https://example.com/manifest.json": {
+      "shouldTranslate": false
+    },
+    "Enter a valid manifest URL.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce una URL de manifiesto válida."
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "Fetch Manifest": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obtener manifiesto"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo"
+          }
+        }
+      }
+    },
+    "Remove Addon": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar complemento"
+          }
+        }
+      }
+    },
+    "Keep Addon": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conservar complemento"
+          }
+        }
+      }
+    },
+    "Keep Anyway": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conservar de todos modos"
+          }
+        }
+      }
+    },
+    "Fetching manifest…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obteniendo manifiesto…"
+          }
+        }
+      }
+    },
+    "The addon could not be installed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo instalar el complemento."
+          }
+        }
+      }
+    },
+    "Setting up addon. Analyzing stream format.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurando el complemento. Analizando el formato de las fuentes."
+          }
+        }
+      }
+    },
+    "Setting up addon…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurando el complemento…"
+          }
+        }
+      }
+    },
+    "Analyzing stream format": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analizando el formato de las fuentes"
+          }
+        }
+      }
+    },
+    "Analyzing stream format · %@ (%lld/%lld)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analizando el formato de las fuentes · %1$@ (%2$lld/%3$lld)"
+          }
+        }
+      }
+    },
+    "Analyzing stream format · this can take up to a minute": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analizando el formato de las fuentes · esto puede tardar hasta un minuto"
+          }
+        }
+      }
+    },
+    "Verifying parsing profile": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificando el perfil de análisis"
+          }
+        }
+      }
+    },
+    "Stream format coverage %lld%%": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cobertura del formato de las fuentes: %lld%%"
+          }
+        }
+      }
+    },
+    "Media IDs: %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID de medios: %@"
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versión %@"
+          }
+        }
+      }
+    },
+    "Unknown version": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versión desconocida"
+          }
+        }
+      }
+    },
+    "%lldm": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
+    "%lldh": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h"
+          }
+        }
+      }
+    },
+    "%lldh %lldm": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h %lld min"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "shouldTranslate": false
+    },
+    "Opens anime details": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre los detalles del anime"
+          }
+        }
+      }
+    },
+    "season %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "temporada %lld"
+          }
+        }
+      }
+    },
+    "episode %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "episodio %lld"
+          }
+        }
+      }
+    },
+    "Resume %@, %@, %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanudar %1$@, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "Resumes this episode immediately": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanuda este episodio inmediatamente"
+          }
+        }
+      }
+    },
+    "Remove %@ from Continue Watching": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar %@ de Seguir viendo"
+          }
+        }
+      }
+    },
+    "E%lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E%lld"
+          }
+        }
+      }
+    },
+    "S%lld · ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "T%lld · "
+          }
+        }
+      }
+    },
+    "The manifest is missing a valid name.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al manifiesto le falta un nombre válido."
+          }
+        }
+      }
+    },
+    "The manifest is missing a valid id.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al manifiesto le falta un ID válido."
+          }
+        }
+      }
+    },
+    "Could not build a Kitsu request URL.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo construir la URL de solicitud de Kitsu."
+          }
+        }
+      }
+    },
+    "Kitsu returned an unexpected pagination link.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kitsu devolvió un enlace de paginación inesperado."
+          }
+        }
+      }
+    },
+    "Addon ready": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complemento listo"
+          }
+        }
+      }
+    },
+    "Nami successfully identified this addon's stream format.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nami identificó correctamente el formato de las fuentes de este complemento."
+          }
+        }
+      }
+    },
+    "Addon installed with limited compatibility": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complemento instalado con compatibilidad limitada"
+          }
+        }
+      }
+    },
+    "Nami could identify some stream information, but not all of it. Playback should still work, but automatic source selection may be less accurate.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nami pudo identificar parte de la información de las fuentes, pero no toda. La reproducción debería funcionar, aunque la selección automática de fuentes puede ser menos precisa."
+          }
+        }
+      }
+    },
+    "Addon format not recognized": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formato del complemento no reconocido"
+          }
+        }
+      }
+    },
+    "Nami couldn't reliably interpret this addon's stream results. The addon may still work, but automatic source selection may be less accurate.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nami no pudo interpretar de forma fiable los resultados de este complemento. El complemento aún puede funcionar, pero la selección automática de fuentes puede ser menos precisa."
+          }
+        }
+      }
+    },
+    "Addon installed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complemento instalado"
+          }
+        }
+      }
+    },
+    "The addon didn't return streams for Nami's setup titles, so its format couldn't be analyzed. It will use the built-in parser; you can recalibrate later from Addons settings.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El complemento no devolvió fuentes para los títulos de configuración de Nami, así que no se pudo analizar su formato. Se usará el analizador integrado; puedes recalibrarlo más tarde desde los ajustes de Complementos."
+          }
+        }
+      }
+    },
+    "On-device format analysis couldn't finish, so Nami will use its built-in parser instead. Playback still works; automatic source selection may be slightly less accurate.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis de formato en el dispositivo no pudo completarse, así que Nami usará su analizador integrado. La reproducción sigue funcionando; la selección automática de fuentes puede ser algo menos precisa."
+          }
+        }
+      }
+    },
+    "Nami couldn't run on-device format analysis for this addon, so it will use its built-in parser instead. Playback works normally; automatic source selection may be slightly less accurate.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nami no pudo ejecutar el análisis de formato en el dispositivo para este complemento, así que usará su analizador integrado. La reproducción funciona con normalidad; la selección automática de fuentes puede ser algo menos precisa."
+          }
+        }
+      }
+    },
+    "Nami already understands this addon's format and will use its optimized parser.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nami ya entiende el formato de este complemento y usará su analizador optimizado."
+          }
+        }
+      }
+    },
+    "The addon did not respond in time.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El complemento no respondió a tiempo."
+          }
+        }
+      }
+    },
+    "The manifest could not be read.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo leer el manifiesto."
+          }
+        }
+      }
+    },
+    "This Real-Debrid account has no active premium time.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta cuenta de Real-Debrid no tiene tiempo premium activo."
+          }
+        }
+      }
+    },
+    "Enter your Real-Debrid API token.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce tu token de API de Real-Debrid."
+          }
+        }
+      }
+    },
+    "The Real-Debrid request failed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud a Real-Debrid falló."
+          }
+        }
+      }
+    },
+    "Untitled": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin título"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ajustes"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrar"
+          }
+        }
+      }
+    },
+    "Searching for the best source…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscando la mejor fuente…"
+          }
+        }
+      }
+    },
+    "Checking %lld enabled addons": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Checking %lld enabled addon"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Checking %lld enabled addons"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Comprobando %lld complemento activado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Comprobando %lld complementos activados"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "We couldn't confidently choose a source. Pick one below.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No pudimos elegir una fuente con seguridad. Elige una abajo."
+          }
+        }
+      }
+    },
+    "Best Match": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejor resultado"
+          }
+        }
+      }
+    },
+    "Other Sources": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otras fuentes"
+          }
+        }
+      }
+    },
+    "%lld more options": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more option"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more options"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld opción más"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld opciones más"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Low Confidence": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baja confianza"
+          }
+        }
+      }
+    },
+    "These aren't auto-selected. Choose manually only if you're sure.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estas no se seleccionan automáticamente. Elígelas manualmente solo si estás seguro."
+          }
+        }
+      }
+    },
+    "Showing %lld of %lld sources": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrando %1$lld de %2$lld fuentes"
+          }
+        }
+      }
+    },
+    "Choose a file": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige un archivo"
+          }
+        }
+      }
+    },
+    "This source contains %lld video files. Pick the one to play.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "This source contains %lld video file. Pick the one to play."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "This source contains %lld video files. Pick the one to play."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Esta fuente contiene %lld archivo de vídeo. Elige el que quieres reproducir."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Esta fuente contiene %lld archivos de vídeo. Elige el que quieres reproducir."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Parts are often labelled by episode number or size.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las partes suelen etiquetarse por número de episodio o tamaño."
+          }
+        }
+      }
+    },
+    "No streaming addons are configured": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay complementos de emisión configurados"
+          }
+        }
+      }
+    },
+    "Add a compatible streaming addon in Settings to discover sources for this episode.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade un complemento de emisión compatible en Ajustes para descubrir fuentes para este episodio."
+          }
+        }
+      }
+    },
+    "Open Addon Settings": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir ajustes de complementos"
+          }
+        }
+      }
+    },
+    "No playable sources were found for this episode": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron fuentes reproducibles para este episodio"
+          }
+        }
+      }
+    },
+    "Try again, or add more addons in Settings.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inténtalo de nuevo o añade más complementos en Ajustes."
+          }
+        }
+      }
+    },
+    "Some addons failed to respond. Try again in a moment.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algunos complementos no respondieron. Inténtalo de nuevo en un momento."
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar"
+          }
+        }
+      }
+    },
+    "score %lld ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "puntos %lld "
+          }
+        }
+      }
+    },
+    "ep %lld ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ep %lld "
+          }
+        }
+      }
+    },
+    "cache %lld ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "caché %lld "
+          }
+        }
+      }
+    },
+    "res %lld ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "res %lld "
+          }
+        }
+      }
+    },
+    "src %lld ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fuente %lld "
+          }
+        }
+      }
+    },
+    "size %lld ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tamaño %lld "
+          }
+        }
+      }
+    },
+    "seed %lld ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sem %lld "
+          }
+        }
+      }
+    },
+    "lang %lld ": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "idioma %lld "
+          }
+        }
+      }
+    },
+    "pen %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pen %lld"
+          }
+        }
+      }
+    },
+    "hash %@": {
+      "shouldTranslate": false
+    },
+    "magnet %@": {
+      "shouldTranslate": false
+    },
+    "url %@": {
+      "shouldTranslate": false
+    },
+    "file #%lld": {
+      "shouldTranslate": false
+    },
+    "BEST": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MEJOR"
+          }
+        }
+      }
+    },
+    "Unknown quality": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calidad desconocida"
+          }
+        }
+      }
+    },
+    "Not cached, Real-Debrid will download it first": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin caché, Real-Debrid lo descargará primero"
+          }
+        }
+      }
+    },
+    "Unavailable on Real-Debrid": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No disponible en Real-Debrid"
+          }
+        }
+      }
+    },
+    "Cache status unknown": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estado de caché desconocido"
+          }
+        }
+      }
+    },
+    "Direct stream, cache status doesn't apply": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuente directa; el estado de caché no aplica"
+          }
+        }
+      }
+    },
+    "LARGEST": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MÁS GRANDE"
+          }
+        }
+      }
+    },
+    "Video file": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivo de vídeo"
+          }
+        }
+      }
+    },
+    "largest file": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "archivo más grande"
+          }
+        }
+      }
+    },
+    "The addon lists this source as cached; not yet verified": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El complemento indica que esta fuente está en caché; aún no se ha verificado"
+          }
+        }
+      }
+    },
+    "Total score %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puntuación total %lld"
+          }
+        }
+      }
+    },
+    "Why this stream?": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Por qué esta fuente?"
+          }
+        }
+      }
+    },
+    "%lld%% confidence": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% de confianza"
+          }
+        }
+      }
+    },
+    "Remove %@ from Library": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar %@ de la biblioteca"
+          }
+        }
+      }
+    },
+    "Open Details": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir detalles"
+          }
+        }
+      }
+    },
+    "Open on Kitsu": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir en Kitsu"
+          }
+        }
+      }
+    },
+    "Streams": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuentes"
+          }
+        }
+      }
+    },
+    "Catalog": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catálogo"
+          }
+        }
+      }
+    },
+    "Metadata": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadatos"
+          }
+        }
+      }
+    },
+    "Subtitles": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtítulos"
+          }
+        }
+      }
+    },
+    "The addon took too long to respond.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El complemento tardó demasiado en responder."
+          }
+        }
+      }
+    },
+    "That addon address is not valid.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esa dirección de complemento no es válida."
+          }
+        }
+      }
+    },
+    "Addons must use HTTPS. Enable the advanced HTTP override for local development if you trust the address.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los complementos deben usar HTTPS. Activa la anulación avanzada de HTTP para desarrollo local si confías en la dirección."
+          }
+        }
+      }
+    },
+    "That address uses an unsupported scheme. Only HTTPS is allowed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esa dirección usa un esquema no compatible. Solo se permite HTTPS."
+          }
+        }
+      }
+    },
+    "Addon addresses must not contain embedded credentials.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las direcciones de complementos no deben contener credenciales integradas."
+          }
+        }
+      }
+    },
+    "This addon's manifest is larger than allowed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El manifiesto de este complemento es más grande de lo permitido."
+          }
+        }
+      }
+    },
+    "The addon returned more data than allowed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El complemento devolvió más datos de los permitidos."
+          }
+        }
+      }
+    },
+    "This addon returned an invalid manifest. %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este complemento devolvió un manifiesto no válido. %@"
+          }
+        }
+      }
+    },
+    "This addon's manifest doesn't declare any stream providers. If it's configurable, open its configuration, enable at least one stream provider, then add the addon again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El manifiesto de este complemento no declara ningún proveedor de fuentes. Si es configurable, abre su configuración, activa al menos un proveedor de fuentes y vuelve a añadir el complemento."
+          }
+        }
+      }
+    },
+    "This addon only serves its own catalog IDs (%@), which Nami can't match to its anime library. Use a stream addon that supports IMDb, TMDB, Kitsu, MAL, or AniList IDs.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este complemento solo sirve sus propios ID de catálogo (%@), que Nami no puede asociar con su biblioteca de anime. Usa un complemento de fuentes que admita ID de IMDb, TMDB, Kitsu, MAL o AniList."
+          }
+        }
+      }
+    },
+    "This addon uses a protocol the app does not support yet.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este complemento usa un protocolo que la app aún no admite."
+          }
+        }
+      }
+    },
+    "%@ is already installed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ya está instalado."
+          }
+        }
+      }
+    },
+    "This addon does not support %@.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este complemento no admite %@."
+          }
+        }
+      }
+    },
+    "This addon needs an ID we could not resolve (%@).": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este complemento necesita un ID que no pudimos resolver (%@)."
+          }
+        }
+      }
+    },
+    "The addon request failed. %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud al complemento falló. %@"
+          }
+        }
+      }
+    },
+    "No playable sources were found for this episode.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron fuentes reproducibles para este episodio."
+          }
+        }
+      }
+    },
+    "Couldn't remove anime": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo quitar el anime"
+          }
+        }
+      }
+    },
+    "Couldn't load your library": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo cargar tu biblioteca"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceptar"
+          }
+        }
+      }
+    },
+    "Please try again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "Nothing in %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada en %@"
+          }
+        }
+      }
+    },
+    "Your library is empty": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu biblioteca está vacía"
+          }
+        }
+      }
+    },
+    "Try another status tab.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prueba otra pestaña de estado."
+          }
+        }
+      }
+    },
+    "Add anime from their details page to build your local library. Everything is stored on this Mac.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade anime desde su página de detalles para crear tu biblioteca local. Todo se guarda en este Mac."
+          }
+        }
+      }
+    },
+    "Browse": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explorar"
+          }
+        }
+      }
+    },
+    "Ep %lld / %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ep %1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "Ep %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ep %lld"
+          }
+        }
+      }
+    },
+    "Final Season": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporada final"
+          }
+        }
+      }
+    },
+    "Season %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporada %lld"
+          }
+        }
+      }
+    },
+    "No playable source was found for the next episode.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontró una fuente reproducible para el siguiente episodio."
+          }
+        }
+      }
+    },
+    "On-device format analysis is not available on this Mac.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis de formato en el dispositivo no está disponible en este Mac."
+          }
+        }
+      }
+    },
+    "The addon did not return streams to analyze.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El complemento no devolvió fuentes para analizar."
+          }
+        }
+      }
+    },
+    "The addon's sample text was too large for the on-device model.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El texto de muestra del complemento era demasiado grande para el modelo en el dispositivo."
+          }
+        }
+      }
+    },
+    "The format analysis failed. %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis de formato falló. %@"
+          }
+        }
+      }
+    },
+    "Generation failed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La generación falló"
+          }
+        }
+      }
+    },
+    "Watching": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viendo"
+          }
+        }
+      }
+    },
+    "To watch": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por ver"
+          }
+        }
+      }
+    },
+    "Completed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completado"
+          }
+        }
+      }
+    },
+    "On Hold": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En pausa"
+          }
+        }
+      }
+    },
+    "Dropped": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abandonado"
+          }
+        }
+      }
+    },
+    "Favorites": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Favoritos"
+          }
+        }
+      }
+    },
+    "Player": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproductor"
+          }
+        }
+      }
+    },
+    "External Player": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproductor externo"
+          }
+        }
+      }
+    },
+    "When an episode nears its end, the next one is prepared and can start automatically.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando un episodio está por terminar, se prepara el siguiente y puede empezar automáticamente."
+          }
+        }
+      }
+    },
+    "Skip Intro Button": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Botón de omitir intro"
+          }
+        }
+      }
+    },
+    "Shows a button while an episode's opening, ending, or recap is playing, using community-sourced skip times. Timings aren't available for every episode.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra un botón mientras se reproduce la intro, el final o el resumen de un episodio, usando tiempos de omisión de la comunidad. No hay tiempos disponibles para todos los episodios."
+          }
+        }
+      }
+    },
+    "Playback Engine": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motor de reproducción"
+          }
+        }
+      }
+    },
+    "MPV plays MKV releases with styled ASS/SSA subtitles and embedded audio tracks. AVPlayer is the legacy system player and cannot play MKV.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MPV reproduce lanzamientos MKV con subtítulos ASS/SSA con estilo y pistas de audio integradas. AVPlayer es el reproductor del sistema heredado y no puede reproducir MKV."
+          }
+        }
+      }
+    },
+    "Open Streams In": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir fuentes en"
+          }
+        }
+      }
+    },
+    "No supported external players were found. Install VLC, IINA, or mpv to enable external playback.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron reproductores externos compatibles. Instala VLC, IINA o mpv para habilitar la reproducción externa."
+          }
+        }
+      }
+    },
+    "Streams open in the selected app instead of the built-in player. Watch progress isn't tracked for external playback.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las fuentes se abren en la app seleccionada en lugar del reproductor integrado. El progreso no se registra en la reproducción externa."
+          }
+        }
+      }
+    },
+    "Rescan for installed players": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volver a buscar reproductores instalados"
+          }
+        }
+      }
+    },
+    "Built-in Player": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproductor integrado"
+          }
+        }
+      }
+    },
+    "Skip Intro": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omitir intro"
+          }
+        }
+      }
+    },
+    "Skip Outro": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omitir outro"
+          }
+        }
+      }
+    },
+    "Skip Recap": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omitir resumen"
+          }
+        }
+      }
+    },
+    "%lld hours": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld hour"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld hours"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld hora"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld horas"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%@ left": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan %@"
+          }
+        }
+      }
+    },
+    "System Default": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predeterminado del sistema"
+          }
+        }
+      }
+    },
+    "No results": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin resultados"
+          }
+        }
+      }
+    },
+    "Try a different search or clear some filters.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prueba otra búsqueda o borra algunos filtros."
+          }
+        }
+      }
+    },
+    "Clear Filters": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar filtros"
+          }
+        }
+      }
+    },
+    "Search anime": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar anime"
+          }
+        }
+      }
+    },
+    "Genre": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Género"
+          }
+        }
+      }
+    },
+    "All Genres": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los géneros"
+          }
+        }
+      }
+    },
+    "Any Season": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cualquier temporada"
+          }
+        }
+      }
+    },
+    "Year": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Año"
+          }
+        }
+      }
+    },
+    "Any Year": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cualquier año"
+          }
+        }
+      }
+    },
+    "Format": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formato"
+          }
+        }
+      }
+    },
+    "Any Format": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cualquier formato"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estado"
+          }
+        }
+      }
+    },
+    "Any Status": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cualquier estado"
+          }
+        }
+      }
+    },
+    "Sort: %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordenar: %@"
+          }
+        }
+      }
+    },
+    "Recent Searches": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Búsquedas recientes"
+          }
+        }
+      }
+    },
+    "Clear": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar"
+          }
+        }
+      }
+    },
+    "Provider confirmed this episode": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El proveedor confirmó este episodio"
+          }
+        }
+      }
+    },
+    "Season and episode match": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coinciden temporada y episodio"
+          }
+        }
+      }
+    },
+    "Absolute episode numbering": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numeración absoluta de episodios"
+          }
+        }
+      }
+    },
+    "Episode falls inside this batch": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El episodio está dentro de este lote"
+          }
+        }
+      }
+    },
+    "Batch contents could not be verified": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron verificar los contenidos del lote"
+          }
+        }
+      }
+    },
+    "Title match for a movie": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coincidencia de título para una película"
+          }
+        }
+      }
+    },
+    "No episode number in the release title": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin número de episodio en el título del lanzamiento"
+          }
+        }
+      }
+    },
+    "Release is a different episode": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El lanzamiento es de otro episodio"
+          }
+        }
+      }
+    },
+    "Season does not match": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La temporada no coincide"
+          }
+        }
+      }
+    },
+    "Release is a special": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El lanzamiento es un especial"
+          }
+        }
+      }
+    },
+    "Special episode match": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coincidencia de episodio especial"
+          }
+        }
+      }
+    },
+    "Extra content such as a preview or creditless sequence": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contenido extra como un avance o una secuencia sin créditos"
+          }
+        }
+      }
+    },
+    "Title only partially matches": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El título solo coincide parcialmente"
+          }
+        }
+      }
+    },
+    "Release title does not match this anime": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El título del lanzamiento no coincide con este anime"
+          }
+        }
+      }
+    },
+    "Requested episode is beyond the known episode count": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El episodio solicitado supera el recuento de episodios conocido"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        }
+      }
+    },
+    "Streaming": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emisión"
+          }
+        }
+      }
+    },
+    "Advanced": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avanzado"
+          }
+        }
+      }
+    },
+    "Appearance, version, and local storage.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apariencia, versión y almacenamiento local."
+          }
+        }
+      }
+    },
+    "How sources are chosen, ranked, and filtered.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo se eligen, clasifican y filtran las fuentes."
+          }
+        }
+      }
+    },
+    "Resolve torrent and hoster sources through your account.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resuelve fuentes de torrents y hosts a través de tu cuenta."
+          }
+        }
+      }
+    },
+    "Providers that discover playable sources.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proveedores que descubren fuentes reproducibles."
+          }
+        }
+      }
+    },
+    "Player engines and what happens between episodes.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motores de reproducción y qué ocurre entre episodios."
+          }
+        }
+      }
+    },
+    "Fine-tune scoring, release groups, and caches.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajusta la puntuación, los grupos de lanzamiento y las cachés."
+          }
+        }
+      }
+    },
+    "%lld": {
+      "shouldTranslate": false
+    },
+    "Stream Selection": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selección de fuentes"
+          }
+        }
+      }
+    },
+    "Quality": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calidad"
+          }
+        }
+      }
+    },
+    "Auto Select Best Stream": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionar automáticamente la mejor fuente"
+          }
+        }
+      }
+    },
+    "Automatically choose the best available source so playback can start immediately.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige automáticamente la mejor fuente disponible para que la reproducción empiece de inmediato."
+          }
+        }
+      }
+    },
+    "Cache Played Sources": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar en caché las fuentes reproducidas"
+          }
+        }
+      }
+    },
+    "Keeps the resolved source for each episode so returning to one starts instantly. Cached sources are kept for %@.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conserva la fuente resuelta de cada episodio para que volver a uno empiece al instante. Las fuentes en caché se conservan durante %@."
+          }
+        }
+      }
+    },
+    "Quality Preference": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferencia de calidad"
+          }
+        }
+      }
+    },
+    "Prefer Cached Streams": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferir fuentes en caché"
+          }
+        }
+      }
+    },
+    "Cached sources start instantly. Uncached torrents are prepared by Real-Debrid first.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las fuentes en caché se inician al instante. Real-Debrid prepara primero los torrents que no están en caché."
+          }
+        }
+      }
+    },
+    "Ranks sources by their audio language and picks the default audio track.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clasifica las fuentes por su idioma de audio y elige la pista de audio predeterminada."
+          }
+        }
+      }
+    },
+    "Ranks sources by their subtitle language and picks the default subtitle track.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clasifica las fuentes por su idioma de subtítulos y elige la pista de subtítulos predeterminada."
+          }
+        }
+      }
+    },
+    "Auto Select": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selección automática"
+          }
+        }
+      }
+    },
+    "Release Groups": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grupos de lanzamiento"
+          }
+        }
+      }
+    },
+    "Caches": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés"
+          }
+        }
+      }
+    },
+    "Confidence Threshold": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umbral de confianza"
+          }
+        }
+      }
+    },
+    "How certain stream scoring must be before a source is picked automatically.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuánta certeza debe tener la puntuación de fuentes antes de elegir una automáticamente."
+          }
+        }
+      }
+    },
+    "Minimum Seeders for Uncached": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semillas mínimas para fuentes sin caché"
+          }
+        }
+      }
+    },
+    "Uncached torrents below this seeder count are skipped.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se omiten los torrents sin caché por debajo de este número de semillas."
+          }
+        }
+      }
+    },
+    "Episode Size Limit": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Límite de tamaño por episodio"
+          }
+        }
+      }
+    },
+    "Sources larger than this are skipped for episodes. Defaults to 5 GB.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las fuentes más grandes que esto se omiten en los episodios. Valor predeterminado: 5 GB."
+          }
+        }
+      }
+    },
+    "Movie Size Limit": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Límite de tamaño para películas"
+          }
+        }
+      }
+    },
+    "Sources larger than this are skipped for movies. Defaults to 20 GB.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las fuentes más grandes que esto se omiten en las películas. Valor predeterminado: 20 GB."
+          }
+        }
+      }
+    },
+    "Show Stream Scoring Debug Info": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar información de depuración de la puntuación de fuentes"
+          }
+        }
+      }
+    },
+    "Reveals the scoring breakdown for each source in the source picker.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra el desglose de puntuación de cada fuente en el selector de fuentes."
+          }
+        }
+      }
+    },
+    "%lld%%": {
+      "shouldTranslate": false
+    },
+    "Preferred Groups": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grupos preferidos"
+          }
+        }
+      }
+    },
+    "Preferred groups are boosted when ranking sources.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los grupos preferidos reciben un impulso al clasificar las fuentes."
+          }
+        }
+      }
+    },
+    "Comma separated": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separados por comas"
+          }
+        }
+      }
+    },
+    "Blocked Groups": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grupos bloqueados"
+          }
+        }
+      }
+    },
+    "Blocked groups are never selected automatically.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los grupos bloqueados nunca se seleccionan automáticamente."
+          }
+        }
+      }
+    },
+    "Cached Metadata": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadatos en caché"
+          }
+        }
+      }
+    },
+    "Cached Kitsu metadata is refreshed periodically. Clearing it forces a fresh fetch.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los metadatos de Kitsu en caché se actualizan periódicamente. Borrarlos fuerza una nueva descarga."
+          }
+        }
+      }
+    },
+    "Clear Cache": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar caché"
+          }
+        }
+      }
+    },
+    "Metadata cache cleared.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de metadatos borrada."
+          }
+        }
+      }
+    },
+    "Unlimited": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin límite"
+          }
+        }
+      }
+    },
+    "2 GB": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 GB"
+          }
+        }
+      }
+    },
+    "5 GB": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 GB"
+          }
+        }
+      }
+    },
+    "10 GB": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 GB"
+          }
+        }
+      }
+    },
+    "20 GB": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 GB"
+          }
+        }
+      }
+    },
+    "50 GB": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "50 GB"
+          }
+        }
+      }
+    },
+    "Unexpected response type": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tipo de respuesta inesperado"
+          }
+        }
+      }
+    },
+    "Redirect without target": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redirección sin destino"
+          }
+        }
+      }
+    },
+    "Too many redirects": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demasiadas redirecciones"
+          }
+        }
+      }
+    },
+    "Redirect loop": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bucle de redirecciones"
+          }
+        }
+      }
+    },
+    "Unsupported URL": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL no compatible"
+          }
+        }
+      }
+    },
+    "HTML page": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Página HTML"
+          }
+        }
+      }
+    },
+    "JSON response": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta JSON"
+          }
+        }
+      }
+    },
+    "%llds video": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vídeo de %llds"
+          }
+        }
+      }
+    },
+    "Account not activated": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuenta no activada"
+          }
+        }
+      }
+    },
+    "IP address not allowed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dirección IP no permitida"
+          }
+        }
+      }
+    },
+    "The image request returned an unexpected response.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud de imagen devolvió una respuesta inesperada."
+          }
+        }
+      }
+    },
+    "The image request failed with status %lld.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud de imagen falló con el estado %lld."
+          }
+        }
+      }
+    },
+    "The image data could not be decoded.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron decodificar los datos de la imagen."
+          }
+        }
+      }
+    },
+    "Resolution": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolución"
+          }
+        }
+      }
+    },
+    "Codec": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Códec"
+          }
+        }
+      }
+    },
+    "Dynamic range": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rango dinámico"
+          }
+        }
+      }
+    },
+    "Audio language": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma de audio"
+          }
+        }
+      }
+    },
+    "Subtitle language": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma de subtítulos"
+          }
+        }
+      }
+    },
+    "Release group": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grupo de lanzamiento"
+          }
+        }
+      }
+    },
+    "File size": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamaño del archivo"
+          }
+        }
+      }
+    },
+    "Seeders": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semillas"
+          }
+        }
+      }
+    },
+    "Movies": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Películas"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
+          }
+        }
+      }
+    },
+    "%@ is no longer installed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ya no está instalado."
+          }
+        }
+      }
+    },
+    "Loading": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargando"
+          }
+        }
+      }
+    },
+    "Play": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir"
+          }
+        }
+      }
+    },
+    "View details": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver detalles"
+          }
+        }
+      }
+    },
+    "Resume": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanudar"
+          }
+        }
+      }
+    },
+    "Continue Episode %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar con el episodio %lld"
+          }
+        }
+      }
+    },
+    "Play Episode %lld": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir el episodio %lld"
+          }
+        }
+      }
+    },
+    "Play Episode 1": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir el episodio 1"
+          }
+        }
+      }
+    },
+    "Addon changes could not be saved.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron guardar los cambios de complementos."
+          }
+        }
+      }
+    },
+    "The video is not ready yet.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El vídeo aún no está listo."
+          }
+        }
+      }
+    },
+    "The video took too long to load.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El vídeo tardó demasiado en cargar."
+          }
+        }
+      }
+    },
+    "This source could not be played. %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo reproducir esta fuente. %@"
+          }
+        }
+      }
+    },
+    "This addon's protocol is not supported yet.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El protocolo de este complemento aún no es compatible."
+          }
+        }
+      }
+    },
+    "The addon request was cancelled.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud al complemento se canceló."
+          }
+        }
+      }
+    },
+    "The addon request failed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La solicitud al complemento falló."
+          }
+        }
+      }
+    },
+    "No synopsis is available for this episode yet.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay sinopsis disponible para este episodio."
+          }
+        }
+      }
+    },
+    "Timed out": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiempo de espera agotado"
+          }
+        }
+      }
+    },
+    "Unknown playback error": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error de reproducción desconocido"
+          }
+        }
+      }
+    },
+    "Technical details": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalles técnicos"
+          }
+        }
+      }
+    },
+    "Close (Esc)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrar (Esc)"
+          }
+        }
+      }
+    },
+    "Close cover art": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrar portada"
+          }
+        }
+      }
+    },
+    "Next Episode": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siguiente episodio"
+          }
+        }
+      }
+    },
+    "Starting in %lld…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empezando en %lld…"
+          }
+        }
+      }
+    },
+    "No confident automatic source for the next episode.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay una fuente automática fiable para el siguiente episodio."
+          }
+        }
+      }
+    },
+    "Preparing next episode…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparando el siguiente episodio…"
+          }
+        }
+      }
+    },
+    "Play Now": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir ahora"
+          }
+        }
+      }
+    },
+    "Choose Source": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir fuente"
+          }
+        }
+      }
+    },
+    "Close player": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrar reproductor"
+          }
+        }
+      }
+    },
+    "Pause": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausar"
+          }
+        }
+      }
+    },
+    "Toggle fullscreen": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alternar pantalla completa"
+          }
+        }
+      }
+    },
+    "Playback speed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velocidad de reproducción"
+          }
+        }
+      }
+    },
+    "Playback speed %lf×": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velocidad de reproducción %lf×"
+          }
+        }
+      }
+    },
+    "Audio track": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pista de audio"
+          }
+        }
+      }
+    },
+    "Normal": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal"
+          }
+        }
+      }
+    },
+    "Speed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velocidad"
+          }
+        }
+      }
+    },
+    "Audio": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio"
+          }
+        }
+      }
+    },
+    "Unmute": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar sonido"
+          }
+        }
+      }
+    },
+    "Mute": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silenciar"
+          }
+        }
+      }
+    },
+    "Volume": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumen"
+          }
+        }
+      }
+    },
+    "Playback position": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posición de reproducción"
+          }
+        }
+      }
+    },
+    "%@ / %@": {
+      "shouldTranslate": false
+    },
+    "Airing": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En emisión"
+          }
+        }
+      }
+    },
+    "Finished": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finalizado"
+          }
+        }
+      }
+    },
+    "TBA": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por anunciar"
+          }
+        }
+      }
+    },
+    "Unreleased": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin estrenar"
+          }
+        }
+      }
+    },
+    "TV": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV"
+          }
+        }
+      }
+    },
+    "TV Special": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Especial de TV"
+          }
+        }
+      }
+    },
+    "Movie": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Película"
+          }
+        }
+      }
+    },
+    "OVA": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OVA"
+          }
+        }
+      }
+    },
+    "ONA": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ONA"
+          }
+        }
+      }
+    },
+    "Special": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Especial"
+          }
+        }
+      }
+    },
+    "Winter": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invierno"
+          }
+        }
+      }
+    },
+    "Spring": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primavera"
+          }
+        }
+      }
+    },
+    "Summer": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verano"
+          }
+        }
+      }
+    },
+    "Fall": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otoño"
+          }
+        }
+      }
+    },
+    "Adaptation": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptación"
+          }
+        }
+      }
+    },
+    "Alternative Setting": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historia alternativa"
+          }
+        }
+      }
+    },
+    "Alternative Version": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versión alternativa"
+          }
+        }
+      }
+    },
+    "Character": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personaje"
+          }
+        }
+      }
+    },
+    "Full Story": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historia completa"
+          }
+        }
+      }
+    },
+    "Parent Story": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historia principal"
+          }
+        }
+      }
+    },
+    "Side Story": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historia paralela"
+          }
+        }
+      }
+    },
+    "Spin-off": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spin-off"
+          }
+        }
+      }
+    },
+    "Summary": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resumen"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

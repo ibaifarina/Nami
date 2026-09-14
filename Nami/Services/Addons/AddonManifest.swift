@@ -162,10 +162,10 @@ extension AddonManifest {
         let trimmedID = id.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedID.isEmpty, trimmedID.count <= 128 else {
-            throw AddonError.invalidManifest("The manifest is missing a valid id.")
+            throw AddonError.invalidManifest(String(localized: "The manifest is missing a valid id."))
         }
         guard !trimmedName.isEmpty, trimmedName.count <= 128 else {
-            throw AddonError.invalidManifest("The manifest is missing a valid name.")
+            throw AddonError.invalidManifest(String(localized: "The manifest is missing a valid name."))
         }
         guard protocolType != nil else {
             throw AddonError.unsupportedProtocol
