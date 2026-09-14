@@ -3,6 +3,8 @@ import Foundation
 struct UserPreferences: Codable, Hashable, Sendable {
     static let defaultMaximumEpisodeFileSizeBytes: Int64 = 5_000_000_000
     static let defaultMaximumMovieFileSizeBytes: Int64 = 20_000_000_000
+    static let defaultMinimumEpisodeFileSizeBytes: Int64 = 100_000_000
+    static let defaultMinimumMovieFileSizeBytes: Int64 = 300_000_000
 
     var autoSelectBestStream = true
     var preferredQuality: QualityPreference = .auto
@@ -15,6 +17,8 @@ struct UserPreferences: Codable, Hashable, Sendable {
     var preferredReleaseGroups: [String] = []
     var blockedReleaseGroups: [String] = []
     var minimumSeedersForUncached = 2
+    var minimumEpisodeFileSizeBytes: Int64 = UserPreferences.defaultMinimumEpisodeFileSizeBytes
+    var minimumMovieFileSizeBytes: Int64 = UserPreferences.defaultMinimumMovieFileSizeBytes
     var maximumEpisodeFileSizeBytes: Int64 = UserPreferences.defaultMaximumEpisodeFileSizeBytes
     var maximumMovieFileSizeBytes: Int64 = UserPreferences.defaultMaximumMovieFileSizeBytes
     var autoSelectConfidenceThreshold = 0.88
@@ -49,6 +53,10 @@ struct UserPreferences: Codable, Hashable, Sendable {
         preferredReleaseGroups = try container.decodeIfPresent([String].self, forKey: .preferredReleaseGroups) ?? []
         blockedReleaseGroups = try container.decodeIfPresent([String].self, forKey: .blockedReleaseGroups) ?? []
         minimumSeedersForUncached = try container.decodeIfPresent(Int.self, forKey: .minimumSeedersForUncached) ?? 2
+        minimumEpisodeFileSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .minimumEpisodeFileSizeBytes)
+            ?? Self.defaultMinimumEpisodeFileSizeBytes
+        minimumMovieFileSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .minimumMovieFileSizeBytes)
+            ?? Self.defaultMinimumMovieFileSizeBytes
         maximumEpisodeFileSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .maximumEpisodeFileSizeBytes)
             ?? legacyMaximumFileSizeBytes
             ?? Self.defaultMaximumEpisodeFileSizeBytes
@@ -116,7 +124,24 @@ enum AudioPreference: String, Codable, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
 
     var displayName: String {
-        self == .any ? String(localized: "Any") : LanguageName.displayName(for: rawValue)
+        languageCode.map { LanguageDetector.displayName(for: $0) } ?? String(localized: "Any")
+    }
+
+    /// ISO 639-1 code used by the detector and scoring, or `nil` for "Any".
+    var languageCode: String? {
+        switch self {
+        case .japanese: "ja"
+        case .english: "en"
+        case .spanish: "es"
+        case .french: "fr"
+        case .german: "de"
+        case .italian: "it"
+        case .portuguese: "pt"
+        case .russian: "ru"
+        case .korean: "ko"
+        case .chinese: "zh"
+        case .any: nil
+        }
     }
 }
 
@@ -136,24 +161,23 @@ enum SubtitlePreference: String, Codable, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
 
     var displayName: String {
-        self == .any ? String(localized: "Any") : LanguageName.displayName(for: rawValue)
+        languageCode.map { LanguageDetector.displayName(for: $0) } ?? String(localized: "Any")
     }
-}
 
-enum LanguageName {
-    static func displayName(for token: String) -> String {
-        switch token {
-        case "japanese": String(localized: "Japanese")
-        case "english": String(localized: "English")
-        case "spanish": String(localized: "Spanish")
-        case "french": String(localized: "French")
-        case "german": String(localized: "German")
-        case "italian": String(localized: "Italian")
-        case "portuguese": String(localized: "Portuguese")
-        case "russian": String(localized: "Russian")
-        case "korean": String(localized: "Korean")
-        case "chinese": String(localized: "Chinese")
-        default: token.capitalized
+    /// ISO 639-1 code used by the detector and scoring, or `nil` for "Any".
+    var languageCode: String? {
+        switch self {
+        case .english: "en"
+        case .japanese: "ja"
+        case .spanish: "es"
+        case .french: "fr"
+        case .german: "de"
+        case .italian: "it"
+        case .portuguese: "pt"
+        case .russian: "ru"
+        case .korean: "ko"
+        case .chinese: "zh"
+        case .any: nil
         }
     }
 }

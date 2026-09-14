@@ -202,12 +202,72 @@ struct ReleaseParserTests {
     @Test func detectsDubAndSub() {
         let dubbed = ReleaseParser.parse("Anime English Dub [1080p]")
         #expect(dubbed.isDubbed)
-        #expect(dubbed.audioLanguages.contains("english"))
+        #expect(dubbed.audioLanguages.contains("en"))
 
         let subbed = ReleaseParser.parse("Anime Multi Sub Spanish [1080p]")
         #expect(subbed.isSubbed)
         #expect(subbed.isDualAudio == false)
-        #expect(subbed.subtitleLanguages.contains("spanish"))
+        #expect(subbed.subtitleLanguages.contains("es"))
+    }
+
+    @Test func infersLanguagesFromDualAudio() {
+        let parsed = ReleaseParser.parse("Anime Dual Audio [1080p]")
+        #expect(parsed.audioLanguages == ["ja", "en"])
+        #expect(parsed.subtitleLanguages.isEmpty)
+    }
+
+    @Test func infersLanguagesFromDubAndRaw() {
+        #expect(ReleaseParser.parse("Anime Dubbed [1080p]").audioLanguages == ["en"])
+        #expect(ReleaseParser.parse("Anime Dubs [1080p]").audioLanguages == ["en"])
+        #expect(ReleaseParser.parse("[Erai-raws] Anime - 07 [1080p]").audioLanguages == ["ja"])
+    }
+
+    @Test func infersEnglishSubtitlesForSubbedReleases() {
+        #expect(ReleaseParser.parse("Anime Multi-Subs [1080p]").subtitleLanguages == ["en"])
+        #expect(ReleaseParser.parse("Anime Multiple Subtitle [1080p]").subtitleLanguages == ["en"])
+        #expect(ReleaseParser.parse("Anime Subbed [1080p]").subtitleLanguages == ["en"])
+    }
+
+    @Test func recognizesLanguageCodes() {
+        let parsed = ReleaseParser.parse("[Group] Show - 07 [1080p][ENG][JPN]")
+        #expect(parsed.audioLanguages == ["ja", "en"])
+        #expect(parsed.subtitleLanguages.isEmpty)
+    }
+
+    @Test func separatesSubtitleMentionsFromAudio() {
+        let parsed = ReleaseParser.parse("Anime English Sub [1080p]")
+        #expect(parsed.subtitleLanguages == ["en"])
+        #expect(parsed.audioLanguages.isEmpty)
+    }
+
+    @Test func recognizesLocalizedLanguageNames() {
+        let parsed = ReleaseParser.parse("Show - 07 [1080p] Castellano Español Latino")
+        #expect(parsed.audioLanguages == ["es"])
+        #expect(parsed.subtitleLanguages.isEmpty)
+    }
+
+    @Test func recognizesBracketedShortCodes() {
+        let parsed = ReleaseParser.parse("Show - 07 [1080p][ES][EN]")
+        #expect(parsed.audioLanguages == ["es", "en"])
+    }
+
+    @Test func recognizesRegionLanguageCodes() {
+        let parsed = ReleaseParser.parse("Show - 07 [1080p] (es-419) (pt-BR)")
+        #expect(parsed.audioLanguages == ["es", "pt"])
+    }
+
+    @Test func vostfrImpliesFrenchSubtitles() {
+        let parsed = ReleaseParser.parse("Show - 07 [1080p] VOSTFR")
+        #expect(parsed.subtitleLanguages == ["fr"])
+        #expect(parsed.audioLanguages.isEmpty)
+    }
+
+    @Test func classifiesLanguagesPerDescriptionLine() {
+        let parsed = ReleaseParser.parse(
+            "Audio: Japanese, Castellano\nSubtitles: Español, English"
+        )
+        #expect(parsed.audioLanguages == ["ja", "es"])
+        #expect(parsed.subtitleLanguages == ["es", "en"])
     }
 
     // MARK: Extension and normalization

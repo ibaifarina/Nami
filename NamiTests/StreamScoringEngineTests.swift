@@ -8,11 +8,11 @@ struct StreamScoringEngineTests {
         quality: QualityBalance = .balanced,
         preferredQuality: QualityPreference = .auto,
         preferCached: Bool = true,
-        audio: AudioPreference = .any,
-        subtitles: SubtitlePreference = .any,
         preferredGroups: [String] = [],
         blockedGroups: [String] = [],
         minSeeders: Int = 2,
+        minSize: Int64? = nil,
+        minMovieSize: Int64? = nil,
         maxSize: Int64? = nil,
         maxMovieSize: Int64? = nil,
         threshold: Double = 0.88,
@@ -23,11 +23,11 @@ struct StreamScoringEngineTests {
         options.qualityBalance = quality
         options.preferredQuality = preferredQuality
         options.preferCachedStreams = preferCached
-        options.preferredAudio = audio
-        options.preferredSubtitles = subtitles
         options.preferredReleaseGroups = preferredGroups
         options.blockedReleaseGroups = blockedGroups
         options.minimumSeedersForUncached = minSeeders
+        options.minimumEpisodeFileSizeBytes = minSize
+        options.minimumMovieFileSizeBytes = minMovieSize
         options.maximumEpisodeFileSizeBytes = maxSize
         options.maximumMovieFileSizeBytes = maxMovieSize
         options.confidenceThreshold = threshold
@@ -258,6 +258,38 @@ struct StreamScoringEngineTests {
         #expect(engine.evaluate(unknown, context: context).isAutoEligible)
     }
 
+    @Test func minimumFileSizeGate() {
+        let engine = StreamScoringEngine(options: options(minSize: 100_000_000))
+        let tiny = candidate(id: "tiny", sizeBytes: 40_000_000)
+        let normal = candidate(id: "normal", sizeBytes: 1_800_000_000)
+        let unknown = candidate(id: "unknown", sizeBytes: nil)
+
+        let ranked = engine.rank([tiny, normal, unknown], context: context)
+
+        #expect(ranked.first { $0.candidate.id == "tiny" }?.isAutoEligible == false)
+        #expect(ranked.first { $0.candidate.id == "normal" }?.isAutoEligible == true)
+        #expect(ranked.first { $0.candidate.id == "unknown" }?.isAutoEligible == true)
+    }
+
+    @Test func movieMinimumFileSizeGateUsesMovieLimit() {
+        let engine = StreamScoringEngine(
+            options: options(minSize: 100_000_000, minMovieSize: 300_000_000)
+        )
+        let small = candidate(id: "small", sizeBytes: 200_000_000)
+        let fine = candidate(id: "fine", sizeBytes: 1_500_000_000)
+        let movieContext = ScoringContext(
+            episodeDurationMinutes: 110,
+            addonPriorities: [:],
+            debridAvailable: true,
+            isMovie: true
+        )
+
+        let ranked = engine.rank([small, fine], context: movieContext)
+
+        #expect(ranked.first { $0.candidate.id == "small" }?.isAutoEligible == false)
+        #expect(ranked.first { $0.candidate.id == "fine" }?.isAutoEligible == true)
+    }
+
     @Test func maximumFileSizeGate() {
         let engine = StreamScoringEngine(options: options(maxSize: 2_000_000_000))
         let huge = candidate(id: "huge", sizeBytes: 5_000_000_000)
@@ -369,23 +401,22 @@ struct StreamScoringEngineTests {
         #expect(longEpisode == 8)
     }
 
-    @Test func languagePreferencesRewardMatchesAndPenalizeMismatches() {
-        let engine = StreamScoringEngine(options: options(audio: .japanese, subtitles: .english))
-        let matching = candidate(id: "match", audio: ["japanese", "english"], subtitles: ["english"])
-        let wrong = candidate(id: "wrong", audio: ["english"], subtitles: ["spanish"])
+    /// Language metadata belongs to playback track selection, never to source
+    /// scoring: release names must not be rewarded or penalized for it.
+    @Test func languageMetadataDoesNotAffectSourceScoring() {
+        let engine = StreamScoringEngine(options: options())
+        let japanese = candidate(id: "ja", audio: ["ja"], subtitles: ["en"])
+        let spanish = candidate(id: "es", audio: ["es"], subtitles: ["es"])
         let unknown = candidate(id: "unknown")
 
-        let matchingScore = engine.evaluate(matching, context: context)
-        let wrongScore = engine.evaluate(wrong, context: context)
+        let japaneseScore = engine.evaluate(japanese, context: context)
+        let spanishScore = engine.evaluate(spanish, context: context)
         let unknownScore = engine.evaluate(unknown, context: context)
 
-        #expect(matchingScore.breakdown.language == 8)
-        #expect(wrongScore.breakdown.penalties == -16)
-        #expect(unknownScore.breakdown.language == 0)
-        #expect(unknownScore.breakdown.penalties == 0)
-
-        let matchingDecision = engine.selectBest([matching, wrong], context: context)
-        #expect(matchingDecision.candidate?.id == "match")
+        #expect(japaneseScore.breakdown.total == spanishScore.breakdown.total)
+        #expect(japaneseScore.breakdown.total == unknownScore.breakdown.total)
+        #expect(japaneseScore.breakdown.penalties == 0)
+        #expect(spanishScore.breakdown.penalties == 0)
     }
 
     @Test func addonPriorityAddsUpToFourPoints() {
@@ -410,14 +441,13 @@ struct StreamScoringEngineTests {
     }
 
     @Test func decisionExplainsWhyAStreamWasChosen() {
-        let engine = StreamScoringEngine(options: options(audio: .japanese))
-        let best = candidate(id: "best", audio: ["japanese"], subtitles: ["english"])
+        let engine = StreamScoringEngine(options: options())
+        let best = candidate(id: "best", audio: ["ja"], subtitles: ["en"])
 
         let decision = engine.selectBest([best], context: context)
 
         #expect(decision.reasons.contains { $0.text.contains("Cached") })
         #expect(decision.reasons.contains { $0.text.contains("1080p") })
-        #expect(decision.reasons.contains { $0.text.contains("Preferred language") })
         #expect(decision.scoreGapToSecondPlace == nil)
     }
 }

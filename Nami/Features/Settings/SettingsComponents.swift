@@ -627,6 +627,41 @@ struct SettingsSliderRow: View {
     }
 }
 
+/// Slider for byte thresholds. Zero reads as the `offLabel`, otherwise the
+/// value is formatted with the system byte formatter.
+struct SettingsSizeSliderRow: View {
+    let title: String
+    var description: String?
+    @Binding var bytes: Int64
+    let range: ClosedRange<Int64>
+    var step: Int64 = 50_000_000
+    var offLabel: String = String(localized: "Off")
+
+    var body: some View {
+        SettingsStackedRow(title, value: valueText, description: description) {
+            Slider(value: binding, in: doubleRange, step: Double(step))
+                .accessibilityLabel(title)
+                .accessibilityValue(valueText)
+        }
+    }
+
+    private var binding: Binding<Double> {
+        Binding(
+            get: { Double(bytes) },
+            set: { bytes = Int64($0.rounded()) }
+        )
+    }
+
+    private var doubleRange: ClosedRange<Double> {
+        Double(range.lowerBound)...Double(range.upperBound)
+    }
+
+    private var valueText: String {
+        guard bytes > 0 else { return offLabel }
+        return ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+    }
+}
+
 struct SettingsStepperRow: View {
     let title: String
     var description: String?

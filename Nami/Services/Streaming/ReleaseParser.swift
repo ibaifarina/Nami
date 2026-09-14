@@ -38,8 +38,10 @@ enum ReleaseParser {
         let isBatch = batchWord || range != nil
         let special = contains(Self.special, in: rawTitle)
         let extra = contains(Self.extra, in: rawTitle)
-        let languages = Self.languages(in: rawTitle)
-        let subtitleLanguages = contains(Self.multiSubs, in: rawTitle) ? languages : []
+        let languageSets = LanguageDetector.sets(in: rawTitle)
+        let isDualAudio = contains(Self.dualAudio, in: rawTitle)
+        let isDubbed = contains(Self.dubbed, in: rawTitle)
+        let isSubbed = contains(Self.subbed, in: rawTitle)
 
         return ParsedRelease(
             rawTitle: rawTitle,
@@ -55,11 +57,11 @@ enum ReleaseParser {
             isBatch: isBatch,
             isSpecial: special,
             isExtra: extra,
-            isDualAudio: contains(Self.dualAudio, in: rawTitle),
-            isDubbed: contains(Self.dubbed, in: rawTitle),
-            isSubbed: contains(Self.subbed, in: rawTitle),
-            audioLanguages: languages,
-            subtitleLanguages: Set(subtitleLanguages),
+            isDualAudio: isDualAudio,
+            isDubbed: isDubbed,
+            isSubbed: isSubbed,
+            audioLanguages: languageSets.audio,
+            subtitleLanguages: languageSets.subtitles,
             fileExtension: fileExtension(from: rawTitle),
             sizeBytes: fileSize(from: rawTitle),
             seeders: seeders(from: rawTitle)
@@ -256,11 +258,6 @@ enum ReleaseParser {
         return nil
     }
 
-    static func languages(in rawTitle: String) -> Set<String> {
-        let matches = allMatches(Self.language, in: rawTitle)
-        return Set(matches.compactMap { $0[safe: 1] ?? nil }.map { $0.lowercased() })
-    }
-
     private static func isNoiseTag(_ value: String) -> Bool {
         let lowered = value.lowercased()
         if lowered.first?.isNumber == true { return true }
@@ -314,11 +311,9 @@ enum ReleaseParser {
 
     private static let special = "\\b(?:special|specials|ova|oad|ona)\\b"
     private static let extra = "\\b(?:ncop|nced|trailer|preview|pv|sample|menu)\\b"
-    private static let dualAudio = "\\b(?:dual|multi)[\\s\\-_]?audio\\b"
-    private static let dubbed = "\\bdub(?:bed)?\\b"
+    private static let dualAudio = "\\b(?:dual|multi|multiple)[\\s\\-_]?audio\\b"
+    private static let dubbed = "\\bdub(?:bed|s)?\\b"
     private static let subbed = "\\bsub(?:bed|s)?\\b"
-    private static let multiSubs = "\\bmulti[\\s\\-_]?subs?\\b"
-    private static let language = "\\b(english|japanese|spanish|french|german|italian|portuguese|russian|korean|chinese)\\b"
     private static let fileExtension = "\\.(mkv|mp4|avi|mov|webm)\\b"
     private static let fileSize = "\\b(\\d+(?:[.,]\\d+)?)\\s*(tib|tb|gib|gb|mib|mb|kib|kb)\\b"
     private static let seedersEmoji = "\u{1F464}\\s*(\\d+)"

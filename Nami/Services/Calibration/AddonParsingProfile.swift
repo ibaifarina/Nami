@@ -441,11 +441,7 @@ enum ProfileValueNormalizer {
     static func language(_ raw: String) -> String? {
         let key = cleaned(raw)
         guard !key.isEmpty else { return nil }
-        if LanguageVocabulary.known.contains(key) { return key }
-        for language in LanguageVocabulary.known where key.contains(language) {
-            return language
-        }
-        return LanguageVocabulary.aliases[key]
+        return LanguageDetector.canonicalCode(forToken: key)
     }
 
     private static func cleaned(_ raw: String) -> String {
@@ -453,32 +449,5 @@ enum ProfileValueNormalizer {
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .trimmingCharacters(in: CharacterSet(charactersIn: "[](){}.,;:/|"))
             .lowercased()
-    }
-}
-
-/// Shared language vocabulary used by the generic parser and calibrated
-/// profiles. Includes common ISO 639 codes seen in release names.
-enum LanguageVocabulary {
-    static let known = [
-        "japanese", "english", "spanish", "french", "german",
-        "italian", "portuguese", "russian", "korean", "chinese",
-    ]
-
-    static let aliases: [String: String] = [
-        "jpn": "japanese", "jap": "japanese", "jp": "japanese", "ja": "japanese",
-        "eng": "english", "en": "english",
-        "spa": "spanish", "esp": "spanish", "es": "spanish",
-        "fre": "french", "fra": "french", "fr": "french",
-        "ger": "german", "deu": "german", "de": "german",
-        "ita": "italian", "it": "italian",
-        "por": "portuguese", "pt": "portuguese",
-        "rus": "russian", "ru": "russian",
-        "kor": "korean", "ko": "korean",
-        "chi": "chinese", "zho": "chinese", "zh": "chinese",
-    ]
-
-    /// Canonicalizes a free-form language token.
-    static func canonical(_ raw: String) -> String? {
-        ProfileValueNormalizer.language(raw)
     }
 }

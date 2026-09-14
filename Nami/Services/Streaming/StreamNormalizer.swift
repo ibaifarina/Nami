@@ -44,6 +44,7 @@ struct StreamNormalizer: Sendable {
             profileParser.parse(fields: raw.profileFields, profile: $0)
         }
         let parsed = ReleaseParser.parse(raw.displayTitle)
+        let fieldLanguages = Self.fieldLanguages(from: raw)
         let hash = raw.infoHash?.lowercased()
         let magnetHash = raw.magnetURI.flatMap { StreamDeduplicator.hash(fromMagnet: $0.absoluteString) }
         let identity = hash
@@ -75,10 +76,12 @@ struct StreamNormalizer: Sendable {
             isCachedHint: extraction?.isCached ?? false,
             audioLanguages: parsed.audioLanguages
                 .union(Self.languages(from: raw.providerMetadata["audio"]))
-                .union(extraction?.audioLanguages ?? []),
+                .union(extraction?.audioLanguages ?? [])
+                .union(fieldLanguages.audio),
             subtitleLanguages: parsed.subtitleLanguages
                 .union(Self.languages(from: raw.providerMetadata["subtitles"]))
-                .union(extraction?.subtitleLanguages ?? []),
+                .union(extraction?.subtitleLanguages ?? [])
+                .union(fieldLanguages.subtitles),
             parsedEpisode: ParsedEpisodeInfo(
                 season: parsed.season,
                 episode: parsed.episode,
@@ -94,8 +97,23 @@ struct StreamNormalizer: Sendable {
 
     static func languages(from value: String?) -> Set<String> {
         guard let value else { return [] }
-        let lowered = value.lowercased()
-        return Set(LanguageVocabulary.known.filter { lowered.contains($0) })
+        return LanguageDetector.languages(in: value)
+    }
+
+    /// Languages that only appear in secondary addon fields such as the
+    /// description or filename, not in the headline title.
+    private static func fieldLanguages(
+        from raw: RawStreamResult
+    ) -> (audio: Set<String>, subtitles: Set<String>) {
+        var audio = Set<String>()
+        var subtitles = Set<String>()
+        var seen: Set<String> = [raw.displayTitle]
+        for (_, value) in raw.profileFields where seen.insert(value).inserted {
+            let languages = LanguageDetector.sets(in: value)
+            audio.formUnion(languages.audio)
+            subtitles.formUnion(languages.subtitles)
+        }
+        return (audio, subtitles)
     }
 
     /// Structured addon quality strings (for example `"1080p"` from the

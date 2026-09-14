@@ -133,6 +133,8 @@ struct StreamSelectionView: View {
                                 isBest: true,
                                 isResolving: model.resolvingCandidateID == best.candidate.id,
                                 showDebug: model.showDebugInfo,
+                                preferredAudio: environment.preferences.preferredAudio.languageCode,
+                                preferredSubtitles: environment.preferences.preferredSubtitles.languageCode,
                                 onSelect: { Task { await model.choose(best) } }
                             )
                             if model.showDebugInfo, let decision = model.decision {
@@ -156,6 +158,8 @@ struct StreamSelectionView: View {
                                     scored: scored,
                                     isResolving: model.resolvingCandidateID == scored.candidate.id,
                                     showDebug: model.showDebugInfo,
+                                    preferredAudio: environment.preferences.preferredAudio.languageCode,
+                                    preferredSubtitles: environment.preferences.preferredSubtitles.languageCode,
                                     onSelect: { Task { await model.choose(scored) } }
                                 )
                             }
@@ -173,6 +177,8 @@ struct StreamSelectionView: View {
                                     scored: scored,
                                     isResolving: model.resolvingCandidateID == scored.candidate.id,
                                     showDebug: model.showDebugInfo,
+                                    preferredAudio: environment.preferences.preferredAudio.languageCode,
+                                    preferredSubtitles: environment.preferences.preferredSubtitles.languageCode,
                                     onSelect: { Task { await model.choose(scored) } }
                                 )
                                 .opacity(0.75)
@@ -286,6 +292,8 @@ private struct SourceRow: View {
     var isBest = false
     var isResolving = false
     var showDebug = false
+    var preferredAudio: String?
+    var preferredSubtitles: String?
     var onSelect: () -> Void
 
     @State private var isHovering = false
@@ -306,6 +314,20 @@ private struct SourceRow: View {
                         }
                         .font(AppFont.cardMeta)
                         .foregroundStyle(.secondary)
+                    }
+                    if !audioLanguages.isEmpty {
+                        languageRow(
+                            kind: .audio,
+                            languages: audioLanguages,
+                            preferred: preferredAudio
+                        )
+                    }
+                    if !subtitleLanguages.isEmpty {
+                        languageRow(
+                            kind: .subtitle,
+                            languages: subtitleLanguages,
+                            preferred: preferredSubtitles
+                        )
                     }
                     if !footer.isEmpty {
                         Text(footer)
@@ -421,13 +443,42 @@ private struct SourceRow: View {
         }
     }
 
+    private var audioLanguages: [String] {
+        sortedLanguages(scored.candidate.audioLanguages, preferred: preferredAudio)
+    }
+
+    private var subtitleLanguages: [String] {
+        sortedLanguages(scored.candidate.subtitleLanguages, preferred: preferredSubtitles)
+    }
+
+    private func languageRow(
+        kind: LanguageTag.Kind,
+        languages: [String],
+        preferred: String?
+    ) -> some View {
+        HStack(spacing: Spacing.xxs) {
+            ForEach(languages, id: \.self) { language in
+                LanguageTag(
+                    language: language,
+                    kind: kind,
+                    isPreferred: language == preferred
+                )
+            }
+        }
+    }
+
+    private func sortedLanguages(_ languages: Set<String>, preferred: String?) -> [String] {
+        languages.sorted { lhs, rhs in
+            if lhs == preferred { return true }
+            if rhs == preferred { return false }
+            return LanguageDetector.displayName(for: lhs) < LanguageDetector.displayName(for: rhs)
+        }
+    }
+
     private var footer: String {
         var parts = scored.candidate.sources.map(\.addonName)
         if let group = scored.candidate.releaseGroup, !group.isEmpty {
             parts.append(group)
-        }
-        if !scored.candidate.audioLanguages.isEmpty {
-            parts.append(scored.candidate.audioLanguages.sorted().joined(separator: "/"))
         }
         return parts.joined(separator: " \u{00B7} ")
     }
@@ -458,7 +509,6 @@ private struct SourceRow: View {
             + String(localized: "src \(Int(breakdown.source)) ")
             + String(localized: "size \(Int(breakdown.size)) ")
             + String(localized: "seed \(Int(breakdown.seeders)) ")
-            + String(localized: "lang \(Int(breakdown.language)) ")
             + String(localized: "pen \(Int(breakdown.penalties))")
     }
 
@@ -485,12 +535,79 @@ private struct SourceRow: View {
             headlineRest,
             sizeText,
             scored.candidate.seeders.map { String(localized: "\($0) seeders") },
+            languageAccessibilityText,
             footer,
             CacheIndicator.label(for: scored.candidate.debridStatus, hasTorrentSource: hasTorrentSource),
         ]
         .compactMap { $0 }
         .filter { !$0.isEmpty }
         .joined(separator: ", ")
+    }
+
+    private var languageAccessibilityText: String? {
+        var parts: [String] = []
+        if !audioLanguages.isEmpty {
+            parts.append(
+                LanguageTag.Kind.audio.label
+                    + ": "
+                    + audioLanguages.map { LanguageDetector.displayName(for: $0) }.joined(separator: ", ")
+            )
+        }
+        if !subtitleLanguages.isEmpty {
+            parts.append(
+                LanguageTag.Kind.subtitle.label
+                    + ": "
+                    + subtitleLanguages.map { LanguageDetector.displayName(for: $0) }.joined(separator: ", ")
+            )
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: ", ")
+    }
+}
+
+private struct LanguageTag: View {
+    enum Kind {
+        case audio
+        case subtitle
+
+        var systemImage: String {
+            switch self {
+            case .audio: "speaker.wave.2.fill"
+            case .subtitle: "captions.bubble.fill"
+            }
+        }
+
+        var label: String {
+            switch self {
+            case .audio: String(localized: "Audio")
+            case .subtitle: String(localized: "Subtitles")
+            }
+        }
+    }
+
+    let language: String
+    let kind: Kind
+    var isPreferred = false
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: kind.systemImage)
+                .font(.system(size: 9, weight: .semibold))
+            Text(LanguageDetector.shortCode(for: language))
+                .font(AppFont.cardMeta.weight(.semibold).monospaced())
+        }
+        .foregroundStyle(isPreferred ? Color.primary : Color.secondary)
+        .padding(.horizontal, Spacing.xs - 2)
+        .padding(.vertical, 2)
+        .background(
+            Capsule().fill(Color.primary.opacity(isPreferred ? 0.12 : 0.05))
+        )
+        .help(description)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(description)
+    }
+
+    private var description: String {
+        kind.label + " \u{00B7} " + LanguageDetector.displayName(for: language)
     }
 }
 

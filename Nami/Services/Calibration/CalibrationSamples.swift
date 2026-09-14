@@ -228,7 +228,7 @@ enum SampleAttributeProbe {
             if sample.seeders != nil { return true }
             return texts.contains { ReleaseParser.seeders(from: $0) != nil }
         case .audioLanguage:
-            if texts.contains(where: { !ReleaseParser.languages(in: $0).isEmpty }) { return true }
+            if texts.contains(where: { !LanguageDetector.languages(in: $0).isEmpty }) { return true }
             return combined.contains("dual audio") || combined.contains("multi audio")
         case .subtitleLanguage:
             return combined.contains("sub") || combined.contains("subtitle")

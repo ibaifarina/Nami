@@ -18,6 +18,8 @@ struct PreferencesStoreTests {
         #expect(store.preferredSubtitles == .english)
         #expect(store.autoplayNextEpisode)
         #expect(store.cacheResolvedSources)
+        #expect(store.minimumEpisodeFileSizeBytes == 100_000_000)
+        #expect(store.minimumMovieFileSizeBytes == 300_000_000)
         #expect(store.maximumEpisodeFileSizeBytes == 5_000_000_000)
         #expect(store.maximumMovieFileSizeBytes == 20_000_000_000)
     }
@@ -61,6 +63,8 @@ struct PreferencesStoreTests {
         #expect(decoded.preferredQuality == .p1080)
         #expect(decoded.qualityBalance == .balanced)
         #expect(decoded.preferredAudio == .japanese)
+        #expect(decoded.minimumEpisodeFileSizeBytes == 100_000_000)
+        #expect(decoded.minimumMovieFileSizeBytes == 300_000_000)
         #expect(decoded.maximumEpisodeFileSizeBytes == 5_000_000_000)
         #expect(decoded.maximumMovieFileSizeBytes == 20_000_000_000)
     }

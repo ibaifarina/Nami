@@ -78,14 +78,14 @@ struct AddonParsingProfileTests {
                     field: .title,
                     kind: .keyword,
                     pattern: "JPN",
-                    value: "japanese"
+                    value: "ja"
                 ),
                 AddonParsingRule(
                     attribute: .subtitleLanguage,
                     field: .title,
                     kind: .keyword,
                     pattern: "ENG subs",
-                    value: "english"
+                    value: "en"
                 ),
                 AddonParsingRule(
                     attribute: .dynamicRange,
@@ -96,8 +96,8 @@ struct AddonParsingProfileTests {
             ])
         )
 
-        #expect(extraction.audioLanguages == ["japanese"])
-        #expect(extraction.subtitleLanguages == ["english"])
+        #expect(extraction.audioLanguages == ["ja"])
+        #expect(extraction.subtitleLanguages == ["en"])
         #expect(extraction.dynamicRange == .dolbyVision)
     }
 
@@ -157,8 +157,8 @@ struct AddonParsingProfileTests {
         #expect(ProfileValueNormalizer.videoCodec("x264") == .avc)
         #expect(ProfileValueNormalizer.dynamicRange("HDR10+") == .hdr10Plus)
         #expect(ProfileValueNormalizer.releaseSource("BDRip") == .bluRay)
-        #expect(ProfileValueNormalizer.language("jpn") == "japanese")
-        #expect(ProfileValueNormalizer.language("English") == "english")
+        #expect(ProfileValueNormalizer.language("jpn") == "ja")
+        #expect(ProfileValueNormalizer.language("English") == "en")
         #expect(ProfileValueNormalizer.videoResolution("nonsense") == nil)
     }
 

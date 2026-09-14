@@ -94,8 +94,27 @@ struct StreamNormalizerTests {
             )
         )
 
-        #expect(candidate.audioLanguages == ["japanese", "english"])
-        #expect(candidate.subtitleLanguages == ["english", "spanish"])
+        #expect(candidate.audioLanguages == ["ja", "en"])
+        #expect(candidate.subtitleLanguages == ["en", "es"])
+    }
+
+    @Test func mergesLanguagesFromAddonDescription() {
+        let result = RawStreamResult(
+            addonID: "sample.sources",
+            addonName: "Sample Sources",
+            displayTitle: "Show - 07 [1080p]",
+            rawTitle: "Show - 07 [1080p]",
+            infoHash: "aabbccddeeff00112233445566778899aabbccdd",
+            sourceFields: [
+                .title: "Show - 07 [1080p]",
+                .description: "Audio: Japanese, Castellano\nSubtitles: Español, English",
+            ]
+        )
+
+        let candidate = normalizer.normalize(result)
+
+        #expect(candidate.audioLanguages == ["ja", "es"])
+        #expect(candidate.subtitleLanguages == ["es", "en"])
     }
 
     @Test func fallsBackToDirectURLAsIdentity() {

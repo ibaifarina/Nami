@@ -32,6 +32,7 @@ final class PlaybackCoordinator {
     private var lastSyncedLibraryProgress: Int?
     private var previousVolume: Double = 1
     private var hasCompletedSession = false
+    private var hasAppliedAutomaticTrackSelection = false
 
     var onPlaybackTick: ((Anime, Episode, Double, Double) -> Void)?
     var onPlaybackEnded: (() -> Void)?
@@ -111,6 +112,7 @@ final class PlaybackCoordinator {
         engine = engineFactory(kind)
         bindEngineCallbacks()
         engineGeneration += 1
+        hasAppliedAutomaticTrackSelection = false
         volume = engine.volume
         previousVolume = engine.volume
         engine.setRate(rate)
@@ -204,6 +206,7 @@ final class PlaybackCoordinator {
         subtitleTracks = []
         selectedAudioTrackID = nil
         selectedSubtitleTrackID = nil
+        hasAppliedAutomaticTrackSelection = false
         lastProgressWrite = .distantPast
         lastSyncedLibraryProgress = nil
         hasCompletedSession = false
@@ -232,6 +235,7 @@ final class PlaybackCoordinator {
         subtitleTracks = []
         selectedAudioTrackID = nil
         selectedSubtitleTrackID = nil
+        hasAppliedAutomaticTrackSelection = false
         lastProgressWrite = .distantPast
         lastSyncedLibraryProgress = nil
         hasCompletedSession = false
@@ -260,6 +264,7 @@ final class PlaybackCoordinator {
         subtitleTracks = []
         selectedAudioTrackID = nil
         selectedSubtitleTrackID = nil
+        hasAppliedAutomaticTrackSelection = false
         title = ""
         episodeLabel = ""
         lastSyncedLibraryProgress = nil
@@ -419,60 +424,29 @@ final class PlaybackCoordinator {
     private func tracksChanged() {
         audioTracks = engine.audioTracks()
         subtitleTracks = engine.subtitleTracks()
-        applyPreferredTracks()
+        applyAutomaticTrackSelectionIfNeeded()
     }
 
-    private func applyPreferredTracks() {
-        if selectedAudioTrackID == nil, let match = preferredAudioTrack() {
-            selectedAudioTrackID = match.id
-            engine.selectAudioTrack(match)
-        }
-        if selectedSubtitleTrackID == nil, let match = preferredSubtitleTrack() {
-            selectedSubtitleTrackID = match.id
-            engine.selectSubtitleTrack(match)
-        }
-    }
+    /// Applies track preferences exactly once per loaded media file, as soon as
+    /// the engine reports a usable track list. Later `track-list` events,
+    /// including the ones caused by setting `aid`/`sid` and the ones following
+    /// a manual choice, are left alone.
+    private func applyAutomaticTrackSelectionIfNeeded() {
+        guard !hasAppliedAutomaticTrackSelection else { return }
+        guard !audioTracks.isEmpty || !subtitleTracks.isEmpty else { return }
+        hasAppliedAutomaticTrackSelection = true
 
-    private func preferredAudioTrack() -> MediaTrack? {
-        guard let token = preferences.preferredAudio.languageToken else {
-            return audioTracks.first { $0.isDefault } ?? audioTracks.first
+        let selection = PlaybackTrackSelector.select(
+            audioTracks: audioTracks,
+            subtitleTracks: subtitleTracks,
+            preferences: preferences.preferences
+        )
+        if let audio = selection.audio {
+            selectedAudioTrackID = audio.id
+            engine.selectAudioTrack(audio)
         }
-        let tokens = Self.preferenceTokens(for: token)
-        return audioTracks.first { matches(track: $0, tokens: tokens) }
-            ?? audioTracks.first { $0.isDefault }
-    }
-
-    private func preferredSubtitleTrack() -> MediaTrack? {
-        guard let token = preferences.preferredSubtitles.languageToken else {
-            return subtitleTracks.first { $0.isDefault }
-        }
-        let tokens = Self.preferenceTokens(for: token)
-        return subtitleTracks.first { matches(track: $0, tokens: tokens) }
-    }
-
-    private func matches(track: MediaTrack, tokens: Set<String>) -> Bool {
-        var haystack = Set<String>()
-        if let language = track.language?.lowercased() {
-            haystack.insert(language)
-        }
-        haystack.insert(track.title.lowercased())
-        return !haystack.isDisjoint(with: tokens)
-    }
-
-    private static func preferenceTokens(for token: String) -> Set<String> {
-        switch token {
-        case "japanese": ["japanese", "ja", "jpn"]
-        case "english": ["english", "en", "eng"]
-        case "spanish": ["spanish", "es", "spa"]
-        case "french": ["french", "fr", "fra", "fre"]
-        case "german": ["german", "de", "deu", "ger"]
-        case "italian": ["italian", "it", "ita"]
-        case "portuguese": ["portuguese", "pt", "por"]
-        case "russian": ["russian", "ru", "rus"]
-        case "korean": ["korean", "ko", "kor"]
-        case "chinese": ["chinese", "zh", "zho", "chi"]
-        default: [token]
-        }
+        selectedSubtitleTrackID = selection.subtitle?.id
+        engine.selectSubtitleTrack(selection.subtitle)
     }
 
     private func writeProgress(force: Bool) {

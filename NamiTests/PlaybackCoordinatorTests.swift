@@ -81,6 +81,10 @@ private final class MockPlayerEngine: PlayerEngine {
         onTimeChange?(time, duration)
     }
 
+    func emitTracksChange() {
+        onTracksChange?()
+    }
+
     func emitEnded() {
         isPlaying = false
         onStateChange?(.ended)
@@ -302,6 +306,41 @@ struct PlaybackCoordinatorTests {
 
         #expect(setup.coordinator.selectedAudioTrackID == "audio-1")
         #expect(setup.engine.selectedAudio == ["audio-0", "audio-1"])
+    }
+
+    @Test func automaticTrackSelectionDoesNotRevertManualSubtitleChange() async throws {
+        let setup = try makeSetup(audio: .japanese, subtitles: .spanish)
+        setup.engine.subtitleTrackList = [
+            MediaTrack(id: "subtitle-0", kind: .subtitle, title: "Spanish Full", language: "spa"),
+            MediaTrack(id: "subtitle-1", kind: .subtitle, title: "English Full", language: "eng"),
+        ]
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(7), startAt: nil)
+        await waitUntil { setup.coordinator.selectedSubtitleTrackID == "subtitle-0" }
+
+        setup.coordinator.selectSubtitleTrack(setup.engine.subtitleTrackList[1])
+        setup.engine.emitTracksChange()
+
+        #expect(setup.coordinator.selectedSubtitleTrackID == "subtitle-1")
+        #expect(setup.engine.selectedSubtitles.last == "subtitle-1")
+    }
+
+    @Test func newEpisodeResetsGuardAndAppliesPreferencesAgain() async throws {
+        let setup = try makeSetup(audio: .japanese, subtitles: .spanish)
+        setup.engine.subtitleTrackList = [
+            MediaTrack(id: "subtitle-0", kind: .subtitle, title: "Spanish Full", language: "spa"),
+            MediaTrack(id: "subtitle-1", kind: .subtitle, title: "English Full", language: "eng"),
+        ]
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(7), startAt: nil)
+        await waitUntil { setup.coordinator.selectedSubtitleTrackID == "subtitle-0" }
+
+        setup.coordinator.selectSubtitleTrack(setup.engine.subtitleTrackList[1])
+        #expect(setup.coordinator.selectedSubtitleTrackID == "subtitle-1")
+
+        setup.coordinator.start(stream: stream, anime: anime, episode: episode(8), startAt: nil)
+        await waitUntil { setup.coordinator.selectedSubtitleTrackID == "subtitle-0" }
+
+        #expect(setup.coordinator.episodeLabel == "Episode 8")
+        #expect(setup.coordinator.selectedSubtitleTrackID == "subtitle-0")
     }
 
     @Test func loadFailureSetsFailedStateAndRetryRecovers() async throws {

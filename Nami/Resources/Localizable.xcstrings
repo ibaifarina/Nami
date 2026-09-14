@@ -5380,22 +5380,22 @@
         }
       }
     },
-    "Ranks sources by their audio language and picks the default audio track.": {
+    "Automatically selects this audio track when available.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clasifica las fuentes por su idioma de audio y elige la pista de audio predeterminada."
+            "value": "Selecciona automáticamente esta pista de audio cuando esté disponible."
           }
         }
       }
     },
-    "Ranks sources by their subtitle language and picks the default subtitle track.": {
+    "Automatically selects subtitles in this language when available.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clasifica las fuentes por su idioma de subtítulos y elige la pista de subtítulos predeterminada."
+            "value": "Selecciona automáticamente subtítulos en este idioma cuando estén disponibles."
           }
         }
       }

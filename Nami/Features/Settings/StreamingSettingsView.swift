@@ -83,6 +83,18 @@ struct AdvancedSettingsView: View {
                     value: $preferences.minimumSeedersForUncached,
                     range: 0...50
                 )
+                SettingsSizeSliderRow(
+                    title: String(localized: "Minimum Episode Size"),
+                    description: String(localized: "Sources smaller than this are skipped for episodes. Defaults to 100 MB."),
+                    bytes: $preferences.minimumEpisodeFileSizeBytes,
+                    range: 0...2_000_000_000
+                )
+                SettingsSizeSliderRow(
+                    title: String(localized: "Minimum Movie Size"),
+                    description: String(localized: "Sources smaller than this are skipped for movies. Defaults to 300 MB."),
+                    bytes: $preferences.minimumMovieFileSizeBytes,
+                    range: 0...2_000_000_000
+                )
                 SettingsDropdownRow(
                     title: String(localized: "Episode Size Limit"),
                     description: String(localized: "Sources larger than this are skipped for episodes. Defaults to 5 GB."),

@@ -8,7 +8,6 @@ struct StreamScoreBreakdown: Hashable, Sendable {
     var codec: Double = 0
     var size: Double = 0
     var seeders: Double = 0
-    var language: Double = 0
     var releaseGroup: Double = 0
     var addonPriority: Double = 0
     var penalties: Double = 0
@@ -21,7 +20,6 @@ struct StreamScoreBreakdown: Hashable, Sendable {
             + codec
             + size
             + seeders
-            + language
             + releaseGroup
             + addonPriority
             + penalties
@@ -33,11 +31,11 @@ struct StreamScoringOptions: Hashable, Sendable {
     var qualityBalance: QualityBalance = .balanced
     var preferredQuality: QualityPreference = .auto
     var preferCachedStreams: Bool = true
-    var preferredAudio: AudioPreference = .japanese
-    var preferredSubtitles: SubtitlePreference = .english
     var preferredReleaseGroups: [String] = []
     var blockedReleaseGroups: [String] = []
     var minimumSeedersForUncached: Int = 2
+    var minimumEpisodeFileSizeBytes: Int64?
+    var minimumMovieFileSizeBytes: Int64?
     var maximumEpisodeFileSizeBytes: Int64?
     var maximumMovieFileSizeBytes: Int64?
     var confidenceThreshold: Double = 0.88
@@ -50,11 +48,19 @@ struct StreamScoringOptions: Hashable, Sendable {
         qualityBalance = preferences.qualityBalance
         preferredQuality = preferences.preferredQuality
         preferCachedStreams = preferences.preferCachedStreams
-        preferredAudio = preferences.preferredAudio
-        preferredSubtitles = preferences.preferredSubtitles
         preferredReleaseGroups = preferences.preferredReleaseGroups
         blockedReleaseGroups = preferences.blockedReleaseGroups
         minimumSeedersForUncached = preferences.minimumSeedersForUncached
+
+        minimumEpisodeFileSizeBytes =
+            preferences.minimumEpisodeFileSizeBytes > 0
+            ? preferences.minimumEpisodeFileSizeBytes
+            : nil
+
+        minimumMovieFileSizeBytes =
+            preferences.minimumMovieFileSizeBytes > 0
+            ? preferences.minimumMovieFileSizeBytes
+            : nil
 
         maximumEpisodeFileSizeBytes =
             preferences.maximumEpisodeFileSizeBytes > 0
@@ -155,19 +161,11 @@ struct StreamScoringEngine: Sendable {
         breakdown.seeders =
             seederScore(candidate)
 
-        let language = languageScores(candidate)
-
-        breakdown.language =
-            language.bonus
-
         breakdown.releaseGroup =
             releaseGroupScore(candidate)
 
         breakdown.addonPriority =
             addonPriorityScore(candidate, context: context)
-
-        breakdown.penalties =
-            language.penalty
 
         if isBlockedGroup(candidate) {
             breakdown.penalties -= 100
@@ -181,26 +179,60 @@ struct StreamScoringEngine: Sendable {
         )
     }
 
+    // MARK: - Ranking
+
+    /// Ranks sources independently of audio/subtitle language.
+    ///
+    /// If cached streams are preferred, every eligible cached source is ranked
+    /// ahead of every uncached source. Within each group, the normal quality
+    /// score decides the order.
+    ///
+    /// Language preferences are applied later, after the selected media has
+    /// been loaded and its real audio/subtitle tracks are available.
     func rank(
         _ candidates: [StreamCandidate],
         context: ScoringContext
     ) -> [ScoredStream] {
-        candidates
-            .map {
-                evaluate($0, context: context)
-            }
-            .sorted { lhs, rhs in
-                if lhs.isAutoEligible != rhs.isAutoEligible {
-                    return lhs.isAutoEligible
-                }
+        let scored = candidates.map {
+            evaluate($0, context: context)
+        }
 
-                if lhs.total != rhs.total {
-                    return lhs.total > rhs.total
-                }
+        let eligible = scored.filter(\.isAutoEligible)
 
-                return lhs.candidate.id < rhs.candidate.id
-            }
+        let rejected = scored
+            .filter { !$0.isAutoEligible }
+            .sorted(by: scoreSort)
+
+        guard options.preferCachedStreams else {
+            return eligible.sorted(by: scoreSort) + rejected
+        }
+
+        let cached = eligible
+            .filter { $0.candidate.debridStatus == .cached }
+            .sorted(by: scoreSort)
+
+        let nonCached = eligible
+            .filter { $0.candidate.debridStatus != .cached }
+            .sorted(by: scoreSort)
+
+        // Cached is a hard priority, not merely a score bonus. If validation
+        // later rejects all cached candidates, the fallback pipeline can keep
+        // walking this list and naturally reach the uncached candidates.
+        return cached + nonCached + rejected
     }
+
+    private func scoreSort(
+        _ lhs: ScoredStream,
+        _ rhs: ScoredStream
+    ) -> Bool {
+        if lhs.total != rhs.total {
+            return lhs.total > rhs.total
+        }
+
+        return lhs.candidate.id < rhs.candidate.id
+    }
+
+    // MARK: - Selection
 
     func selectBest(
         _ candidates: [StreamCandidate],
@@ -228,9 +260,15 @@ struct StreamScoringEngine: Sendable {
         let second =
             eligible.dropFirst().first
 
+        // Cached-first ranking can intentionally place a cached stream ahead
+        // of an uncached stream with a higher raw quality score, so never
+        // expose a negative score gap.
         let gap =
             second.map {
-                top.total - $0.total
+                max(
+                    0,
+                    top.total - $0.total
+                )
             }
 
         let confidence =
@@ -286,6 +324,17 @@ struct StreamScoringEngine: Sendable {
             )
         }
 
+        if let minimum =
+            minimumFileSizeBytes(for: context),
+           let size = candidate.sizeBytes,
+           size > 0,
+           size < minimum
+        {
+            reasons.append(
+                String(localized: "File is smaller than your minimum size")
+            )
+        }
+
         if let maximum =
             maximumFileSizeBytes(for: context),
            let size = candidate.sizeBytes,
@@ -331,6 +380,14 @@ struct StreamScoringEngine: Sendable {
             || candidate.directURL != nil
     }
 
+    private func minimumFileSizeBytes(
+        for context: ScoringContext
+    ) -> Int64? {
+        context.isMovie
+            ? options.minimumMovieFileSizeBytes
+            : options.minimumEpisodeFileSizeBytes
+    }
+
     private func maximumFileSizeBytes(
         for context: ScoringContext
     ) -> Int64? {
@@ -344,13 +401,16 @@ struct StreamScoringEngine: Sendable {
     private func cachedScore(
         _ candidate: StreamCandidate
     ) -> Double {
-        guard candidate.debridStatus == .cached else {
+        guard options.preferCachedStreams,
+              candidate.debridStatus == .cached
+        else {
             return 0
         }
 
-        return options.preferCachedStreams
-            ? 30
-            : 15
+        // Cached is already a hard ranking priority in rank(). The bonus is
+        // retained for the score breakdown and confidence calculation; it does
+        // not decide cached-vs-uncached ordering.
+        return 30
     }
 
     func resolutionScore(
@@ -482,8 +542,7 @@ struct StreamScoringEngine: Sendable {
     func seederScore(
         _ candidate: StreamCandidate
     ) -> Double {
-        // Seeders don't matter once the file is already cached
-        // on Real-Debrid.
+        // Seeder count is irrelevant once RD already has the file.
         guard candidate.debridStatus != .cached else {
             return 0
         }
@@ -502,27 +561,23 @@ struct StreamScoringEngine: Sendable {
 
     // MARK: - File size / bitrate quality
 
-    /// Scores the approximate bitrate density of the stream.
+    /// Estimates encode quality from file size relative to runtime.
     ///
-    /// Instead of treating raw file size as quality directly,
-    /// we normalize by runtime and compensate slightly for more
-    /// efficient codecs.
+    /// This is intentionally monotonic:
+    /// within reasonable limits, a higher bitrate receives a better score.
     ///
-    /// This means, for example:
+    /// Once the bitrate is already very high, the score plateaus instead
+    /// of continuing to reward enormous files.
     ///
-    /// - 400 MB AV1 can compete with a somewhat larger AVC encode.
-    /// - 300 MB HEVC is still usable, but is no longer treated as
-    ///   equally ideal to a 700 MB–1 GB HEVC release.
-    ///
-    /// The codec multipliers are ranking heuristics, not claims of
-    /// exact codec efficiency.
+    /// More efficient codecs receive a small normalization bonus so that
+    /// a smaller HEVC/AV1 encode can reasonably compete with a larger AVC encode.
     func sizeScore(
         bytes: Int64?,
         durationMinutes: Int?,
         codec: VideoCodec?
     ) -> Double {
         guard let bytes,
-              bytes > 0
+            bytes > 0
         else {
             return 0
         }
@@ -539,77 +594,78 @@ struct StreamScoringEngine: Sendable {
                 for: options.qualityBalance
             )
 
-        // Extremely compressed.
-        //
-        // Scale from roughly -14 at effectively zero bitrate
-        // to -6 as we approach the minimum acceptable range.
+        // Very compressed.
         if effectiveMBPerMinute < bands.minimum {
             let progress =
                 clamped(
-                    effectiveMBPerMinute
-                        / bands.minimum
+                    effectiveMBPerMinute / bands.minimum
                 )
 
-            return -14 + 8 * progress
+            return -12 + 8 * progress
         }
 
-        // Acceptable, but still below our preferred quality target.
-        //
-        // This is intentionally a wide score ramp. It makes a
-        // 300 MB encode noticeably less attractive than a
-        // 600–900 MB encode when everything else is equivalent.
+        // Acceptable -> good.
         if effectiveMBPerMinute < bands.idealLow {
             let progress =
-                (
-                    effectiveMBPerMinute
-                        - bands.minimum
-                )
-                / (
-                    bands.idealLow
-                        - bands.minimum
-                )
+                (effectiveMBPerMinute - bands.minimum)
+                / (bands.idealLow - bands.minimum)
 
-            return -6 + 20 * progress
+            return -4 + 12 * progress
         }
 
-        // Sweet spot.
+        // Good -> excellent.
         if effectiveMBPerMinute <= bands.idealHigh {
-            return 14
-        }
-
-        // Larger than necessary.
-        //
-        // Keep it attractive for a while, but gradually stop
-        // rewarding huge files simply because they're huge.
-        if effectiveMBPerMinute <= bands.maximum {
             let progress =
-                (
-                    effectiveMBPerMinute
-                        - bands.idealHigh
-                )
-                / (
-                    bands.maximum
-                        - bands.idealHigh
-                )
+                (effectiveMBPerMinute - bands.idealLow)
+                / (bands.idealHigh - bands.idealLow)
 
-            return 14 - 14 * progress
+            return 8 + 10 * progress
         }
 
-        // Extremely oversized for the selected quality balance.
-        return -10
+        switch options.qualityBalance {
+        case .dataSaver:
+            // In Data Saver, oversized files are genuinely undesirable.
+            //
+            // Score falls from +18 at idealHigh
+            // to 0 at maximum.
+            if effectiveMBPerMinute <= bands.maximum {
+                let progress =
+                    (effectiveMBPerMinute - bands.idealHigh)
+                    / (bands.maximum - bands.idealHigh)
+
+                return 18 - 18 * progress
+            }
+
+            // Huge files should be strongly unattractive.
+            return -10
+
+        case .balanced:
+            // In Balanced, high bitrate is fine.
+            // Give only a tiny extra reward and then plateau.
+            if effectiveMBPerMinute <= bands.maximum {
+                let progress =
+                    (effectiveMBPerMinute - bands.idealHigh)
+                    / (bands.maximum - bands.idealHigh)
+
+                return 18 + 2 * progress
+            }
+
+            return 20
+
+        case .best:
+            // In Best, continue rewarding bitrate strongly for longer.
+            if effectiveMBPerMinute <= bands.maximum {
+                let progress =
+                    (effectiveMBPerMinute - bands.idealHigh)
+                    / (bands.maximum - bands.idealHigh)
+
+                return 18 + 4 * progress
+            }
+
+            return 22
+        }
     }
 
-    /// Converts the real MB/min into a rough "effective quality"
-    /// MB/min by accounting for codec efficiency.
-    ///
-    /// Example:
-    ///
-    /// 400 MB / 24 min HEVC
-    /// = ~16.7 MB/min raw
-    /// = ~20 MB/min effective
-    ///
-    /// This prevents efficient HEVC/AV1 encodes from being unfairly
-    /// punished just because their files are smaller than AVC.
     private func effectiveMegabytesPerMinute(
         bytes: Int64,
         durationMinutes: Int?,
@@ -658,13 +714,6 @@ struct StreamScoringEngine: Sendable {
     ) -> SizeBands {
         switch balance {
         case .dataSaver:
-            // 24-minute AVC episode:
-            //
-            // minimum:   ~120 MB
-            // ideal:     ~192–600 MB
-            // maximum:   ~1.2 GB
-            //
-            // Efficient codecs effectively need somewhat less.
             SizeBands(
                 minimum: 5,
                 idealLow: 8,
@@ -673,84 +722,21 @@ struct StreamScoringEngine: Sendable {
             )
 
         case .balanced:
-            // 24-minute AVC episode:
-            //
-            // minimum:   ~240 MB
-            // ideal:     ~528 MB–1.2 GB
-            // maximum:   ~2.4 GB
-            //
-            // HEVC reaches the ideal range at roughly:
-            // ~440 MB+
-            //
-            // AV1 reaches it at roughly:
-            // ~390 MB+
             SizeBands(
                 minimum: 10,
                 idealLow: 22,
-                idealHigh: 50,
-                maximum: 100
+                idealHigh: 70,
+                maximum: 120
             )
 
         case .best:
-            // 24-minute AVC episode:
-            //
-            // minimum:   ~360 MB
-            // ideal:     ~720 MB–1.68 GB
-            // maximum:   ~3.6 GB
-            //
-            // HEVC reaches the ideal range at roughly:
-            // ~600 MB+
-            //
-            // AV1 reaches it at roughly:
-            // ~530 MB+
             SizeBands(
                 minimum: 15,
                 idealLow: 30,
-                idealHigh: 70,
-                maximum: 150
+                idealHigh: 100,
+                maximum: 170
             )
         }
-    }
-
-    // MARK: - Language
-
-    private func languageScores(
-        _ candidate: StreamCandidate
-    ) -> (
-        bonus: Double,
-        penalty: Double
-    ) {
-        var bonus = 0.0
-        var penalty = 0.0
-
-        if let token =
-            options.preferredAudio.languageToken
-        {
-            if !candidate.audioLanguages.isEmpty {
-                if candidate.audioLanguages.contains(token) {
-                    bonus += 4
-                } else {
-                    penalty -= 10
-                }
-            }
-        }
-
-        if let token =
-            options.preferredSubtitles.languageToken
-        {
-            if !candidate.subtitleLanguages.isEmpty {
-                if candidate.subtitleLanguages.contains(token) {
-                    bonus += 4
-                } else {
-                    penalty -= 6
-                }
-            }
-        }
-
-        return (
-            bonus,
-            penalty
-        )
     }
 
     // MARK: - Release groups
@@ -849,8 +835,10 @@ struct StreamScoringEngine: Sendable {
 
         if let second {
             let gap =
-                top.total
-                - second.total
+                max(
+                    0,
+                    top.total - second.total
+                )
 
             let ratio =
                 gap
@@ -861,10 +849,7 @@ struct StreamScoringEngine: Sendable {
 
             value += min(
                 0.08,
-                max(
-                    0,
-                    ratio
-                ) * 0.2
+                ratio * 0.2
             )
         } else {
             value += 0.03
@@ -877,35 +862,7 @@ struct StreamScoringEngine: Sendable {
             value -= 0.15
         }
 
-        if hasLanguageMismatch(
-            top.candidate
-        ) {
-            value -= 0.2
-        }
-
         return clamped(value)
-    }
-
-    private func hasLanguageMismatch(
-        _ candidate: StreamCandidate
-    ) -> Bool {
-        if let token =
-            options.preferredAudio.languageToken,
-           !candidate.audioLanguages.isEmpty,
-           !candidate.audioLanguages.contains(token)
-        {
-            return true
-        }
-
-        if let token =
-            options.preferredSubtitles.languageToken,
-           !candidate.subtitleLanguages.isEmpty,
-           !candidate.subtitleLanguages.contains(token)
-        {
-            return true
-        }
-
-        return false
     }
 
     // MARK: - Reasons
@@ -945,14 +902,20 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "Episode match confidence \(percent)%"),
+                    text: String(
+                        localized:
+                        "Episode match confidence \(percent)%"
+                    ),
                     kind: .positive
                 )
             )
         } else {
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "Uncertain episode match (\(percent)%)"),
+                    text: String(
+                        localized:
+                        "Uncertain episode match (\(percent)%)"
+                    ),
                     kind: .caution
                 )
             )
@@ -972,7 +935,10 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "\(resolution.label) quality"),
+                    text: String(
+                        localized:
+                        "\(resolution.label) quality"
+                    ),
                     kind:
                         breakdown.resolution >= 15
                         ? .positive
@@ -992,7 +958,10 @@ struct StreamScoringEngine: Sendable {
 
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "\(source.label) source"),
+                    text: String(
+                        localized:
+                        "\(source.label) source"
+                    ),
                     kind: kind
                 )
             )
@@ -1003,7 +972,10 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "\(codec.label) codec"),
+                    text: String(
+                        localized:
+                        "\(codec.label) codec"
+                    ),
                     kind: .positive
                 )
             )
@@ -1013,7 +985,10 @@ struct StreamScoringEngine: Sendable {
             candidate.sizeBytes
         {
             let text =
-                String(localized: "File size \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))")
+                String(
+                    localized:
+                    "File size \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))"
+                )
 
             let kind: ScoreReason.Kind
 
@@ -1038,7 +1013,10 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "\(seeders) seeders"),
+                    text: String(
+                        localized:
+                        "\(seeders) seeders"
+                    ),
                     kind:
                         seeders
                             >= options.minimumSeedersForUncached
@@ -1048,21 +1026,16 @@ struct StreamScoringEngine: Sendable {
             )
         }
 
-        if breakdown.language > 0 {
-            reasons.append(
-                ScoreReason(
-                    text: String(localized: "Preferred language available"),
-                    kind: .positive
-                )
-            )
-        }
 
         if breakdown.releaseGroup > 0,
            let group = candidate.releaseGroup
         {
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "Preferred group \(group)"),
+                    text: String(
+                        localized:
+                        "Preferred group \(group)"
+                    ),
                     kind: .positive
                 )
             )
@@ -1074,7 +1047,10 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "Blocked group \(group)"),
+                    text: String(
+                        localized:
+                        "Blocked group \(group)"
+                    ),
                     kind: .negative
                 )
             )
@@ -1085,7 +1061,10 @@ struct StreamScoringEngine: Sendable {
         {
             reasons.append(
                 ScoreReason(
-                    text: String(localized: "Batch contains this episode"),
+                    text: String(
+                        localized:
+                        "Batch contains this episode"
+                    ),
                     kind: .caution
                 )
             )
@@ -1103,21 +1082,5 @@ struct StreamScoringEngine: Sendable {
             max(value, 0),
             1
         )
-    }
-}
-
-extension AudioPreference {
-    var languageToken: String? {
-        self == .any
-            ? nil
-            : rawValue
-    }
-}
-
-extension SubtitlePreference {
-    var languageToken: String? {
-        self == .any
-            ? nil
-            : rawValue
     }
 }
