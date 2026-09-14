@@ -2,35 +2,47 @@
 
 <img src="assets/logo.png" width="140" alt="Nami App Icon" />
 
-
-
 # Nami
 
-### Native macOS anime streaming with automatic source selection and high-quality playback
+### A native macOS anime player where Play just works.
 
-An anime-first streaming app that turns a stack of addons, debrid services, and release files into one clean Play button.
+Nami automatically finds, ranks, validates, and plays the best available source —  
+so you don't have to choose between a list of releases every time you want to watch something.
 
-<img width="800" height="543" alt="Demo" src="assets/main-screen-screenshot.webp" />
+<br>
+
+<img width="800" alt="Nami Home" src="assets/main-screen-screenshot.webp" />
 
 </div>
-
-
 
 ---
 
 ## Overview
 
-Nami is a native macOS streaming client built around Kitsu metadata, a safe modular addon system, and Real-Debrid.
+Nami is a native macOS anime streaming client focused on making anime playback feel effortless.
 
-It discovers anime, resolves episodes across addons, parses and deduplicates release candidates, ranks every source with a transparent scoring engine, and plays the best release through an embedded libmpv engine — while keeping manual source selection one click away.
+Instead of presenting a long list of sources and asking you to figure out which one works, Nami handles the process automatically:
 
-Built for:
+**Find → Match → Rank → Validate → Play**
 
-* Anime fans who want one clean library
-* Stremio-compatible addon users
-* Real-Debrid subscribers
-* MKV / ASS subtitle releases
-* Apple Silicon Macs
+Under the hood, Nami combines Kitsu metadata, Stremio-compatible addons, Real-Debrid, automatic release parsing, and an embedded `libmpv` player.
+
+If the preferred source fails, Nami can automatically move on to the next best candidate. Manual source selection is always available when you want it.
+
+The interface is available in:
+
+- 🇬🇧 English
+- 🇪🇸 Spanish
+
+### Built for
+
+- Anime-first discovery and browsing
+- One-click playback
+- Stremio-compatible stream addons
+- Real-Debrid
+- High-quality MKV releases
+- ASS / SSA subtitles
+- Apple Silicon Macs
 
 ---
 
@@ -38,102 +50,128 @@ Built for:
 
 <table>
 <tr>
-<th align="left">Discovery</th>
-<th align="left">Auto-Select</th>
-<th align="left">Playback</th>
+<th align="left">Discover</th>
+<th align="left">Smart Sources</th>
+<th align="left">Watch</th>
 </tr>
 
 <tr>
-<td>
+<td valign="top">
 
-* Kitsu metadata
-* Trending and seasonal
-* Search with history
-* Anime details and episode lists
-* Continue Watching shelf
-* Local library and progress
-
-</td>
-
-<td>
-
-* Stremio-compatible addons
-* Generic HTTP addon protocol
-* Release name parsing
-* Episode matching
-* Stream deduplication
-* Real-Debrid cache probe
-* Weighted scoring engine
-* "Why this stream?" breakdown
-* Manual source picker
+- Kitsu metadata
+- Trending & seasonal anime
+- Search with history
+- Anime details
+- Seasons & episodes
+- Continue Watching
+- Local watch progress
+- English & Spanish UI
 
 </td>
 
-<td>
+<td valign="top">
 
-* libmpv + AVPlayer engines
-* Embedded ASS/SSA subtitles
-* Multiple audio tracks
-* Skip intro/outro (AniSkip)
-* Next-episode autoplay
-* Prefetch of next episode
-* Resume playback progress
-* Hardware decoding
-* Speed and volume controls
+- Stremio-compatible addons
+- Torrentio, Comet & AIOStreams support
+- Automatic episode matching
+- Release metadata parsing
+- Stream deduplication
+- Real-Debrid cache detection
+- Automatic source ranking
+- Stream validation & fallback
+- "Why this stream?" scoring
+- Manual source picker
+
+</td>
+
+<td valign="top">
+
+- `libmpv` playback
+- MKV support
+- ASS / SSA subtitles
+- Multiple audio tracks
+- AniSkip intro / outro skipping
+- Next-episode autoplay
+- Next-episode prefetching
+- Resume playback
+- Hardware decoding
+- Playback speed & volume controls
 
 </td>
 </tr>
 </table>
 
-> **Minimum target:** macOS 15.0+ (Apple Silicon recommended)
+> **Requires macOS 15.0+**  
+> Apple Silicon is recommended.
+
+---
+
+## Automatic Source Selection
+
+Nami is designed around automatic playback rather than manual source selection.
+
+When you press **Play**, Nami evaluates available releases using signals such as:
+
+- Episode match confidence
+- Real-Debrid cache availability
+- Resolution
+- Release source
+- Video codec
+- File size / bitrate
+- Audio and subtitle languages
+- Release group
+- Seeder availability
+- Addon priority
+
+Candidates are ranked using a transparent scoring engine and the strongest sources are validated before playback.
+
+If a source is unavailable, blocked, or invalid, Nami can automatically try the next preferred candidate.
+
+You can still open the source picker at any time and choose manually.
 
 ---
 
 ## Addon Support
 
-Nami works with Stremio-compatible addons.
+Nami supports **Stremio-compatible stream addons**.
 
-* **Torrentio** and **Comet** are supported out of the box. Nami already understands their result format and uses a built-in optimized parser, so no format analysis is needed.
-* **Other Stremio-compatible stream addons** can be added when they accept IMDb, TMDB, Kitsu, MAL, or AniList IDs. Catalog-only addons that use private item IDs cannot be matched to Nami's anime library. Compatible custom addons are analyzed on-device with Apple's AI using Foundation Models and Apple Intelligence on macOS 26+.
-* On Macs where Apple Intelligence isn't available, Nami automatically falls back to its built-in parser, although parsing may be less reliable.
-* Results are best when an addon includes as much release information as possible in its stream text, such as resolution, codec, dynamic range, audio and subtitle languages, release group, and file size.
+### Optimized addons
 
-Nami uses this metadata to match episodes correctly and rank sources accurately.
+Nami includes optimized support for:
 
----
+- **Torrentio**
+- **Comet**
 
-## Localization
+Nami understands their stream result formats directly and can extract release metadata without additional format analysis.
 
-Nami ships with English and Spanish and can display several languages. Change the app language in **Settings → General → Language**; applying it restarts the app.
+> These addons are not bundled or installed automatically. Nami only provides compatibility with addons configured by the user.
 
-All strings live in `Nami/Resources/Localizable.xcstrings`. To add a language:
+### AIOStreams
 
-1. Add a case with its language code in `Nami/Core/Domain/AppLanguage.swift`.
-2. Open `Localizable.xcstrings` in Xcode, add the language, and translate the entries.
+**AIOStreams is also supported.**
 
-In code, SwiftUI text (`Text`, `Button`, `Label`, `.help`, `.accessibilityLabel`, and friends) is localized automatically. Plain `String` values such as enum display names, error messages, and strings passed to custom components use `String(localized:)`. Plurals are declared in the string catalog.
+Because AIOStreams allows users to customize the formatting of stream results, Nami cannot assume one fixed output format.
 
----
+When configuring AIOStreams for Nami, it is strongly recommended to include as much release information as possible in the displayed stream text.
 
-## Quick Start
+Useful information includes:
 
-### Run with Xcode
+- Resolution — `1080p`, `2160p`, etc.
+- Codec — `H264`, `HEVC`, `AV1`
+- Dynamic range — `HDR`, `HDR10`, `Dolby Vision`
+- Audio language
+- Subtitle language
+- Dual Audio indicators
+- Release group
+- File size
+- Seeder count
+- Debrid/cache status
+- Release/source name
 
-`project.yml` is the source of truth. Generate the project once, then open it and press **⌘R**.
+The more information the addon exposes, the more accurately Nami can understand, compare, and rank its results.
 
-```bash
-xcodegen generate
-open Nami.xcodeproj
-```
+For example, this is much more useful to Nami:
 
-### Run with the helper script
-
-```bash
-./build_and_run.sh
-```
-
-### Run the tests
-
-```bash
-xcodebuild -project Nami.xcodeproj -scheme Nami -destination platform=macOS
-```
+```text
+1080p · HEVC · Japanese · English Subs
+SubsPlease · 1.2 GB · RD+
